@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YAAD — Play. Remember. Connect.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f4e9d8;
+    --cream-deep:#e9dcc3;
+    --card:#fffaf1;
+    --ink:#4a3626;
+    --ink-soft:#8a6a4f;
+    --border:#d9c3a0;
+    --brown:#8b5a3c;
+    --brown-dark:#6b4530;
+    --terracotta:#c46a42;
+    --terracotta-soft:#f0d7c4;
+    --sage:#6e8f57;
+    --sage-soft:#dbe6d1;
+    --blue:#7c94ad;
+    --blue-soft:#dfe6ee;
+    --coral:#c47a6a;
+    --coral-soft:#f2ddd6;
+    --mauve:#96688c;
+    --mauve-soft:#e9dbe6;
+    --gold:#c9932f;
+    --amber-soft:#f6e6c4;
+    --shadow:0 10px 28px rgba(74,54,38,.14);
+    --radius:20px;
+  }
+  *{box-sizing:border-box;}
+  html{font-size:17px;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 8%, #f2e6d0 0%, transparent 45%),
+      radial-gradient(circle at 90% 90%, #ecdcc0 0%, transparent 40%),
+      var(--cream-deep);
+    font-family:'Quicksand', sans-serif;
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    padding:28px 14px;
+  }
+  h1,h2,h3{font-family:'Fraunces', serif; margin:0; font-weight:600; color:var(--brown-dark);}
+  button{font-family:inherit;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important; transition-duration:.01ms !important;} }
+
+  .phone{
+    width:100%;
+    max-width:430px;
+    background:var(--cream);
+    border-radius:28px;
+    box-shadow:var(--shadow);
+    border:1px solid var(--border);
+    overflow:hidden;
+    position:relative;
+    min-height:800px;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* roofline signature motif */
+  .roofline{width:100%; height:14px; display:block;}
+  .roofline svg{width:100%; height:100%; display:block;}
+
+  .view{display:none; flex-direction:column; flex:1; min-height:0;}
+  .view.active{display:flex;}
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px 10px;
+    gap:10px;
+  }
+  .topbar .title{font-size:1.28rem;}
+  .icon-btn{
+    width:40px; height:40px; border-radius:50%;
+    border:1px solid var(--border); background:var(--card);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; cursor:pointer; color:var(--ink);
+    transition:transform .12s ease;
+  }
+  .icon-btn:active{transform:scale(.92);}
+  .top-actions{display:flex; gap:8px;}
+  .text-btn{
+    border:1px solid var(--border); background:var(--card); color:var(--ink);
+    border-radius:14px; padding:8px 12px; font-weight:700; cursor:pointer; font-size:.82rem;
+  }
+
+  .content{padding:6px 18px 18px; flex:1; overflow-y:auto;}
+  .content.pad-bottom{padding-bottom:96px;}
+
+  .subtitle{color:var(--ink-soft); font-size:.95rem; margin-top:2px; margin-bottom:14px;}
+
+  /* ROLE SELECT */
+  #view-role .content{display:flex; flex-direction:column; align-items:center; text-align:center; padding-top:26px;}
+  .wordmark{font-size:2.6rem; letter-spacing:1px; color:var(--brown-dark);}
+  .tagline{font-family:'Fraunces', serif; font-style:italic; color:var(--terracotta); margin-top:4px; font-size:1.05rem;}
+  .role-prompt{margin:26px 0 16px; font-size:1.05rem; color:var(--ink-soft);}
+  .role-card{
+    width:100%; background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px; display:flex; align-items:center; gap:14px; margin-bottom:14px; cursor:pointer;
+    box-shadow:0 4px 14px rgba(74,54,38,.06); transition:transform .12s ease, box-shadow .12s ease;
+    text-align:left;
+  }
+  .role-card:hover{transform:translateY(-2px); box-shadow:0 10px 20px rgba(74,54,38,.12);}
+  .role-card .emoji{font-size:2.2rem;}
+  .role-card h3{font-size:1.1rem;}
+  .role-card p{margin:4px 0 0; color:var(--ink-soft); font-size:.88rem;}
+  .role-footnote{color:var(--ink-soft); font-size:.8rem; margin-top:10px;}
+
+  /* GREETING */
+  .greeting{padding:2px 18px 14px;}
+  .greeting h2{font-size:1.5rem;}
+  .greeting .date{color:var(--ink-soft); font-size:.85rem; margin-top:2px;}
+
+  /* BIG GRID (elder home) */
+  .big-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:6px;}
+  .big-tile{
+    border-radius:18px; overflow:hidden; cursor:pointer; border:1px solid var(--border);
+    background:var(--card); text-align:left; box-shadow:0 4px 12px rgba(74,54,38,.08);
+    transition:transform .12s ease;
+  }
+  .big-tile:active{transform:scale(.96);}
+  .big-tile .head{padding:20px 14px 34px; color:#fffaf1;}
+  .big-tile .head .emoji{font-size:1.7rem; display:block; margin-bottom:26px;}
+  .big-tile .head .label{font-family:'Fraunces', serif; font-weight:700; font-size:1.05rem; display:block;}
+  .big-tile .sub{padding:8px 14px 12px; font-size:.78rem; color:var(--ink-soft);}
+  .tile-sage .head{background:var(--sage);}
+  .tile-coral .head{background:var(--coral);}
+  .tile-blue .head{background:var(--blue);}
+  .tile-terracotta .head{background:var(--terracotta);}
+  .tile-brown .head{background:var(--brown);}
+  .tile-mauve .head{background:var(--mauve);}
+
+  .hint-card{
+    margin-top:14px; background:var(--card); border:1.5px dashed var(--gold); border-radius:16px;
+    padding:14px; display:flex; align-items:center; gap:12px; cursor:pointer;
+  }
+  .hint-card .emoji{font-size:1.6rem;}
+  .hint-card .txt b{display:block; font-size:.92rem;}
+  .hint-card .txt span{font-size:.78rem; color:var(--ink-soft);}
+
+  .bottom-bar{
+    padding:12px 18px 18px; border-top:1px solid var(--border); background:var(--cream);
+  }
+  .help-btn{
+    width:100%; background:var(--brown-dark); color:#fffaf1; border:none; border-radius:16px;
+    padding:14px; font-weight:700; font-size:1rem; display:flex; align-items:center; justify-content:center; gap:8px;
+    cursor:pointer;
+  }
+  .switch-link{
+    text-align:center; font-size:.78rem; color:var(--ink-soft); margin-top:10px; text-decoration:underline; cursor:pointer;
+  }
+
+  /* LIST ROWS (play list, memory list, etc) */
+  .list-row{
+    display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--border);
+    border-radius:16px; padding:12px 14px; margin-bottom:10px;
+  }
+  .list-row .ico{
+    width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-size:1.3rem; flex-shrink:0;
+  }
+  .list-row .info{flex:1; min-width:0;}
+  .list-row .info b{display:block; font-size:.98rem;}
+  .list-row .info span{font-size:.78rem; color:var(--ink-soft);}
+  .badge{
+    display:inline-block; font-size:.66rem; font-weight:700; background:var(--sage-soft); color:var(--brown-dark);
+    padding:2px 7px; border-radius:8px; margin-left:6px; vertical-align:middle;
+  }
+  .pill-btn{
+    border:none; border-radius:14px; padding:9px 16px; font-weight:700; font-size:.85rem; cursor:pointer; color:#fffaf1;
+    background:var(--terracotta); flex-shrink:0;
+  }
+  .pill-btn.ghost{background:transparent; color:var(--terracotta); border:1.5px solid var(--terracotta);}
+
+  /* MOOD ROW */
+  .mood-row{display:flex; gap:10px; margin:10px 0 18px;}
+  .mood-btn{
+    flex:1; background:var(--card); border:2px solid var(--border); border-radius:16px; padding:14px 0;
+    font-size:1.6rem; cursor:pointer; text-align:center;
+  }
+  .mood-btn.selected{border-color:var(--sage); background:var(--sage-soft);}
+  .mood-note{background:var(--sage-soft); border-radius:12px; padding:10px 14px; font-size:.85rem; color:var(--brown-dark); display:none;}
+  .mood-note.show{display:block;}
+
+  /* TIMELINE */
+  .timeline{margin-top:4px;}
+  .tl-row{display:flex; gap:12px; align-items:flex-start; margin-bottom:14px;}
+  .tl-dot{width:12px; height:12px; border-radius:50%; background:var(--terracotta); margin-top:5px; flex-shrink:0;}
+  .tl-row .time{font-size:.78rem; color:var(--ink-soft); width:56px; flex-shrink:0;}
+  .tl-row .what{font-weight:700; font-size:.92rem;}
+
+  .prompt-card{
+    background:var(--terracotta-soft); border-radius:16px; padding:16px; margin-top:6px;
+  }
+  .prompt-card p{margin:0 0 10px; font-size:.92rem; color:var(--brown-dark); font-weight:600;}
+
+  /* FAMILY */
+  .voice-card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:16px;}
+  .voice-card .who{font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:10px;}
+  .waveform{display:flex; align-items:center; gap:10px;}
+  .play-circle{
+    width:38px; height:38px; border-radius:50%; background:var(--brown); color:#fffaf1; border:none;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:.9rem;
+  }
+  .bars-track{flex:1; height:8px; background:var(--border); border-radius:6px; overflow:hidden;}
+  .bars-fill{height:100%; width:64%; background:var(--terracotta); border-radius:6px;}
+  .voice-card blockquote{margin:12px 0 0; font-style:italic; color:var(--ink-soft); font-size:.88rem;}
+
+  .memory-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .memory-tile{
+    border-radius:16px; overflow:hidden; background:var(--card); border:1px solid var(--border); cursor:pointer;
+  }
+  .memory-tile .thumb{
+    height:78px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:#fffaf1;
+  }
+  .memory-tile .cap{padding:8px 10px 12px;}
+  .memory-tile .cap b{display:block; font-size:.85rem;}
+  .memory-tile .cap span{font-size:.72rem; color:var(--ink-soft);}
+  .memory-tile.add{
+    display:flex; align-items:center; justify-content:center; border:1.5px dashed var(--gold); min-height:120px;
+    color:var(--ink-soft); font-size:.82rem; text-align:center; flex-direction:column; gap:6px;
+  }
+
+  /* PROGRESS */
+  .bar-row{margin-bottom:18px;}
+  .bar-row .lbl{display:flex; justify-content:space-between; font-size:.9rem; font-weight:700; margin-bottom:6px;}
+  .bar-row .lbl .trend{color:var(--sage); font-weight:700;}
+  .bar-track{height:16px; background:var(--border); border-radius:10px; overflow:hidden;}
+  .bar-fill{height:100%; width:0%; border-radius:10px; transition:width 1s ease;}
+  .bar-mem .bar-fill{background:var(--sage);}
+  .bar-att .bar-fill{background:var(--blue);}
+  .bar-lang .bar-fill{background:var(--gold);}
+  .bar-con .bar-fill{background:var(--coral);}
+
+  .stat-strip{display:flex; gap:10px; margin:14px 0 20px;}
+  .stat-box{flex:1; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px; text-align:center;}
+  .stat-box b{display:block; font-size:1.15rem; color:var(--brown-dark);}
+  .stat-box span{font-size:.7rem; color:var(--ink-soft);}
+
+  .recommend-card{
+    background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px;
+    display:flex; align-items:center; gap:12px; margin-top:6px;
+  }
+  .recommend-card .emoji{font-size:1.7rem;}
+  .recommend-card b{display:block; font-size:.95rem;}
+  .recommend-card span{font-size:.78rem; color:var(--ink-soft);}
+
+  /* HELP */
+  .help-row{
+    display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--border);
+    border-radius:16px; padding:14px; margin-bottom:12px;
+  }
+  .help-row .ico{
+    width:48px; height:48px; border-radius:50%; background:var(--coral-soft); display:flex; align-items:center;
+    justify-content:center; font-size:1.3rem; flex-shrink:0;
+  }
+  .help-row .info b{display:block; font-size:.95rem;}
+  .help-row .info span{font-size:.78rem; color:var(--ink-soft);}
+  .call-btn{
+    margin-left:auto; width:42px; height:42px; border-radius:50%; background:var(--sage); color:#fffaf1;
+    border:none; display:flex; align-items:center; justify-content:center; font-size:1.05rem; cursor:pointer; text-decoration:none;
+  }
+  .lang-note{
+    background:var(--blue-soft); border-radius:12px; padding:12px 14px; font-size:.82rem; color:var(--brown-dark); margin-top:6px;
+  }
+
+  /* CAREGIVER */
+  .snapshot-card{
+    background:var(--card); border:1px solid var(--border); border-radius:18px; padding:16px; margin-bottom:14px;
+    display:flex; gap:14px; align-items:center;
+  }
+  .snapshot-card .avatar{
+    width:56px; height:56px; border-radius:50%; background:var(--brown); color:#fffaf1; display:flex;
+    align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0;
+  }
+  .snapshot-card b{display:block; font-size:1.05rem;}
+  .snapshot-card .status{font-size:.78rem; color:var(--sage); font-weight:700; margin-top:2px;}
+  .mini-stats{display:flex; gap:16px; margin-top:8px;}
+  .mini-stats div{font-size:.72rem; color:var(--ink-soft); text-align:center;}
+  .mini-stats b{display:block; font-size:.95rem; color:var(--brown-dark);}
+
+  .alert-banner{
+    background:var(--amber-soft); border:1px solid #e0c37a; border-radius:14px; padding:12px 14px; margin-bottom:16px;
+    font-size:.85rem; color:var(--brown-dark); display:flex; gap:10px; align-items:flex-start;
+  }
+
+  .tool-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+
+  .form-group{margin-bottom:16px;}
+  .form-group label{display:block; font-weight:700; font-size:.88rem; margin-bottom:7px;}
+  .form-group input[type=text]{
+    width:100%; padding:11px 13px; border-radius:12px; border:1px solid var(--border); font-family:inherit;
+    font-size:.92rem; background:var(--card); color:var(--ink);
+  }
+  .chip-set{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    border:1.5px solid var(--border); background:var(--card); border-radius:20px; padding:7px 13px; font-size:.82rem;
+    cursor:pointer; color:var(--ink-soft); font-weight:600;
+  }
+  .chip.on{background:var(--sage); border-color:var(--sage); color:#fffaf1;}
+
+  .save-btn, .generate-btn{
+    width:100%; border:none; border-radius:14px; padding:14px; font-weight:700; font-size:.95rem;
+    background:var(--brown-dark); color:#fffaf1; cursor:pointer; margin-top:6px;
+  }
+  .toast{
+    display:none; margin-top:12px; background:var(--sage-soft); color:var(--brown-dark); border-radius:12px;
+    padding:10px 14px; font-size:.85rem; text-align:center; font-weight:700;
+  }
+  .toast.show{display:block;}
+
+  .capsule-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px;}
+  .capsule-tile{
+    border:1.5px dashed var(--gold); border-radius:14px; padding:14px 6px; text-align:center; cursor:pointer;
+    font-size:.76rem; color:var(--ink-soft); background:var(--card);
+  }
+  .capsule-tile .emoji{display:block; font-size:1.5rem; margin-bottom:6px;}
+  .capsule-tile.added{border-style:solid; border-color:var(--sage); background:var(--sage-soft); color:var(--brown-dark);}
+
+  .result-block{display:none; margin-top:8px;}
+  .result-block.show{display:block; animation:fadein .3s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .activity-result{
+    background:var(--sage-soft); border-radius:16px; padding:16px; margin-top:14px;
+  }
+  .activity-result h3{font-size:1.05rem; margin-bottom:6px;}
+  .activity-result p{font-size:.88rem; color:var(--brown-dark); line-height:1.5; margin:0 0 12px;}
+  .activity-actions{display:flex; gap:10px;}
+  .activity-actions button{flex:1;}
+
+  .q-row{
+    display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:11px 14px; margin-bottom:9px; font-size:.86rem;
+  }
+  .q-row .n{
+    width:24px; height:24px; border-radius:50%; background:var(--terracotta); color:#fffaf1; font-size:.72rem;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:700;
+  }
+
+  .connect-row{
+    background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; margin-bottom:12px;
+  }
+  .connect-row b{font-size:.95rem;}
+  .connect-row .role{font-size:.76rem; color:var(--ink-soft); display:block; margin:2px 0 8px;}
+  .connect-row .actions{display:flex; gap:8px;}
+  .connect-row .actions .pill-btn{padding:7px 12px; font-size:.78rem;}
+  .add-contact-btn{
+    width:100%; border:1.5px dashed var(--gold); background:transparent; color:var(--brown-dark); font-weight:700;
+    border-radius:14px; padding:12px; cursor:pointer; font-size:.88rem; margin-top:4px;
+  }
+
+  /* MIC / VOICE */
+  .mic-wrap{display:flex; align-items:center; gap:12px; margin-top:14px;}
+  .mic-btn{
+    width:56px; height:56px; border-radius:50%; background:var(--terracotta); color:#fffaf1; border:none;
+    font-size:1.3rem; cursor:pointer; flex-shrink:0; transition:transform .15s ease;
+  }
+  .mic-btn.listening{animation:pulse 1s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(196,106,66,.5);} 70%{box-shadow:0 0 0 16px rgba(196,106,66,0);} 100%{box-shadow:0 0 0 0 rgba(196,106,66,0);}}
+  .mic-status{font-size:.85rem; color:var(--ink-soft);}
+  .answer-bubble{
+    display:none; background:var(--blue-soft); border-radius:14px; padding:10px 14px; margin-top:12px; font-size:.9rem; font-weight:700;
+  }
+  .answer-bubble.show{display:block;}
+
+  .game-card{
+    background:var(--card); border:1px solid var(--border); border-radius:20px; padding:20px; text-align:center;
+  }
+  .match-stats{display:flex; justify-content:space-between; font-size:.82rem; color:var(--ink-soft); margin-bottom:12px;}
+  .match-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px;}
+  .match-card{
+    aspect-ratio:1/1; border-radius:14px; background:linear-gradient(155deg, var(--terracotta), var(--brown));
+    display:flex; align-items:center; justify-content:center; font-size:1.6rem; color:transparent;
+    cursor:pointer; transition:all .2s ease;
+  }
+  .match-card.flipped{background:var(--card); color:var(--ink); border:2px solid var(--gold);}
+  .match-card.matched{background:var(--sage-soft); color:var(--ink); border:2px solid var(--sage); opacity:.75;}
+  .game-card .art{font-size:3rem; margin-bottom:10px;}
+  .game-card h3{font-size:1.1rem; margin-bottom:16px;}
+  .choice-btn{
+    display:block; width:100%; background:var(--card); border:1.5px solid var(--border); border-radius:14px;
+    padding:13px; margin-bottom:10px; font-size:.92rem; font-weight:700; cursor:pointer; color:var(--ink);
+  }
+  .choice-btn:hover{border-color:var(--sage);}
+  .choice-btn.picked{background:var(--sage-soft); border-color:var(--sage);}
+  .next-btn{
+    width:100%; border:none; border-radius:14px; padding:13px; font-weight:700; background:var(--terracotta);
+    color:#fffaf1; margin-top:6px; cursor:pointer;
+  }
+  .next-btn:disabled{opacity:.4; cursor:not-allowed;}
+
+  [data-en],[data-hi],[data-pa],[data-bn],[data-mr]{display:none;}
+  [data-en]{display:inline;}
+  body.lang-hi [data-hi]{display:inline;}
+  body.lang-hi [data-en]{display:none;}
+  body.lang-pa [data-pa]{display:inline;}
+  body.lang-pa [data-en]{display:none;}
+  body.lang-bn [data-bn]{display:inline;}
+  body.lang-bn [data-en]{display:none;}
+  body.lang-mr [data-mr]{display:inline;}
+  body.lang-mr [data-en]{display:none;}
+</style>
+</head>
+<body>
+<div class="phone" id="phone">
+
+  <!-- ============ ROLE SELECT ============ -->
+  <section class="view active" id="view-role">
+    <div class="roofline"><svg viewBox="0 0 400 14" preserveAspectRatio="none"><polyline points="0,14 20,2 40,14 60,2 80,14 100,2 120,14 140,2 160,14 180,2 200,14 220,2 240,14 260,2 280,14 300,2 320,14 340,2 360,14 380,2 400,14" fill="none" stroke="#8b5a3c" stroke-width="2" opacity=".35"/></svg></div>
+    <div class="content">
+      <div class="wordmark">YAAD</div>
+      <div class="tagline" data-i18n="role.tagline">Play. Remember. Connect.</div>
+      <div class="role-prompt" data-i18n="role.prompt">Who's using YAAD right now?</div>
+
+      <div class="role-card" onclick="goto('elder-home')">
+        <div class="emoji">👵</div>
+        <div>
+          <h3 data-i18n="role.card1Title">I'm using it myself</h3>
+          <p data-i18n="role.card1Desc">Games, family memories &amp; a gentle daily routine</p>
+        </div>
+      </div>
+
+      <div class="role-card" onclick="goto('caregiver-home')">
+        <div class="emoji">🤝</div>
+        <div>
+          <h3 data-i18n="role.card2Title">I'm a caregiver / family member</h3>
+          <p data-i18n="role.card2Desc">Set up activities, add memories &amp; keep track</p>
+        </div>
+      </div>
+
+      <div class="role-footnote" data-i18n="role.footnote">You can switch anytime from the home screen.</div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: HOME ============ -->
+  <section class="view" id="view-elder-home">
+    <div class="topbar">
+      <div style="font-family:'Fraunces',serif; font-weight:700; color:var(--brown-dark);">YAAD</div>
+      <div class="top-actions">
+        <button class="text-btn" onclick="cycleLang()" id="langBtn">EN</button>
+        <button class="text-btn" onclick="cycleFont()">A+</button>
+      </div>
+    </div>
+    <div class="greeting">
+      <h2>
+<span data-i18n="elderHome.greeting">Good morning, Grandma Rekha 🌼</span>
+      </h2>
+      <div class="date" id="todayDate">Loading...</div>
+    </div>
+    <div class="content pad-bottom">
+      <div class="big-grid">
+        <div class="big-tile tile-sage" onclick="goto('elder-play')">
+          <div class="head"><span class="emoji">🧠</span><span class="label" data-i18n="elderHome.tilePlay">PLAY</span></div>
+          <div class="sub" data-i18n="elderHome.playSub">Games &amp; exercises</div>
+        </div>
+        <div class="big-tile tile-coral" onclick="goto('elder-day')">
+          <div class="head"><span class="emoji">❤️</span><span class="label" data-i18n="elderHome.tileDay">MY DAY</span></div>
+          <div class="sub" data-i18n="elderHome.daySub">Routine &amp; mood</div>
+        </div>
+        <div class="big-tile tile-blue" onclick="goto('elder-family')">
+          <div class="head"><span class="emoji">👨‍👩‍👧</span><span class="label" data-i18n="elderHome.tileFamily">FAMILY</span></div>
+          <div class="sub" data-i18n="elderHome.familySub">Photos &amp; voices</div>
+        </div>
+        <div class="big-tile tile-terracotta" onclick="goto('elder-progress')">
+          <div class="head"><span class="emoji">📊</span><span class="label" data-i18n="elderHome.tileProgress">MY PROGRESS</span></div>
+          <div class="sub" data-i18n="elderHome.progressSub">How you're doing</div>
+        </div>
+      </div>
+
+      <div class="hint-card" onclick="goto('elder-play')">
+        <div class="emoji">✨</div>
+        <div class="txt">
+          <b data-i18n="elderHome.hintTitle">Cricket Memories is ready</b>
+          <span data-i18n="elderHome.hintDesc">Made for you by Priya — tap Play to try it</span>
+        </div>
+      </div>
+
+      <div class="switch-link" onclick="goto('role')" data-i18n="elderHome.switchUser">Not Grandma Rekha? Switch user</div>
+    </div>
+    <div class="bottom-bar">
+      <button class="help-btn" onclick="goto('elder-help')">☎ <span data-i18n="elderHome.getHelp">Get Help</span></button>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: PLAY ============ -->
+  <section class="view" id="view-elder-play">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title" data-i18n="elderPlay.title">Play</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="subtitle" data-i18n="elderPlay.subtitle">A few minutes a day keeps the mind active</div>
+
+      <div class="list-row" onclick="goto('elder-game')">
+        <div class="ico" style="background:var(--sage-soft);">🏏</div>
+        <div class="info"><b data-i18n="elderPlay.cricketTitle">Cricket Memories</b><span class="badge" data-i18n="elderPlay.madeForYou">Made for you</span><span data-i18n="elderPlay.cricketDesc">A personal activity from Priya</span></div>
+        <button class="pill-btn" data-i18n="common.play">Play</button>
+      </div>
+
+      <div class="list-row" onclick="goto('elder-memorymatch'); startMatch();">
+        <div class="ico" style="background:var(--blue-soft);">🧩</div>
+        <div class="info"><b data-i18n="elderPlay.matchTitle">Memory Match</b><span data-i18n="elderPlay.matchDesc">Find the matching pairs</span></div>
+        <button class="pill-btn" data-i18n="common.play">Play</button>
+      </div>
+
+      <div class="list-row" onclick="goto('elder-nametune'); resetTune();">
+        <div class="ico" style="background:var(--coral-soft);">🎵</div>
+        <div class="info"><b data-i18n="elderPlay.tuneTitle">Name That Tune</b><span data-i18n="elderPlay.tuneDesc">Old Hindi songs quiz</span></div>
+        <button class="pill-btn" data-i18n="common.play">Play</button>
+      </div>
+
+      <div class="list-row">
+        <div class="ico" style="background:var(--terracotta-soft);">🔢</div>
+        <div class="info"><b data-i18n="elderPlay.numberTitle">Number Trail</b><span data-i18n="elderPlay.numberDesc">Tap numbers in order</span></div>
+        <button class="pill-btn" data-i18n="common.play">Play</button>
+      </div>
+
+      <div class="list-row">
+        <div class="ico" style="background:var(--mauve-soft);">🧺</div>
+        <div class="info"><b data-i18n="elderPlay.sortTitle">Sort It</b><span data-i18n="elderPlay.sortDesc">Kitchen, clothes or garden?</span></div>
+        <button class="pill-btn" data-i18n="common.play">Play</button>
+      </div>
+
+      <div class="list-row" onclick="goto('elder-decisions'); resetDecisions();">
+        <div class="ico" style="background:var(--sage-soft);">☂️</div>
+        <div class="info"><b data-i18n="elderPlay.decisionsTitle">Everyday Decisions</b><span data-i18n="elderPlay.decisionsDesc">It's raining — what do you take?</span></div>
+        <button class="pill-btn" data-i18n="common.play">Play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: GAME (Cricket Memories demo) ============ -->
+  <section class="view" id="view-elder-game">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">←</button>
+      <div class="title" data-i18n="game.title">Cricket Memories</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div id="game-step-1" class="game-card">
+        <div class="art">🏏</div>
+        <h3 data-i18n="game.q1">Which team do you remember watching?</h3>
+        <button class="choice-btn" onclick="pickChoice(this)" data-i18n="game.optIndia">India</button>
+        <button class="choice-btn" onclick="pickChoice(this)" data-i18n="game.optDelhi">Delhi Daredevils</button>
+        <button class="choice-btn" onclick="pickChoice(this)" data-i18n="game.optNotSure">Not sure</button>
+        <button class="next-btn" id="step1-next" disabled onclick="showStep(2)" data-i18n="game.nextQuestion">Next question</button>
+      </div>
+
+      <div id="game-step-2" class="game-card" style="display:none;">
+        <div class="art">🎙️</div>
+        <h3 data-i18n="game.q2">Who was your favourite player?</h3>
+        <p style="font-size:.85rem; color:var(--ink-soft); margin:-8px 0 4px;" data-i18n="game.q2Sub">Say your answer, or tap to type instead</p>
+        <div class="mic-wrap" style="justify-content:center;">
+          <button class="mic-btn" id="micBtn" onclick="startListening()">🎤</button>
+          <div class="mic-status" id="micStatus" data-i18n="game.micTapSpeak">Tap the mic and speak</div>
+        </div>
+        <div class="answer-bubble" id="answerBubble" data-i18n="game.answerSaid">You said: "Kapil Dev" 🏏</div>
+        <button class="next-btn" id="step2-next" disabled onclick="showStep(3)" style="margin-top:16px;" data-i18n="game.finish">Finish</button>
+      </div>
+
+      <div id="game-step-3" class="game-card" style="display:none;">
+        <div class="art">🎉</div>
+        <h3 data-i18n="game.q3Title">Wonderful, Grandma Rekha!</h3>
+        <p style="font-size:.88rem; color:var(--ink-soft); margin-bottom:16px;" data-i18n="game.q3Desc">You've completed today's activity. Priya will love hearing about Kapil Dev.</p>
+        <button class="next-btn" onclick="goto('elder-play')" data-i18n="common.backToPlay">Back to Play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: MEMORY MATCH ============ -->
+  <section class="view" id="view-elder-memorymatch">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">←</button>
+      <div class="title" data-i18n="match.title">Memory Match</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="game-card" style="text-align:center;">
+        <h3 style="margin-bottom:6px;" data-i18n="match.instructions">Find the three matching pairs</h3>
+        <p style="font-size:.85rem; color:var(--ink-soft); margin:0 0 14px;" data-i18n="match.sub">Tap two cards to see if they match</p>
+        <div class="match-stats">
+          <span id="matchMoves">Moves: 0</span>
+          <span id="matchFound">Found: 0 / 3</span>
+        </div>
+        <div class="match-grid" id="matchGrid"></div>
+        <button class="next-btn" onclick="startMatch()" data-i18n="match.shuffle">🔀 Shuffle again</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: NAME THAT TUNE ============ -->
+  <section class="view" id="view-elder-nametune">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">←</button>
+      <div class="title" data-i18n="tune.title">Name That Tune</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div id="tune-step-1" class="game-card">
+        <div class="art">🎵</div>
+        <h3 data-i18n="tune.q1">Listen, then take a guess</h3>
+        <div class="mic-wrap" style="justify-content:center;">
+          <button class="mic-btn" id="tuneBtn" onclick="playTune()">▶</button>
+          <div class="mic-status" id="tuneStatus" data-i18n="tune.tapToPlay">Tap to play a clip</div>
+        </div>
+        <p id="tuneClue" style="font-size:.88rem; color:var(--ink-soft); margin-top:16px; display:none;" data-i18n="tune.clue">Clue: a tender old melody, promising to always stay close — one of the most loved romantic songs of its time.</p>
+      </div>
+
+      <div id="tune-step-2" class="game-card" style="display:none;">
+        <div class="art">🎶</div>
+        <h3 data-i18n="tune.q2">Which song was that?</h3>
+        <button class="choice-btn" onclick="pickTune(this,false)" data-i18n="tune.song1">Mere Sapno Ki Rani</button>
+        <button class="choice-btn" onclick="pickTune(this,true)" data-i18n="tune.song2">Lag Ja Gale</button>
+        <button class="choice-btn" onclick="pickTune(this,false)" data-i18n="tune.song3">Chaudhvin Ka Chand</button>
+      </div>
+
+      <div id="tune-step-3" class="game-card" style="display:none;">
+        <div class="art" id="tuneResultArt">🎉</div>
+        <h3 id="tuneResultTitle">Wonderful, Grandma Rekha!</h3>
+        <p id="tuneResultText" style="font-size:.88rem; color:var(--ink-soft); margin-bottom:16px;"></p>
+        <button class="next-btn" onclick="goto('elder-play')" data-i18n="common.backToPlay">Back to Play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: EVERYDAY DECISIONS ============ -->
+  <section class="view" id="view-elder-decisions">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">←</button>
+      <div class="title" data-i18n="decisions.title">Everyday Decisions</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div id="dq-step-0" class="game-card">
+        <div class="art">☂️</div>
+        <h3 data-i18n="decisions.q0">It's raining outside. What should you take with you?</h3>
+        <button class="choice-btn" onclick="pickDecision(0,this,true)" data-i18n="decisions.q0a">An umbrella</button>
+        <button class="choice-btn" onclick="pickDecision(0,this,false)" data-i18n="decisions.q0b">Sunglasses</button>
+        <button class="choice-btn" onclick="pickDecision(0,this,false)" data-i18n="decisions.q0c">A football</button>
+      </div>
+
+      <div id="dq-step-1" class="game-card" style="display:none;">
+        <div class="art">🍽️</div>
+        <h3 data-i18n="decisions.q1">You feel a little hungry before lunchtime. What's a good choice?</h3>
+        <button class="choice-btn" onclick="pickDecision(1,this,true)" data-i18n="decisions.q1a">Have a light snack, like a banana</button>
+        <button class="choice-btn" onclick="pickDecision(1,this,false)" data-i18n="decisions.q1b">Skip eating until dinner</button>
+        <button class="choice-btn" onclick="pickDecision(1,this,false)" data-i18n="decisions.q1c">Have a cold soda</button>
+      </div>
+
+      <div id="dq-step-2" class="game-card" style="display:none;">
+        <div class="art">🚪</div>
+        <h3 data-i18n="decisions.q2">The doorbell rings and you weren't expecting anyone. What do you do first?</h3>
+        <button class="choice-btn" onclick="pickDecision(2,this,true)" data-i18n="decisions.q2a">Ask "Who is it?" before opening</button>
+        <button class="choice-btn" onclick="pickDecision(2,this,false)" data-i18n="decisions.q2b">Open the door right away</button>
+        <button class="choice-btn" onclick="pickDecision(2,this,false)" data-i18n="decisions.q2c">Ignore it completely</button>
+      </div>
+
+      <div id="dq-step-3" class="game-card" style="display:none; text-align:center;">
+        <div class="art">🎉</div>
+        <h3 data-i18n="decisions.doneTitle">Well done, Grandma Rekha!</h3>
+        <p style="font-size:.88rem; color:var(--ink-soft); margin-bottom:16px;" id="dqScoreText"></p>
+        <button class="next-btn" onclick="goto('elder-play')" data-i18n="common.backToPlay">Back to Play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: MY DAY ============ -->
+  <section class="view" id="view-elder-day">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title" data-i18n="day.title">My Day</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="subtitle" data-i18n="day.subtitle">How are you feeling today?</div>
+      <div class="mood-row">
+        <button class="mood-btn" onclick="pickMood(this)">😊</button>
+        <button class="mood-btn" onclick="pickMood(this)">🙂</button>
+        <button class="mood-btn" onclick="pickMood(this)">😐</button>
+        <button class="mood-btn" onclick="pickMood(this)">😔</button>
+      </div>
+      <div class="mood-note" id="moodNote" data-i18n="day.moodNote">Thank you for sharing. Priya will see this. 💛</div>
+
+      <h3 style="font-size:1rem; margin:20px 0 12px;" data-i18n="day.routineTitle">Today's routine</h3>
+      <div class="timeline">
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">7:00</div><div class="what" data-i18n="day.wake">Wake up &amp; stretch</div></div>
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">8:00</div><div class="what" data-i18n="day.breakfast">Breakfast</div></div>
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">9:30</div><div class="what" data-i18n="day.walk">Short walk</div></div>
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">1:00</div><div class="what" data-i18n="day.lunch">Lunch</div></div>
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">6:00</div><div class="what" data-i18n="day.callFamily">Call with family</div></div>
+      </div>
+
+      <div class="prompt-card">
+        <p data-i18n="day.promptText">🌤️ Would you like to do a 5-minute memory activity now?</p>
+        <button class="pill-btn" onclick="goto('elder-play')" style="width:100%;" data-i18n="day.yesPlay">Yes, let's play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: FAMILY ============ -->
+  <section class="view" id="view-elder-family">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title" data-i18n="family.title">Family</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="voice-card">
+        <div class="who" data-i18n="family.voiceFrom">🎙️ Voice message from Priya</div>
+        <div class="waveform">
+          <button class="play-circle">▶</button>
+          <div class="bars-track"><div class="bars-fill"></div></div>
+        </div>
+        <blockquote data-i18n="family.quote">"Maa, we're coming to Delhi this weekend — save some kachoris for us!"</blockquote>
+      </div>
+
+      <h3 style="font-size:1rem; margin:4px 0 12px;" data-i18n="family.albumTitle">Memory album</h3>
+      <div class="memory-grid">
+        <div class="memory-tile"><div class="thumb" style="background:var(--gold);">🪔</div><div class="cap"><b data-i18n="family.diwaliTitle">Diwali, 2019</b><span data-i18n="family.diwaliDesc">Whole family, Delhi</span></div></div>
+        <div class="memory-tile"><div class="thumb" style="background:var(--sage);">🛒</div><div class="cap"><b data-i18n="family.marketTitle">At the market</b><span data-i18n="family.marketDesc">With Manju, 1987</span></div></div>
+        <div class="memory-tile"><div class="thumb" style="background:var(--coral);">💍</div><div class="cap"><b data-i18n="family.weddingTitle">Wedding day</b><span data-i18n="family.weddingDesc">You &amp; Mahesh, 1975</span></div></div>
+        <div class="memory-tile"><div class="thumb" style="background:var(--blue);">🎓</div><div class="cap"><b data-i18n="family.gradTitle">Priya's graduation</b><span data-i18n="family.gradDesc">2015</span></div></div>
+        <div class="memory-tile add">
+          <div>💌</div>
+          <div data-i18n="family.addMemory">Ask your family to add more memories</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: PROGRESS ============ -->
+  <section class="view" id="view-elder-progress">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title" data-i18n="progress.title">My Progress</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="subtitle" data-i18n="progress.subtitle">Here's how this week is going — just gentle trends, nothing to worry about.</div>
+
+      <div class="bar-row">
+        <div class="lbl"><span data-i18n="progress.memory">Memory</span><span class="trend">82% ↑</span></div>
+        <div class="bar-track bar-mem"><div class="bar-fill" data-pct="82"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span data-i18n="progress.attention">Attention</span><span class="trend">90% ↑</span></div>
+        <div class="bar-track bar-att"><div class="bar-fill" data-pct="90"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span data-i18n="progress.consistency">Consistency</span><span class="trend">71% ↑</span></div>
+        <div class="bar-track bar-con"><div class="bar-fill" data-pct="71"></div></div>
+      </div>
+
+      <div class="stat-strip">
+        <div class="stat-box"><b>3/4</b><span data-i18n="progress.activitiesToday">Activities today</span></div>
+        <div class="stat-box"><b data-i18n="progress.sixDays">6 days</b><span data-i18n="progress.streak">Playing streak</span></div>
+      </div>
+
+      <div class="recommend-card">
+        <div class="emoji">🧩</div>
+        <div><b data-i18n="progress.recommendTitle">Today's recommendation</b><span data-i18n="progress.recommendDesc">Picture Memory · 5 minutes · Easy</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: HELP ============ -->
+  <section class="view" id="view-elder-help">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title" data-i18n="help.title">Get Help</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="help-row">
+        <div class="ico">👩</div>
+        <div class="info"><b data-i18n="help.priya">Priya (daughter)</b><span data-i18n="help.priyaDesc">Usually replies within minutes</span></div>
+        <a class="call-btn" href="tel:+911234567890">📞</a>
+      </div>
+      <div class="help-row">
+        <div class="ico">🩺</div>
+        <div class="info"><b data-i18n="help.drSharma">Dr. Sharma</b><span data-i18n="help.drSharmaDesc">Cognitive therapist · Hindi &amp; English</span></div>
+        <a class="call-btn" href="tel:+911234567891">📞</a>
+      </div>
+      <div class="help-row">
+        <div class="ico">🚨</div>
+        <div class="info"><b data-i18n="help.emergency">Emergency contact</b><span data-i18n="help.emergencyDesc">For urgent situations</span></div>
+        <a class="call-btn" href="tel:112">📞</a>
+      </div>
+      <div class="lang-note" data-i18n="help.langNote">💬 Support is available in Hindi, English and other regional languages.</div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: HOME ============ -->
+  <section class="view" id="view-caregiver-home">
+    <div class="topbar">
+      <div style="font-family:'Fraunces',serif; font-weight:700; color:var(--brown-dark);">YAAD <span style="font-family:'Quicksand'; font-weight:700; font-size:.68rem; color:var(--ink-soft); background:var(--card); border:1px solid var(--border); padding:2px 8px; border-radius:8px; vertical-align:middle;" data-i18n="caregiverHome.badge">Caregiver</span></div>
+    </div>
+    <div class="content">
+      <h2 style="font-size:1.35rem; margin-bottom:14px;" data-i18n="caregiverHome.welcome">Welcome back, Priya 👋</h2>
+
+      <div class="snapshot-card">
+        <div class="avatar">👵</div>
+        <div style="flex:1;">
+          <b data-i18n="caregiverHome.grandmaRekha">Grandma Rekha</b>
+          <div class="status" data-i18n="caregiverHome.activeStatus">● Active today, 9:12 AM</div>
+          <div class="mini-stats">
+            <div><b>3/4</b><span data-i18n="caregiverHome.today">Today</span></div>
+            <div><b>6🔥</b><span data-i18n="caregiverHome.streakLabel">Streak</span></div>
+            <div><b>🙂</b><span data-i18n="caregiverHome.moodLabel">Mood</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert-banner">
+        ⚠️ <div data-i18n="caregiverHome.alertText">No activity was logged the day before yesterday. A quick call might help.</div>
+      </div>
+
+      <div class="tool-grid">
+        <div class="big-tile tile-brown" onclick="goto('caregiver-profile')">
+          <div class="head"><span class="emoji">👤</span><span class="label" data-i18n="caregiverHome.profileTitle">Profile &amp; Preferences</span></div>
+          <div class="sub" data-i18n="caregiverHome.profileSub">Update who they are</div>
+        </div>
+        <div class="big-tile tile-terracotta" onclick="goto('caregiver-builder')">
+          <div class="head"><span class="emoji">🎯</span><span class="label" data-i18n="caregiverHome.builderTitle">Activity Builder</span></div>
+          <div class="sub" data-i18n="caregiverHome.builderSub">Create a personal activity</div>
+        </div>
+        <div class="big-tile tile-mauve" onclick="goto('caregiver-capsule')">
+          <div class="head"><span class="emoji">🎁</span><span class="label" data-i18n="caregiverHome.capsuleTitle">Memory Capsule</span></div>
+          <div class="sub" data-i18n="caregiverHome.capsuleSub">Add photos, songs &amp; places</div>
+        </div>
+        <div class="big-tile tile-sage" onclick="goto('caregiver-progress')">
+          <div class="head"><span class="emoji">📈</span><span class="label" data-i18n="caregiverHome.progressTitle">Progress &amp; Alerts</span></div>
+          <div class="sub" data-i18n="caregiverHome.progressSub">See how they're doing</div>
+        </div>
+      </div>
+      <div class="big-tile tile-blue" style="margin-top:12px;" onclick="goto('caregiver-connect')">
+        <div class="head"><span class="emoji">☎️</span><span class="label" data-i18n="caregiverHome.connectTitle">Care Connect</span></div>
+        <div class="sub" data-i18n="caregiverHome.connectSub">Therapists &amp; appointments</div>
+      </div>
+
+      <div class="switch-link" onclick="goto('role')" data-i18n="caregiverHome.switchUser">Switch user</div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: PROFILE ============ -->
+  <section class="view" id="view-caregiver-profile">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title" data-i18n="profile.title">Profile &amp; Preferences</div>
+    </div>
+    <div class="content">
+      <div class="subtitle" data-i18n="profile.subtitle">This helps YAAD personalise everything Grandma Rekha sees.</div>
+
+      <div class="form-group">
+        <label data-i18n="profile.nameLabel">Name</label>
+        <input type="text" value="Grandma Rekha" data-i18n-value="caregiverHome.grandmaRekha">
+      </div>
+      <div class="form-group">
+        <label data-i18n="profile.langLabel">Preferred language</label>
+        <div class="chip-set">
+          <div class="chip on" onclick="toggleChip(this)" data-i18n="lang.hindi">Hindi</div>
+          <div class="chip" onclick="toggleChip(this)" data-i18n="lang.english">English</div>
+          <div class="chip" onclick="toggleChip(this)" data-i18n="lang.tamil">Tamil</div>
+          <div class="chip" onclick="toggleChip(this)" data-i18n="lang.bengali">Bengali</div>
+          <div class="chip" onclick="toggleChip(this)" data-i18n="lang.marathi">Marathi</div>
+          <div class="chip" onclick="toggleChip(this)" data-i18n="lang.telugu">Telugu</div>
+          <div class="chip" onclick="toggleChip(this)" data-i18n="lang.kannada">Kannada</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-i18n="profile.hobbiesLabel">Hobbies &amp; interests</label>
+        <div class="chip-set">
+          <div class="chip on" onclick="toggleChip(this)" data-i18n="hobby.cricket">Cricket</div>
+          <div class="chip on" onclick="toggleChip(this)" data-i18n="hobby.oldHindiSongs">Old Hindi songs</div>
+          <div class="chip" onclick="toggleChip(this)" data-i18n="hobby.gardening">Gardening</div>
+          <div class="chip" onclick="toggleChip(this)" data-i18n="hobby.cooking">Cooking</div>
+          <div class="chip" onclick="toggleChip(this)" data-i18n="hobby.reading">Reading</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-i18n="profile.cityLabel">City / village</label>
+        <input type="text" value="Delhi" data-i18n-value="place.delhi">
+      </div>
+      <div class="form-group">
+        <label data-i18n="profile.abilityLabel">Ability level</label>
+        <div class="chip-set">
+          <div class="chip" onclick="toggleChip(this)" data-i18n="ability.independent">Independent</div>
+          <div class="chip on" onclick="toggleChip(this)" data-i18n="ability.needsLight">Needs light support</div>
+          <div class="chip" onclick="toggleChip(this)" data-i18n="ability.needsMore">Needs more support</div>
+        </div>
+      </div>
+
+      <button class="save-btn" onclick="showToast('profileToast')" data-i18n="profile.saveBtn">💾 Save profile</button>
+      <div class="toast" id="profileToast" data-i18n="profile.savedToast">Saved — YAAD will use this for Grandma Rekha</div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: ACTIVITY BUILDER ============ -->
+  <section class="view" id="view-caregiver-builder">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title" data-i18n="builder.title">Activity Builder</div>
+    </div>
+    <div class="content">
+      <div class="subtitle" data-i18n="builder.subtitle">"Create an activity for this person." Tell YAAD a little about them.</div>
+
+      <div class="form-group">
+        <label data-i18n="builder.hobbiesLabel">Hobbies</label>
+        <div class="chip-set">
+          <div class="chip on" onclick="toggleChip(this)" data-i18n="hobby.cricket">Cricket</div>
+          <div class="chip" onclick="toggleChip(this)" data-i18n="hobby.gardening">Gardening</div>
+          <div class="chip" onclick="toggleChip(this)" data-i18n="hobby.cooking">Cooking</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-i18n="builder.cultureLabel">Culture &amp; language</label>
+        <div class="chip-set">
+          <div class="chip on" onclick="toggleChip(this)" data-i18n="place.delhi">Delhi</div>
+          <div class="chip on" onclick="toggleChip(this)" data-i18n="builder.hindiSongs">Hindi songs</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label data-i18n="builder.memoriesLabel">Memories to draw from</label>
+        <input type="text" value="Watching cricket at the stadium, 1987" data-i18n-value="builder.memoriesValue">
+      </div>
+
+      <button class="generate-btn" id="genBtn" onclick="generateActivity()" data-i18n="builder.generateBtn">✨ Generate activity</button>
+
+      <div class="activity-result result-block" id="activityResult">
+        <div class="activity-result">
+          <h3 data-i18n="builder.resultTitle">🏏 Cricket Memories</h3>
+          <p data-i18n="builder.resultDesc">An old-style cricket photo, followed by two gentle questions — "Which team do you remember watching?" and "Who was your favourite player?" — then a simple matching game with cricket objects.</p>
+          <div class="activity-actions">
+            <button class="pill-btn" onclick="showToast('sendToast')" data-i18n="builder.sendBtn">Send to Grandma Rekha</button>
+            <button class="pill-btn ghost" onclick="generateActivity()" data-i18n="builder.regenBtn">Regenerate</button>
+          </div>
+        </div>
+        <div class="toast" id="sendToast" data-i18n="builder.sentToast">Sent — it will appear at the top of her Play list</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: MEMORY CAPSULE ============ -->
+  <section class="view" id="view-caregiver-capsule">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title" data-i18n="capsule.title">Memory Capsule</div>
+    </div>
+    <div class="content">
+      <div class="subtitle" data-i18n="capsule.subtitle">Upload a photo, song or memory — YAAD turns it into a gentle activity.</div>
+
+      <div class="capsule-grid">
+        <div class="capsule-tile" data-type="photo" onclick="toggleCapsule(this)"><span class="emoji">📷</span><span data-i18n="capsule.photo">Photo</span></div>
+        <div class="capsule-tile" data-type="song" onclick="toggleCapsule(this)"><span class="emoji">🎵</span><span data-i18n="capsule.song">Song</span></div>
+        <div class="capsule-tile" data-type="home" onclick="toggleCapsule(this)"><span class="emoji">🏠</span><span data-i18n="capsule.home">Home</span></div>
+        <div class="capsule-tile" data-type="family" onclick="toggleCapsule(this)"><span class="emoji">👨‍👩‍👧</span><span data-i18n="capsule.family">Family</span></div>
+        <div class="capsule-tile" data-type="food" onclick="toggleCapsule(this)"><span class="emoji">🍛</span><span data-i18n="capsule.food">Food</span></div>
+        <div class="capsule-tile" data-type="hometown" onclick="toggleCapsule(this)"><span class="emoji">📍</span><span data-i18n="capsule.hometown">Hometown</span></div>
+      </div>
+
+      <button class="generate-btn" id="capsuleBtn" disabled onclick="generateCapsule()" data-i18n="capsule.createBtn">✨ Create activity from this</button>
+
+      <div class="result-block" id="capsuleResult">
+        <div id="capsuleGenerated"></div>
+        <button class="pill-btn" style="width:100%; margin-top:6px;" onclick="showToast('capsuleToast')" data-i18n="capsule.sendFamily">Send to Family screen</button>
+        <div class="toast" id="capsuleToast" data-i18n="capsule.addedToast">Added to Grandma Rekha's Memory Wall</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: PROGRESS & ALERTS ============ -->
+  <section class="view" id="view-caregiver-progress">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title" data-i18n="caregiverProgress.title">Progress &amp; Alerts</div>
+    </div>
+    <div class="content">
+      <div class="subtitle" data-i18n="caregiverProgress.subtitle">How Grandma Rekha is doing this week — trends, not diagnoses.</div>
+
+      <div class="bar-row">
+        <div class="lbl"><span data-i18n="progress.memory">Memory</span><span class="trend">78% ↑</span></div>
+        <div class="bar-track bar-mem"><div class="bar-fill" data-pct="78"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span data-i18n="progress.attention">Attention</span><span class="trend">84% ↑</span></div>
+        <div class="bar-track bar-att"><div class="bar-fill" data-pct="84"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span data-i18n="caregiverProgress.language">Language</span><span class="trend" style="color:var(--ink-soft);">72% →</span></div>
+        <div class="bar-track bar-lang"><div class="bar-fill" data-pct="72"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span data-i18n="progress.consistency">Consistency</span><span class="trend" data-i18n="caregiverProgress.sixDaysUp">6 days ↑</span></div>
+        <div class="bar-track bar-con"><div class="bar-fill" data-pct="80"></div></div>
+      </div>
+
+      <div class="recommend-card" style="margin-bottom:16px;">
+        <div class="emoji">🧩</div>
+        <div><b data-i18n="progress.recommendTitle">Today's recommendation</b><span data-i18n="progress.recommendDesc">Picture Memory · 5 minutes · Easy</span></div>
+      </div>
+
+      <div class="alert-banner">
+        ⚠️ <div data-i18n="caregiverProgress.alertText">No activity logged 2 days ago. Consider a gentle check-in call.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: CARE CONNECT ============ -->
+  <section class="view" id="view-caregiver-connect">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title" data-i18n="connect.title">Care Connect</div>
+    </div>
+    <div class="content">
+      <div class="subtitle" data-i18n="connect.subtitle">Therapists, appointments and contacts, all in one place.</div>
+
+      <div class="connect-row">
+        <b data-i18n="help.drSharma">Dr. Sharma</b>
+        <span class="role" data-i18n="connect.drSharmaRole">Cognitive therapist · Hindi &amp; English · Delhi</span>
+        <div class="actions">
+          <button class="pill-btn" data-i18n="connect.viewProfile">View profile</button>
+          <button class="pill-btn ghost" data-i18n="connect.bookAppt">Book appointment</button>
+        </div>
+      </div>
+
+      <div class="connect-row">
+        <b data-i18n="connect.priyaVerma">Priya Verma</b>
+        <span class="role" data-i18n="connect.priyaRole">Primary caregiver · Daughter</span>
+        <div class="actions">
+          <button class="pill-btn" data-i18n="connect.message">Message</button>
+          <button class="pill-btn ghost" data-i18n="connect.call">Call</button>
+        </div>
+      </div>
+
+      <button class="add-contact-btn" data-i18n="connect.addContact">+ Add a contact</button>
+      <div class="lang-note" style="margin-top:16px;" data-i18n="connect.langNote">💬 Local-language support available in Hindi, English and 8 regional languages.</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+function goto(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const target = document.getElementById('view-'+id);
+  target.classList.add('active');
+  document.getElementById('phone').scrollTop = 0;
+  const content = target.querySelector('.content');
+  if(content) content.scrollTop = 0;
+  animateBars(target);
+  if(id === 'elder-home') updateTodayDate();
+}
+
+function animateBars(scope){
+  const fills = scope.querySelectorAll('.bar-fill');
+  fills.forEach(f=>{
+    f.style.width='0%';
+    const pct = f.getAttribute('data-pct');
+    requestAnimationFrame(()=>{ setTimeout(()=>{ f.style.width = pct+'%'; }, 60); });
+  });
+}
+
+let fontStep = 0;
+const fontSizes = ['17px','19px','21px'];
+function cycleFont(){
+  fontStep = (fontStep+1) % fontSizes.length;
+  document.documentElement.style.fontSize = fontSizes[fontStep];
+}
+
+/* ===== i18n ===== */
+const LANGS = ['en','hi','pa','bn','mr'];
+const LANG_LABELS = {en:'EN', hi:'हिं', pa:'ਪੰ', bn:'বাং', mr:'मरा'};
+let langIndex = 0;
+
+const TRANSLATIONS = {
+  role: {
+    tagline:{en:'Play. Remember. Connect.', hi:'खेलें। याद रखें। जुड़ें।', pa:'ਖੇਡੋ। ਯਾਦ ਰੱਖੋ। ਜੁੜੋ।', bn:'খেলুন। মনে রাখুন। যুক্ত হোন।', mr:'खेळा। आठवा। जोडा।'},
+    prompt:{en:"Who's using YAAD right now?", hi:'अभी YAAD का उपयोग कौन कर रहा है?', pa:'ਇਸ ਸਮੇਂ YAAD ਕੌਣ ਵਰਤ ਰਿਹਾ ਹੈ?', bn:'এখন YAAD কে ব্যবহার করছেন?', mr:'सध्या YAAD कोण वापरत आहे?'},
+    card1Title:{en:"I'm using it myself", hi:'मैं स्वयं इसका उपयोग कर रही/रहा हूँ', pa:'ਮੈਂ ਖੁਦ ਇਸਦੀ ਵਰਤੋਂ ਕਰ ਰਿਹਾ/ਰਹੀ ਹਾਂ', bn:'আমি নিজেই এটি ব্যবহার করছি', mr:'मी स्वतः हे वापरत आहे'},
+    card1Desc:{en:'Games, family memories & a gentle daily routine', hi:'खेल, पारिवारिक यादें और एक सहज दैनिक दिनचर्या', pa:'ਖੇਡਾਂ, ਪਰਿਵਾਰਕ ਯਾਦਾਂ ਅਤੇ ਇੱਕ ਸੌਖੀ ਰੋਜ਼ਾਨਾ ਰੁਟੀਨ', bn:'গেম, পারিবারিক স্মৃতি ও একটি সহজ দৈনন্দিন রুটিন', mr:'खेळ, कौटुंबिक आठवणी आणि एक सौम्य दैनंदिन दिनचर्या'},
+    card2Title:{en:"I'm a caregiver / family member", hi:'मैं एक देखभालकर्ता / परिवार का सदस्य हूँ', pa:'ਮੈਂ ਇੱਕ ਦੇਖਭਾਲ ਕਰਨ ਵਾਲਾ / ਪਰਿਵਾਰਕ ਮੈਂਬਰ ਹਾਂ', bn:'আমি একজন পরিচর্যাকারী / পরিবারের সদস্য', mr:'मी एक काळजीवाहू / कुटुंबातील सदस्य आहे'},
+    card2Desc:{en:'Set up activities, add memories & keep track', hi:'गतिविधियाँ सेट करें, यादें जोड़ें और नज़र रखें', pa:'ਗਤੀਵਿਧੀਆਂ ਸੈੱਟ ਕਰੋ, ਯਾਦਾਂ ਜੋੜੋ ਅਤੇ ਨਜ਼ਰ ਰੱਖੋ', bn:'কার্যক্রম সেট করুন, স্মৃতি যোগ করুন ও নজর রাখুন', mr:'क्रियाकलाप सेट करा, आठवणी जोडा आणि लक्ष ठेवा'},
+    footnote:{en:'You can switch anytime from the home screen.', hi:'आप होम स्क्रीन से कभी भी बदल सकते हैं।', pa:'ਤੁਸੀਂ ਹੋਮ ਸਕ੍ਰੀਨ ਤੋਂ ਕਦੇ ਵੀ ਬਦਲ ਸਕਦੇ ਹੋ।', bn:'আপনি হোম স্ক্রিন থেকে যেকোনো সময় পরিবর্তন করতে পারেন।', mr:'तुम्ही होम स्क्रीनवरून कधीही बदलू शकता.'}
+  },
+  elderHome: {
+    greeting:{en:'Good morning, Grandma Rekha 🌼', hi:'सुप्रभात, दादी रेखा जी 🌼', pa:'ਸ਼ੁਭ ਸਵੇਰ, ਦਾਦੀ ਰੇਖਾ ਜੀ 🌼', bn:'শুভ সকাল, রেখা দিদা 🌼', mr:'सुप्रभात, आजी रेखा 🌼'},
+    tilePlay:{en:'PLAY', hi:'खेलें', pa:'ਖੇਡੋ', bn:'খেলুন', mr:'खेळा'},
+    tileDay:{en:'MY DAY', hi:'मेरा दिन', pa:'ਮੇਰਾ ਦਿਨ', bn:'আমার দিন', mr:'माझा दिवस'},
+    tileFamily:{en:'FAMILY', hi:'परिवार', pa:'ਪਰਿਵਾਰ', bn:'পরিবার', mr:'कुटुंब'},
+    tileProgress:{en:'MY PROGRESS', hi:'मेरी प्रगति', pa:'ਮੇਰੀ ਤਰੱਕੀ', bn:'আমার অগ্রগতি', mr:'माझी प्रगती'},
+    playSub:{en:'Games & exercises', hi:'खेल और अभ्यास', pa:'ਖੇਡਾਂ ਅਤੇ ਅਭਿਆਸ', bn:'গেম ও অনুশীলন', mr:'खेळ आणि सराव'},
+    daySub:{en:'Routine & mood', hi:'दिनचर्या और मनोदशा', pa:'ਰੁਟੀਨ ਅਤੇ ਮੂਡ', bn:'রুটিন ও মেজাজ', mr:'दिनचर्या आणि मूड'},
+    familySub:{en:'Photos & voices', hi:'तस्वीरें और आवाज़ें', pa:'ਤਸਵੀਰਾਂ ਅਤੇ ਆਵਾਜ਼ਾਂ', bn:'ছবি ও কণ্ঠস্বর', mr:'फोटो आणि आवाज'},
+    progressSub:{en:"How you're doing", hi:'आप कैसा कर रहे हैं', pa:'ਤੁਸੀਂ ਕਿਵੇਂ ਕਰ ਰਹੇ ਹੋ', bn:'আপনি কেমন করছেন', mr:'तुम्ही कसे करत आहात'},
+    hintTitle:{en:'Cricket Memories is ready', hi:'क्रिकेट यादें तैयार है', pa:'ਕ੍ਰਿਕਟ ਯਾਦਾਂ ਤਿਆਰ ਹੈ', bn:'ক্রিকেট স্মৃতি প্রস্তুত', mr:'क्रिकेट आठवणी तयार आहे'},
+    hintDesc:{en:'Made for you by Priya — tap Play to try it', hi:'प्रिया द्वारा आपके लिए बनाया गया — आज़माने के लिए Play दबाएँ', pa:'ਪ੍ਰਿਆ ਦੁਆਰਾ ਤੁਹਾਡੇ ਲਈ ਬਣਾਇਆ — ਅਜ਼ਮਾਉਣ ਲਈ Play ਦਬਾਓ', bn:'প্রিয়া আপনার জন্য তৈরি করেছেন — চেষ্টা করতে Play চাপুন', mr:'प्रियाने तुमच्यासाठी बनवले — वापरून पाहण्यासाठी Play दाबा'},
+    switchUser:{en:"Not Grandma Rekha? Switch user", hi:'दादी रेखा नहीं? उपयोगकर्ता बदलें', pa:'ਦਾਦੀ ਰੇਖਾ ਨਹੀਂ? ਵਰਤੋਂਕਾਰ ਬਦਲੋ', bn:'রেখা দিদা নন? ব্যবহারকারী পরিবর্তন করুন', mr:'आजी रेखा नाही? वापरकर्ता बदला'},
+    getHelp:{en:'Get Help', hi:'मदद लें', pa:'ਮਦਦ ਲਓ', bn:'সাহায্য নিন', mr:'मदत घ्या'}
+  },
+  common: {
+    play:{en:'Play', hi:'खेलें', pa:'ਖੇਡੋ', bn:'খেলুন', mr:'खेळा'},
+    backToPlay:{en:'Back to Play', hi:'Play पर वापस जाएँ', pa:'Play \u2019te ਵਾਪਸ ਜਾਓ', bn:'Play-এ ফিরে যান', mr:'Play वर परत जा'}
+  },
+  elderPlay: {
+    title:{en:'Play', hi:'खेलें', pa:'ਖੇਡੋ', bn:'খেলুন', mr:'खेळा'},
+    subtitle:{en:'A few minutes a day keeps the mind active', hi:'दिन में कुछ मिनट मन को सक्रिय रखते हैं', pa:'ਦਿਨ ਵਿੱਚ ਕੁਝ ਮਿੰਟ ਮਨ ਨੂੰ ਸਰਗਰਮ ਰੱਖਦੇ ਹਨ', bn:'দিনে কয়েক মিনিট মনকে সক্রিয় রাখে', mr:'दिवसातील काही मिनिटे मन सक्रिय ठेवतात'},
+    cricketTitle:{en:'Cricket Memories', hi:'क्रिकेट यादें', pa:'ਕ੍ਰਿਕਟ ਯਾਦਾਂ', bn:'ক্রিকেট স্মৃতি', mr:'क्रिकेट आठवणी'},
+    madeForYou:{en:'Made for you', hi:'आपके लिए बनाया गया', pa:'ਤੁਹਾਡੇ ਲਈ ਬਣਾਇਆ', bn:'আপনার জন্য তৈরি', mr:'तुमच्यासाठी बनवले'},
+    cricketDesc:{en:'A personal activity from Priya', hi:'प्रिया की ओर से एक व्यक्तिगत गतिविधि', pa:'ਪ੍ਰਿਆ ਵੱਲੋਂ ਇੱਕ ਨਿੱਜੀ ਗਤੀਵਿਧੀ', bn:'প্রিয়ার থেকে একটি ব্যক্তিগত কার্যক্রম', mr:'प्रियाकडून एक वैयक्तिक क्रियाकलाप'},
+    matchTitle:{en:'Memory Match', hi:'मेमोरी मैच', pa:'ਮੈਮਰੀ ਮੈਚ', bn:'মেমরি ম্যাচ', mr:'मेमरी मॅच'},
+    matchDesc:{en:'Find the matching pairs', hi:'मिलते-जुलते जोड़े ढूँढें', pa:'ਮੇਲ ਖਾਂਦੇ ਜੋੜੇ ਲੱਭੋ', bn:'মিলে যাওয়া জোড়া খুঁজুন', mr:'जुळणाऱ्या जोड्या शोधा'},
+    tuneTitle:{en:'Name That Tune', hi:'धुन पहचानें', pa:'ਧੁਨ ਪਛਾਣੋ', bn:'সুর চিনুন', mr:'धून ओळखा'},
+    tuneDesc:{en:'Old Hindi songs quiz', hi:'पुराने हिंदी गीतों की प्रश्नोत्तरी', pa:'ਪੁਰਾਣੇ ਹਿੰਦੀ ਗੀਤਾਂ ਦੀ ਕੁਇਜ਼', bn:'পুরনো হিন্দি গানের কুইজ', mr:'जुन्या हिंदी गाण्यांची प्रश्नमंजुषा'},
+    numberTitle:{en:'Number Trail', hi:'नंबर ट्रेल', pa:'ਨੰਬਰ ਟ੍ਰੇਲ', bn:'নম্বর ট্রেইল', mr:'नंबर ट्रेल'},
+    numberDesc:{en:'Tap numbers in order', hi:'क्रम में नंबरों को दबाएँ', pa:'ਕ੍ਰਮ ਵਿੱਚ ਨੰਬਰ ਦਬਾਓ', bn:'ক্রমানুসারে নম্বর চাপুন', mr:'क्रमाने संख्या दाबा'},
+    sortTitle:{en:'Sort It', hi:'छाँटें', pa:'ਛਾਂਟੋ', bn:'সাজান', mr:'क्रमवारी लावा'},
+    sortDesc:{en:'Kitchen, clothes or garden?', hi:'रसोई, कपड़े या बगीचा?', pa:'ਰਸੋਈ, ਕੱਪੜੇ ਜਾਂ ਬਾਗ਼?', bn:'রান্নাঘর, পোশাক নাকি বাগান?', mr:'स्वयंपाकघर, कपडे की बाग?'},
+    decisionsTitle:{en:'Everyday Decisions', hi:'रोज़मर्रा के फ़ैसले', pa:'ਰੋਜ਼ਾਨਾ ਫੈਸਲੇ', bn:'দৈনন্দিন সিদ্ধান্ত', mr:'रोजचे निर्णय'},
+    decisionsDesc:{en:"It's raining — what do you take?", hi:'बारिश हो रही है — आप क्या लेंगे?', pa:'ਮੀਂਹ ਪੈ ਰਿਹਾ ਹੈ — ਤੁਸੀਂ ਕੀ ਲਵੋਗੇ?', bn:'বৃষ্টি হচ্ছে — আপনি কী নেবেন?', mr:'पाऊस पडत आहे — तुम्ही काय घ्याल?'}
+  },
+  game: {
+    title:{en:'Cricket Memories', hi:'क्रिकेट यादें', pa:'ਕ੍ਰਿਕਟ ਯਾਦਾਂ', bn:'ক্রিকেট স্মৃতি', mr:'क्रिकेट आठवणी'},
+    q1:{en:'Which team do you remember watching?', hi:'आपको कौन सी टीम देखना याद है?', pa:'ਤੁਹਾਨੂੰ ਕਿਹੜੀ ਟੀਮ ਦੇਖਣੀ ਯਾਦ ਹੈ?', bn:'আপনার কোন দল দেখার কথা মনে আছে?', mr:'तुम्हाला कोणता संघ पाहिल्याचे आठवते?'},
+    optIndia:{en:'India', hi:'भारत', pa:'ਭਾਰਤ', bn:'ভারত', mr:'भारत'},
+    optDelhi:{en:'Delhi Daredevils', hi:'दिल्ली डेयरडेविल्स', pa:'ਦਿੱਲੀ ਡੇਅਰਡੈਵਿਲਸ', bn:'দিল্লি ডেয়ারডেভিলস', mr:'दिल्ली डेअरडेव्हिल्स'},
+    optNotSure:{en:'Not sure', hi:'ठीक से याद नहीं', pa:'ਪੱਕਾ ਨਹੀਂ', bn:'নিশ্চিত নই', mr:'खात्री नाही'},
+    nextQuestion:{en:'Next question', hi:'अगला सवाल', pa:'ਅਗਲਾ ਸਵਾਲ', bn:'পরবর্তী প্রশ্ন', mr:'पुढील प्रश्न'},
+    q2:{en:'Who was your favourite player?', hi:'आपका पसंदीदा खिलाड़ी कौन था?', pa:'ਤੁਹਾਡਾ ਮਨਪਸੰਦ ਖਿਡਾਰੀ ਕੌਣ ਸੀ?', bn:'আপনার প্রিয় খেলোয়াড় কে ছিলেন?', mr:'तुमचा आवडता खेळाडू कोण होता?'},
+    q2Sub:{en:'Say your answer, or tap to type instead', hi:'अपना जवाब बोलें, या टाइप करने के लिए दबाएँ', pa:'ਆਪਣਾ ਜਵਾਬ ਬੋਲੋ, ਜਾਂ ਟਾਈਪ ਕਰਨ ਲਈ ਦਬਾਓ', bn:'আপনার উত্তর বলুন, অথবা টাইপ করতে চাপুন', mr:'तुमचे उत्तर बोला, किंवा टाइप करण्यासाठी दाबा'},
+    micTapSpeak:{en:'Tap the mic and speak', hi:'माइक दबाएँ और बोलें', pa:'ਮਾਈਕ ਦਬਾਓ ਅਤੇ ਬੋਲੋ', bn:'মাইক চেপে বলুন', mr:'माइक दाबा आणि बोला'},
+    listening:{en:'Listening...', hi:'सुन रहे हैं...', pa:'ਸੁਣ ਰਹੇ ਹਾਂ...', bn:'শুনছি...', mr:'ऐकत आहे...'},
+    gotIt:{en:'Got it!', hi:'समझ गए!', pa:'ਸਮਝ ਗਏ!', bn:'বুঝেছি!', mr:'समजले!'},
+    answerSaid:{en:'You said: "Kapil Dev" 🏏', hi:'आपने कहा: "कपिल देव" 🏏', pa:'ਤੁਸੀਂ ਕਿਹਾ: "ਕਪਿਲ ਦੇਵ" 🏏', bn:'আপনি বলেছেন: "কপিল দেব" 🏏', mr:'तुम्ही म्हणालात: "कपिल देव" 🏏'},
+    finish:{en:'Finish', hi:'समाप्त करें', pa:'ਖਤਮ ਕਰੋ', bn:'শেষ করুন', mr:'पूर्ण करा'},
+    q3Title:{en:'Wonderful, Grandma Rekha!', hi:'शानदार, दादी रेखा जी!', pa:'ਸ਼ਾਨਦਾਰ, ਦਾਦੀ ਰੇਖਾ ਜੀ!', bn:'চমৎকার, রেখা দিদা!', mr:'छान, आजी रेखा!'},
+    q3Desc:{en:"You've completed today's activity. Priya will love hearing about Kapil Dev.", hi:'आपने आज की गतिविधि पूरी कर ली। कपिल देव के बारे में सुनकर प्रिया को बहुत अच्छा लगेगा।', pa:'ਤੁਸੀਂ ਅੱਜ ਦੀ ਗਤੀਵਿਧੀ ਪੂਰੀ ਕਰ ਲਈ ਹੈ। ਕਪਿਲ ਦੇਵ ਬਾਰੇ ਸੁਣ ਕੇ ਪ੍ਰਿਆ ਨੂੰ ਚੰਗਾ ਲੱਗੇਗਾ।', bn:'আপনি আজকের কার্যক্রম সম্পন্ন করেছেন। কপিল দেবের কথা শুনে প্রিয়ার খুব ভালো লাগবে।', mr:'तुम्ही आजची क्रियाकलाप पूर्ण केली आहे. कपिल देवबद्दल ऐकून प्रियाला खूप आवडेल.'}
+  },
+  match: {
+    title:{en:'Memory Match', hi:'मेमोरी मैच', pa:'ਮੈਮਰੀ ਮੈਚ', bn:'মেমরি ম্যাচ', mr:'मेमरी मॅच'},
+    instructions:{en:'Find the three matching pairs', hi:'तीन मिलते-जुलते जोड़े ढूँढें', pa:'ਤਿੰਨ ਮੇਲ ਖਾਂਦੇ ਜੋੜੇ ਲੱਭੋ', bn:'তিনটি মিলে যাওয়া জোড়া খুঁজুন', mr:'तीन जुळणाऱ्या जोड्या शोधा'},
+    sub:{en:'Tap two cards to see if they match', hi:'दो कार्ड दबाएँ यह देखने के लिए कि वे मिलते हैं या नहीं', pa:'ਦੋ ਕਾਰਡ ਦਬਾਓ ਇਹ ਦੇਖਣ ਲਈ ਕਿ ਕੀ ਉਹ ਮੇਲ ਖਾਂਦੇ ਹਨ', bn:'দুটি কার্ড চাপুন সেগুলো মিলে কিনা দেখতে', mr:'दोन कार्ड दाबा ती जुळतात का ते पाहण्यासाठी'},
+    shuffle:{en:'🔀 Shuffle again', hi:'🔀 फिर से फेंटें', pa:'🔀 ਫੇਰ ਫੇਟੋ', bn:'🔀 আবার ফেরান', mr:'🔀 पुन्हा फेरा'},
+    moves:{en:'Moves: {n}', hi:'चालें: {n}', pa:'ਚਾਲਾਂ: {n}', bn:'চাল: {n}', mr:'चाली: {n}'},
+    found:{en:'Found: {n} / 3', hi:'मिलीं: {n} / 3', pa:'ਲੱਭੀਆਂ: {n} / 3', bn:'পাওয়া গেছে: {n} / 3', mr:'सापडले: {n} / 3'}
+  },
+  tune: {
+    title:{en:'Name That Tune', hi:'धुन पहचानें', pa:'ਧੁਨ ਪਛਾਣੋ', bn:'সুর চিনুন', mr:'धून ओळखा'},
+    q1:{en:'Listen, then take a guess', hi:'सुनें, फिर अंदाज़ा लगाएँ', pa:'ਸੁਣੋ, ਫਿਰ ਅੰਦਾਜ਼ਾ ਲਗਾਓ', bn:'শুনুন, তারপর অনুমান করুন', mr:'ऐका, मग अंदाज लावा'},
+    tapToPlay:{en:'Tap to play a clip', hi:'क्लिप चलाने के लिए दबाएँ', pa:'ਕਲਿੱਪ ਚਲਾਉਣ ਲਈ ਦਬਾਓ', bn:'ক্লিপ চালাতে চাপুন', mr:'क्लिप चालवण्यासाठी दाबा'},
+    playing:{en:'Playing a short clip…', hi:'एक छोटी क्लिप चल रही है…', pa:'ਇੱਕ ਛੋਟੀ ਕਲਿੱਪ ਚੱਲ ਰਹੀ ਹੈ…', bn:'একটি ছোট ক্লিপ চলছে…', mr:'एक छोटी क्लिप चालू आहे…'},
+    clipFinished:{en:'Clip finished — take your time', hi:'क्लिप समाप्त — अपना समय लें', pa:'ਕਲਿੱਪ ਖਤਮ — ਆਪਣਾ ਸਮਾਂ ਲਓ', bn:'ক্লিপ শেষ — সময় নিন', mr:'क्लिप संपली — तुमचा वेळ घ्या'},
+    clue:{en:'Clue: a tender old melody, promising to always stay close — one of the most loved romantic songs of its time.', hi:'संकेत: एक कोमल पुरानी धुन, हमेशा पास रहने का वादा करती हुई — अपने समय के सबसे प्रिय रोमांटिक गीतों में से एक।', pa:'ਸੰਕੇਤ: ਇੱਕ ਕੋਮਲ ਪੁਰਾਣੀ ਧੁਨ, ਹਮੇਸ਼ਾ ਨੇੜੇ ਰਹਿਣ ਦਾ ਵਾਅਦਾ ਕਰਦੀ — ਆਪਣੇ ਸਮੇਂ ਦੇ ਸਭ ਤੋਂ ਪਿਆਰੇ ਰੋਮਾਂਟਿਕ ਗੀਤਾਂ ਵਿੱਚੋਂ ਇੱਕ।', bn:'ইঙ্গিত: একটি কোমল পুরনো সুর, সবসময় কাছে থাকার প্রতিশ্রুতি — সেই সময়ের সবচেয়ে প্রিয় রোমান্টিক গানগুলোর একটি।', mr:'सूचना: एक हळुवार जुनी धून, कायम जवळ राहण्याचे वचन देणारी — त्या काळातील सर्वात लाडक्या प्रणयगीतांपैकी एक.'},
+    q2:{en:'Which song was that?', hi:'वह कौन सा गीत था?', pa:'ਉਹ ਕਿਹੜਾ ਗੀਤ ਸੀ?', bn:'সেটা কোন গান ছিল?', mr:'ते कोणते गाणे होते?'},
+    song1:{en:'Mere Sapno Ki Rani', hi:'मेरे सपनों की रानी', pa:'ਮੇਰੇ ਸੁਪਨਿਆਂ ਦੀ ਰਾਣੀ', bn:'মেরে সপনো কি রানী', mr:'मेरे सपनों की राणी'},
+    song2:{en:'Lag Ja Gale', hi:'लग जा गले', pa:'ਲੱਗ ਜਾ ਗਲੇ', bn:'লাগ জা গলে', mr:'लग जा गले'},
+    song3:{en:'Chaudhvin Ka Chand', hi:'चौदहवीं का चाँद', pa:'ਚੌਧਵੀਂ ਕਾ ਚਾਂਦ', bn:'চৌদহবীঁ কা চাঁদ', mr:'चौदहवीं का चांद'},
+    correctTitle:{en:"That's right, Grandma Rekha!", hi:'बिलकुल सही, दादी रेखा जी!', pa:'ਬਿਲਕੁਲ ਸਹੀ, ਦਾਦੀ ਰੇਖਾ ਜੀ!', bn:'একদম ঠিক, রেখা দিদা!', mr:'अगदी बरोबर, आजी रेखा!'},
+    correctText:{en:'"Lag Ja Gale" — sung by Lata Mangeshkar, from the film Woh Kaun Thi (1964).', hi:'"लग जा गले" — लता मंगेशकर द्वारा गाया गया, फिल्म वो कौन थी (1964) से।', pa:'"ਲੱਗ ਜਾ ਗਲੇ" — ਲਤਾ ਮੰਗੇਸ਼ਕਰ ਦੁਆਰਾ ਗਾਇਆ, ਫਿਲਮ ਵੋਹ ਕੌਣ ਥੀ (1964) ਤੋਂ।', bn:'"লাগ জা গলে" — লতা মঙ্গেশকরের কণ্ঠে, ওহ কৌন থি (1964) ছবি থেকে।', mr:'"लग जा गले" — लता मंगेशकर यांनी गायलेले, वो कौन थी (1964) चित्रपटातील।'},
+    incorrectTitle:{en:'Good try!', hi:'अच्छी कोशिश!', pa:'ਵਧੀਆ ਕੋਸ਼ਿਸ਼!', bn:'ভালো চেষ্টা!', mr:'चांगला प्रयत्न!'},
+    incorrectText:{en:'The song was "Lag Ja Gale" — sung by Lata Mangeshkar, from Woh Kaun Thi (1964).', hi:'गीत था "लग जा गले" — लता मंगेशकर द्वारा गाया गया, वो कौन थी (1964) से।', pa:'ਗੀਤ ਸੀ "ਲੱਗ ਜਾ ਗਲੇ" — ਲਤਾ ਮੰਗੇਸ਼ਕਰ ਦੁਆਰਾ ਗਾਇਆ, ਵੋਹ ਕੌਣ ਥੀ (1964) ਤੋਂ।', bn:'গানটি ছিল "লাগ জা গলে" — লতা মঙ্গেশকরের কণ্ঠে, ওহ কৌন থি (1964) থেকে।', mr:'गाणे होते "लग जा गले" — लता मंगेशकर यांनी गायलेले, वो कौन थी (1964) मधील।'}
+  },
+  decisions: {
+    title:{en:'Everyday Decisions', hi:'रोज़मर्रा के फ़ैसले', pa:'ਰੋਜ਼ਾਨਾ ਫੈਸਲੇ', bn:'দৈনন্দিন সিদ্ধান্ত', mr:'रोजचे निर्णय'},
+    q0:{en:"It's raining outside. What should you take with you?", hi:'बाहर बारिश हो रही है। आपको अपने साथ क्या ले जाना चाहिए?', pa:'ਬਾਹਰ ਮੀਂਹ ਪੈ ਰਿਹਾ ਹੈ। ਤੁਹਾਨੂੰ ਆਪਣੇ ਨਾਲ ਕੀ ਲੈ ਜਾਣਾ ਚਾਹੀਦਾ ਹੈ?', bn:'বাইরে বৃষ্টি হচ্ছে। আপনার সাথে কী নেওয়া উচিত?', mr:'बाहेर पाऊस पडत आहे। तुम्ही सोबत काय घ्यावे?'},
+    q0a:{en:'An umbrella', hi:'एक छाता', pa:'ਇੱਕ ਛਤਰੀ', bn:'একটি ছাতা', mr:'एक छत्री'},
+    q0b:{en:'Sunglasses', hi:'धूप का चश्मा', pa:'ਧੁੱਪ ਦੀਆਂ ਐਨਕਾਂ', bn:'সানগ্লাস', mr:'गॉगल'},
+    q0c:{en:'A football', hi:'एक फुटबॉल', pa:'ਇੱਕ ਫੁੱਟਬਾਲ', bn:'একটি ফুটবল', mr:'एक फुटबॉल'},
+    q1:{en:"You feel a little hungry before lunchtime. What's a good choice?", hi:'दोपहर के भोजन से पहले आपको थोड़ी भूख लगती है। एक अच्छा विकल्प क्या है?', pa:'ਦੁਪਹਿਰ ਦੇ ਖਾਣੇ ਤੋਂ ਪਹਿਲਾਂ ਤੁਹਾਨੂੰ ਥੋੜੀ ਭੁੱਖ ਲੱਗਦੀ ਹੈ। ਵਧੀਆ ਚੋਣ ਕੀ ਹੈ?', bn:'দুপুরের খাবারের আগে আপনার একটু ক্ষুধা লাগে। ভালো পছন্দ কী?', mr:'दुपारच्या जेवणापूर्वी थोडी भूक लागते। चांगला पर्याय कोणता?'},
+    q1a:{en:'Have a light snack, like a banana', hi:'हल्का नाश्ता करें, जैसे केला', pa:'ਹਲਕਾ ਸਨੈਕ ਖਾਓ, ਜਿਵੇਂ ਕੇਲਾ', bn:'হালকা নাশতা খান, যেমন একটি কলা', mr:'हलका नाश्ता घ्या, जसे केळे'},
+    q1b:{en:'Skip eating until dinner', hi:'रात के खाने तक कुछ न खाएँ', pa:'ਰਾਤ ਦੇ ਖਾਣੇ ਤੱਕ ਕੁਝ ਨਾ ਖਾਓ', bn:'রাতের খাবার পর্যন্ত না খাওয়া', mr:'रात्रीच्या जेवणापर्यंत काहीही खाऊ नका'},
+    q1c:{en:'Have a cold soda', hi:'ठंडा सोडा पिएँ', pa:'ਠੰਡਾ ਸੋਡਾ ਪੀਓ', bn:'ঠান্ডা সোডা খান', mr:'थंड सोडा प्या'},
+    q2:{en:"The doorbell rings and you weren't expecting anyone. What do you do first?", hi:'दरवाज़े की घंटी बजती है और आप किसी की उम्मीद नहीं कर रहे थे। आप सबसे पहले क्या करेंगे?', pa:'ਦਰਵਾਜ਼ੇ ਦੀ ਘੰਟੀ ਵੱਜਦੀ ਹੈ ਅਤੇ ਤੁਸੀਂ ਕਿਸੇ ਦੀ ਉਮੀਦ ਨਹੀਂ ਕਰ ਰਹੇ ਸੀ। ਤੁਸੀਂ ਸਭ ਤੋਂ ਪਹਿਲਾਂ ਕੀ ਕਰੋਗੇ?', bn:'দরজার ঘণ্টা বাজে আর আপনি কারো আশা করছিলেন না। আপনি প্রথমে কী করবেন?', mr:'दाराची बेल वाजते आणि तुम्ही कोणाची अपेक्षा करत नव्हता। तुम्ही आधी काय कराल?'},
+    q2a:{en:'Ask "Who is it?" before opening', hi:'खोलने से पहले पूछें "कौन है?"', pa:'ਖੋਲ੍ਹਣ ਤੋਂ ਪਹਿਲਾਂ ਪੁੱਛੋ "ਕੌਣ ਹੈ?"', bn:'খোলার আগে জিজ্ঞাসা করুন "কে?"', mr:'उघडण्यापूर्वी विचारा "कोण आहे?"'},
+    q2b:{en:'Open the door right away', hi:'तुरंत दरवाज़ा खोल दें', pa:'ਤੁਰੰਤ ਦਰਵਾਜ਼ਾ ਖੋਲ੍ਹੋ', bn:'সঙ্গে সঙ্গে দরজা খুলুন', mr:'लगेच दार उघडा'},
+    q2c:{en:'Ignore it completely', hi:'पूरी तरह से अनदेखा करें', pa:'ਪੂਰੀ ਤਰ੍ਹਾਂ ਨਜ਼ਰਅੰਦਾਜ਼ ਕਰੋ', bn:'সম্পূর্ণ উপেক্ষা করুন', mr:'पूर्णपणे दुर्लक्ष करा'},
+    doneTitle:{en:'Well done, Grandma Rekha!', hi:'शाबाश, दादी रेखा जी!', pa:'ਸ਼ਾਬਾਸ਼, ਦਾਦੀ ਰੇਖਾ ਜੀ!', bn:'বাহ, রেখা দিদা!', mr:'शाब्बास, आजी रेखा!'},
+    scoreText:{en:'You got {n} out of 3 — nicely done.', hi:'आपको 3 में से {n} मिले — बहुत अच्छा।', pa:'ਤੁਹਾਨੂੰ 3 ਵਿੱਚੋਂ {n} ਮਿਲੇ — ਬਹੁਤ ਵਧੀਆ।', bn:'আপনি ৩টির মধ্যে {n}টি পেয়েছেন — চমৎকার।', mr:'तुम्हाला 3 पैकी {n} मिळाले — छान झाले.'}
+  },
+  day: {
+    title:{en:'My Day', hi:'मेरा दिन', pa:'ਮੇਰਾ ਦਿਨ', bn:'আমার দিন', mr:'माझा दिवस'},
+    subtitle:{en:'How are you feeling today?', hi:'आज आप कैसा महसूस कर रहे हैं?', pa:'ਅੱਜ ਤੁਸੀਂ ਕਿਵੇਂ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ?', bn:'আজ আপনার কেমন লাগছে?', mr:'आज तुम्हाला कसे वाटत आहे?'},
+    moodNote:{en:'Thank you for sharing. Priya will see this. 💛', hi:'साझा करने के लिए धन्यवाद। प्रिया इसे देखेगी। 💛', pa:'ਸਾਂਝਾ ਕਰਨ ਲਈ ਧੰਨਵਾਦ। ਪ੍ਰਿਆ ਇਹ ਦੇਖੇਗੀ। 💛', bn:'শেয়ার করার জন্য ধন্যবাদ। প্রিয়া এটি দেখবেন। 💛', mr:'सामायिक केल्याबद्दल धन्यवाद। प्रिया हे पाहील। 💛'},
+    routineTitle:{en:"Today's routine", hi:'आज की दिनचर्या', pa:'ਅੱਜ ਦੀ ਰੁਟੀਨ', bn:'আজকের রুটিন', mr:'आजची दिनचर्या'},
+    wake:{en:'Wake up & stretch', hi:'जागें और स्ट्रेच करें', pa:'ਜਾਗੋ ਅਤੇ ਖਿੱਚੋ', bn:'জেগে উঠুন ও স্ট্রেচ করুন', mr:'उठा आणि स्ट्रेच करा'},
+    breakfast:{en:'Breakfast', hi:'नाश्ता', pa:'ਨਾਸ਼ਤਾ', bn:'সকালের নাশতা', mr:'नाश्ता'},
+    walk:{en:'Short walk', hi:'छोटी सैर', pa:'ਛੋਟੀ ਸੈਰ', bn:'ছোট হাঁটা', mr:'लहान फेरफटका'},
+    lunch:{en:'Lunch', hi:'दोपहर का भोजन', pa:'ਦੁਪਹਿਰ ਦਾ ਖਾਣਾ', bn:'দুপুরের খাবার', mr:'दुपारचे जेवण'},
+    callFamily:{en:'Call with family', hi:'परिवार के साथ कॉल', pa:'ਪਰਿਵਾਰ ਨਾਲ ਕਾਲ', bn:'পরিবারের সাথে কল', mr:'कुटुंबासोबत कॉल'},
+    promptText:{en:'🌤️ Would you like to do a 5-minute memory activity now?', hi:'🌤️ क्या आप अभी 5 मिनट की मेमोरी गतिविधि करना चाहेंगे?', pa:'🌤️ ਕੀ ਤੁਸੀਂ ਹੁਣ 5 ਮਿੰਟ ਦੀ ਮੈਮਰੀ ਗਤੀਵਿਧੀ ਕਰਨਾ ਚਾਹੋਗੇ?', bn:'🌤️ আপনি কি এখন ৫ মিনিটের মেমরি কার্যক্রম করতে চান?', mr:'🌤️ तुम्हाला आत्ता 5 मिनिटांची मेमरी क्रियाकलाप करायला आवडेल का?'},
+    yesPlay:{en:"Yes, let's play", hi:'हाँ, चलिए खेलते हैं', pa:'ਹਾਂ, ਚੱਲੋ ਖੇਡੀਏ', bn:'হ্যাঁ, চলুন খেলি', mr:'हो, चला खेळूया'}
+  },
+  family: {
+    title:{en:'Family', hi:'परिवार', pa:'ਪਰਿਵਾਰ', bn:'পরিবার', mr:'कुटुंब'},
+    voiceFrom:{en:'🎙️ Voice message from Priya', hi:'🎙️ प्रिया की ओर से आवाज़ संदेश', pa:'🎙️ ਪ੍ਰਿਆ ਵੱਲੋਂ ਆਵਾਜ਼ ਸੁਨੇਹਾ', bn:'🎙️ প্রিয়ার কাছ থেকে ভয়েস বার্তা', mr:'🎙️ प्रियाकडून आवाज संदेश'},
+    quote:{en:'"Maa, we\u2019re coming to Delhi this weekend — save some kachoris for us!"', hi:'"माँ, हम इस सप्ताहांत दिल्ली आ रहे हैं — हमारे लिए कुछ कचौरियाँ बचाकर रखना!"', pa:'"ਮਾਂ, ਅਸੀਂ ਇਸ ਵੀਕਐਂਡ ਦਿੱਲੀ ਆ ਰਹੇ ਹਾਂ — ਸਾਡੇ ਲਈ ਕੁਝ ਕਚੌਰੀਆਂ ਬਚਾ ਕੇ ਰੱਖੋ!"', bn:'"মা, আমরা এই সপ্তাহান্তে দিল্লি আসছি — আমাদের জন্য কিছু কচুরি রেখো!"', mr:'"आई, आम्ही या वीकेंडला दिल्लीला येत आहोत — आमच्यासाठी काही कचोऱ्या ठेव!"'},
+    albumTitle:{en:'Memory album', hi:'यादों का एल्बम', pa:'ਯਾਦਾਂ ਦਾ ਐਲਬਮ', bn:'স্মৃতির অ্যালবাম', mr:'आठवणींचा अल्बम'},
+    diwaliTitle:{en:'Diwali, 2019', hi:'दिवाली, 2019', pa:'ਦੀਵਾਲੀ, 2019', bn:'দিওয়ালি, ২০১৯', mr:'दिवाळी, 2019'},
+    diwaliDesc:{en:'Whole family, Delhi', hi:'पूरा परिवार, दिल्ली', pa:'ਸਾਰਾ ਪਰਿਵਾਰ, ਦਿੱਲੀ', bn:'সম্পূর্ণ পরিবার, দিল্লি', mr:'संपूर्ण कुटुंब, दिल्ली'},
+    marketTitle:{en:'At the market', hi:'बाज़ार में', pa:'ਬਾਜ਼ਾਰ ਵਿੱਚ', bn:'বাজারে', mr:'बाजारात'},
+    marketDesc:{en:'With Manju, 1987', hi:'मंजू के साथ, 1987', pa:'ਮੰਜੂ ਨਾਲ, 1987', bn:'মঞ্জুর সাথে, ১৯৮৭', mr:'मंजूसोबत, 1987'},
+    weddingTitle:{en:'Wedding day', hi:'शादी का दिन', pa:'ਵਿਆਹ ਦਾ ਦਿਨ', bn:'বিয়ের দিন', mr:'लग्नाचा दिवस'},
+    weddingDesc:{en:'You & Mahesh, 1975', hi:'आप और महेश, 1975', pa:'ਤੁਸੀਂ ਅਤੇ ਮਹੇਸ਼, 1975', bn:'আপনি ও মহেশ, ১৯৭৫', mr:'तुम्ही आणि महेश, 1975'},
+    gradTitle:{en:"Priya's graduation", hi:'प्रिया का स्नातक समारोह', pa:'ਪ੍ਰਿਆ ਦੀ ਗ੍ਰੈਜੂਏਸ਼ਨ', bn:'প্রিয়ার স্নাতক অনুষ্ঠান', mr:'प्रियाची पदवीदान समारंभ'},
+    gradDesc:{en:'2015', hi:'2015', pa:'2015', bn:'২০১৫', mr:'2015'},
+    addMemory:{en:'Ask your family to add more memories', hi:'अपने परिवार से और यादें जोड़ने के लिए कहें', pa:'ਆਪਣੇ ਪਰਿਵਾਰ ਨੂੰ ਹੋਰ ਯਾਦਾਂ ਜੋੜਨ ਲਈ ਕਹੋ', bn:'আপনার পরিবারকে আরও স্মৃতি যোগ করতে বলুন', mr:'तुमच्या कुटुंबाला आणखी आठवणी जोडायला सांगा'}
+  },
+  progress: {
+    title:{en:'My Progress', hi:'मेरी प्रगति', pa:'ਮੇਰੀ ਤਰੱਕੀ', bn:'আমার অগ্রগতি', mr:'माझी प्रगती'},
+    subtitle:{en:"Here's how this week is going — just gentle trends, nothing to worry about.", hi:'यह रहा कि यह सप्ताह कैसा जा रहा है — बस हल्के रुझान, चिंता की कोई बात नहीं।', pa:'ਇਹ ਹੈ ਕਿ ਇਹ ਹਫ਼ਤਾ ਕਿਵੇਂ ਜਾ ਰਿਹਾ ਹੈ — ਬੱਸ ਹਲਕੇ ਰੁਝਾਨ, ਚਿੰਤਾ ਦੀ ਕੋਈ ਗੱਲ ਨਹੀਂ।', bn:'এই সপ্তাহ কেমন যাচ্ছে তা এখানে — শুধু হালকা প্রবণতা, চিন্তার কিছু নেই।', mr:'हा आठवडा कसा जात आहे ते इथे आहे — फक्त सौम्य कल, काळजीचे कारण नाही.'},
+    memory:{en:'Memory', hi:'स्मृति', pa:'ਯਾਦਦਾਸ਼ਤ', bn:'স্মৃতি', mr:'स्मृती'},
+    attention:{en:'Attention', hi:'ध्यान', pa:'ਧਿਆਨ', bn:'মনোযোগ', mr:'लक्ष'},
+    consistency:{en:'Consistency', hi:'निरंतरता', pa:'ਲਗਾਤਾਰਤਾ', bn:'ধারাবাহিকতা', mr:'सातत्य'},
+    activitiesToday:{en:'Activities today', hi:'आज की गतिविधियाँ', pa:'ਅੱਜ ਦੀਆਂ ਗਤੀਵਿਧੀਆਂ', bn:'আজকের কার্যক্রম', mr:'आजचे क्रियाकलाप'},
+    sixDays:{en:'6 days', hi:'6 दिन', pa:'6 ਦਿਨ', bn:'৬ দিন', mr:'6 दिवस'},
+    streak:{en:'Playing streak', hi:'लगातार खेलने का सिलसिला', pa:'ਲਗਾਤਾਰ ਖੇਡਣ ਦਾ ਸਿਲਸਿਲਾ', bn:'একটানা খেলার ধারা', mr:'सलग खेळण्याचा क्रम'},
+    recommendTitle:{en:"Today's recommendation", hi:'आज की सिफ़ारिश', pa:'ਅੱਜ ਦੀ ਸਿਫ਼ਾਰਸ਼', bn:'আজকের সুপারিশ', mr:'आजची शिफारस'},
+    recommendDesc:{en:'Picture Memory · 5 minutes · Easy', hi:'चित्र स्मृति · 5 मिनट · आसान', pa:'ਤਸਵੀਰ ਯਾਦਦਾਸ਼ਤ · 5 ਮਿੰਟ · ਆਸਾਨ', bn:'ছবি স্মৃতি · ৫ মিনিট · সহজ', mr:'चित्र स्मृती · 5 मिनिटे · सोपे'}
+  },
+  help: {
+    title:{en:'Get Help', hi:'मदद लें', pa:'ਮਦਦ ਲਓ', bn:'সাহায্য নিন', mr:'मदत घ्या'},
+    priya:{en:'Priya (daughter)', hi:'प्रिया (बेटी)', pa:'ਪ੍ਰਿਆ (ਧੀ)', bn:'প্রিয়া (মেয়ে)', mr:'प्रिया (मुलगी)'},
+    priyaDesc:{en:'Usually replies within minutes', hi:'आमतौर पर मिनटों में जवाब देती है', pa:'ਆਮ ਤੌਰ \u2019te ਮਿੰਟਾਂ ਵਿੱਚ ਜਵਾਬ ਦਿੰਦੀ ਹੈ', bn:'সাধারণত মিনিটের মধ্যে উত্তর দেয়', mr:'सहसा काही मिनिटांत उत्तर देते'},
+    drSharma:{en:'Dr. Sharma', hi:'डॉ. शर्मा', pa:'ਡਾ. ਸ਼ਰਮਾ', bn:'ডাঃ শর্মা', mr:'डॉ. शर्मा'},
+    drSharmaDesc:{en:'Cognitive therapist · Hindi & English', hi:'संज्ञानात्मक चिकित्सक · हिंदी और अंग्रेज़ी', pa:'ਬੋਧਾਤਮਕ ਥੈਰੇਪਿਸਟ · ਹਿੰਦੀ ਅਤੇ ਅੰਗਰੇਜ਼ੀ', bn:'কগনিটিভ থেরাপিস্ট · হিন্দি ও ইংরেজি', mr:'संज्ञानात्मक थेरपिस्ट · हिंदी आणि इंग्रजी'},
+    emergency:{en:'Emergency contact', hi:'आपातकालीन संपर्क', pa:'ਐਮਰਜੈਂਸੀ ਸੰਪਰਕ', bn:'জরুরি যোগাযোগ', mr:'आणीबाणी संपर्क'},
+    emergencyDesc:{en:'For urgent situations', hi:'तत्काल स्थितियों के लिए', pa:'ਜ਼ਰੂਰੀ ਹਾਲਾਤਾਂ ਲਈ', bn:'জরুরি পরিস্থিতির জন্য', mr:'तातडीच्या परिस्थितीसाठी'},
+    langNote:{en:'💬 Support is available in Hindi, English and other regional languages.', hi:'💬 सहायता हिंदी, अंग्रेज़ी और अन्य क्षेत्रीय भाषाओं में उपलब्ध है।', pa:'💬 ਸਹਾਇਤਾ ਹਿੰਦੀ, ਅੰਗਰੇਜ਼ੀ ਅਤੇ ਹੋਰ ਖੇਤਰੀ ਭਾਸ਼ਾਵਾਂ ਵਿੱਚ ਉਪਲਬਧ ਹੈ।', bn:'💬 হিন্দি, ইংরেজি ও অন্যান্য আঞ্চলিক ভাষায় সহায়তা পাওয়া যায়।', mr:'💬 हिंदी, इंग्रजी आणि इतर प्रादेशिक भाषांमध्ये मदत उपलब्ध आहे.'}
+  },
+  caregiverHome: {
+    badge:{en:'Caregiver', hi:'देखभालकर्ता', pa:'ਦੇਖਭਾਲ ਕਰਨ ਵਾਲਾ', bn:'পরিচর্যাকারী', mr:'काळजीवाहू'},
+    welcome:{en:'Welcome back, Priya 👋', hi:'वापसी पर स्वागत है, प्रिया 👋', pa:'ਵਾਪਸੀ \u2019te ਸੁਆਗਤ ਹੈ, ਪ੍ਰਿਆ 👋', bn:'ফিরে আসায় স্বাগতম, প্রিয়া 👋', mr:'परत आल्याबद्दल स्वागत आहे, प्रिया 👋'},
+    grandmaRekha:{en:'Grandma Rekha', hi:'दादी रेखा', pa:'ਦਾਦੀ ਰੇਖਾ', bn:'রেখা দিদা', mr:'आजी रेखा'},
+    activeStatus:{en:'● Active today, 9:12 AM', hi:'● आज सक्रिय, सुबह 9:12', pa:'● ਅੱਜ ਸਰਗਰਮ, ਸਵੇਰੇ 9:12', bn:'● আজ সক্রিয়, সকাল ৯:১২', mr:'● आज सक्रिय, सकाळी 9:12'},
+    today:{en:'Today', hi:'आज', pa:'ਅੱਜ', bn:'আজ', mr:'आज'},
+    streakLabel:{en:'Streak', hi:'सिलसिला', pa:'ਸਿਲਸਿਲਾ', bn:'ধারা', mr:'सलगता'},
+    moodLabel:{en:'Mood', hi:'मनोदशा', pa:'ਮੂਡ', bn:'মেজাজ', mr:'मूड'},
+    alertText:{en:'No activity was logged the day before yesterday. A quick call might help.', hi:'कल से पहले वाले दिन कोई गतिविधि दर्ज नहीं हुई। एक त्वरित कॉल मददगार हो सकती है।', pa:'ਪਰਸੋਂ ਕੋਈ ਗਤੀਵਿਧੀ ਦਰਜ ਨਹੀਂ ਹੋਈ। ਇੱਕ ਤੇਜ਼ ਕਾਲ ਮਦਦਗਾਰ ਹੋ ਸਕਦੀ ਹੈ।', bn:'গতপরশু কোনো কার্যক্রম রেকর্ড হয়নি। একটি দ্রুত কল সাহায্য করতে পারে।', mr:'परवा कोणतीही क्रियाकलाप नोंदवली गेली नाही. एक झटपट कॉल मदत करू शकतो.'},
+    profileTitle:{en:'Profile & Preferences', hi:'प्रोफ़ाइल और वरीयताएँ', pa:'ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਤਰਜੀਹਾਂ', bn:'প্রোফাইল ও পছন্দ', mr:'प्रोफाइल आणि प्राधान्ये'},
+    profileSub:{en:'Update who they are', hi:'वे कौन हैं यह अपडेट करें', pa:'ਉਹ ਕੌਣ ਹਨ ਅੱਪਡੇਟ ਕਰੋ', bn:'তারা কে তা আপডেট করুন', mr:'ते कोण आहेत ते अद्ययावत करा'},
+    builderTitle:{en:'Activity Builder', hi:'गतिविधि निर्माता', pa:'ਗਤੀਵਿਧੀ ਬਿਲਡਰ', bn:'কার্যক্রম নির্মাতা', mr:'क्रियाकलाप निर्माता'},
+    builderSub:{en:'Create a personal activity', hi:'एक व्यक्तिगत गतिविधि बनाएँ', pa:'ਇੱਕ ਨਿੱਜੀ ਗਤੀਵਿਧੀ ਬਣਾਓ', bn:'একটি ব্যক্তিগত কার্যক্রম তৈরি করুন', mr:'एक वैयक्तिक क्रियाकलाप तयार करा'},
+    capsuleTitle:{en:'Memory Capsule', hi:'मेमोरी कैप्सूल', pa:'ਮੈਮਰੀ ਕੈਪਸੂਲ', bn:'মেমরি ক্যাপসুল', mr:'मेमरी कॅप्सूल'},
+    capsuleSub:{en:'Add photos, songs & places', hi:'तस्वीरें, गीत और स्थान जोड़ें', pa:'ਤਸਵੀਰਾਂ, ਗੀਤ ਅਤੇ ਸਥਾਨ ਜੋੜੋ', bn:'ছবি, গান ও স্থান যোগ করুন', mr:'फोटो, गाणी आणि ठिकाणे जोडा'},
+    progressTitle:{en:'Progress & Alerts', hi:'प्रगति और अलर्ट', pa:'ਤਰੱਕੀ ਅਤੇ ਚੇਤਾਵਨੀਆਂ', bn:'অগ্রগতি ও সতর্কতা', mr:'प्रगती आणि सूचना'},
+    progressSub:{en:"See how they're doing", hi:'देखें वे कैसा कर रहे हैं', pa:'ਦੇਖੋ ਉਹ ਕਿਵੇਂ ਕਰ ਰਹੇ ਹਨ', bn:'তারা কেমন করছেন দেখুন', mr:'ते कसे करत आहेत ते पहा'},
+    connectTitle:{en:'Care Connect', hi:'केयर कनेक्ट', pa:'ਕੇਅਰ ਕਨੈਕਟ', bn:'কেয়ার কানেক্ট', mr:'केअर कनेक्ट'},
+    connectSub:{en:'Therapists & appointments', hi:'चिकित्सक और अपॉइंटमेंट', pa:'ਥੈਰੇਪਿਸਟ ਅਤੇ ਮੁਲਾਕਾਤਾਂ', bn:'থেরাপিস্ট ও অ্যাপয়েন্টমেন্ট', mr:'थेरपिस्ट आणि भेटी'},
+    switchUser:{en:'Switch user', hi:'उपयोगकर्ता बदलें', pa:'ਵਰਤੋਂਕਾਰ ਬਦਲੋ', bn:'ব্যবহারকারী পরিবর্তন করুন', mr:'वापरकर्ता बदला'}
+  },
+  profile: {
+    title:{en:'Profile & Preferences', hi:'प्रोफ़ाइल और वरीयताएँ', pa:'ਪ੍ਰੋਫਾਈਲ ਅਤੇ ਤਰਜੀਹਾਂ', bn:'প্রোফাইল ও পছন্দ', mr:'प्रोफाइल आणि प्राधान्ये'},
+    subtitle:{en:'This helps YAAD personalise everything Grandma Rekha sees.', hi:'यह YAAD को दादी रेखा जो कुछ भी देखती हैं उसे व्यक्तिगत बनाने में मदद करता है।', pa:'ਇਹ YAAD ਨੂੰ ਦਾਦੀ ਰੇਖਾ ਜੋ ਕੁਝ ਵੀ ਦੇਖਦੀ ਹੈ ਉਸਨੂੰ ਨਿੱਜੀ ਬਣਾਉਣ ਵਿੱਚ ਮਦਦ ਕਰਦਾ ਹੈ।', bn:'এটি YAAD-কে রেখা দিদা যা কিছু দেখেন তা ব্যক্তিগতকৃত করতে সাহায্য করে।', mr:'हे YAAD ला आजी रेखा जे काही पाहतात ते वैयक्तिकृत करण्यास मदत करते.'},
+    nameLabel:{en:'Name', hi:'नाम', pa:'ਨਾਮ', bn:'নাম', mr:'नाव'},
+    langLabel:{en:'Preferred language', hi:'पसंदीदा भाषा', pa:'ਤਰਜੀਹੀ ਭਾਸ਼ਾ', bn:'পছন্দের ভাষা', mr:'पसंतीची भाषा'},
+    hobbiesLabel:{en:'Hobbies & interests', hi:'शौक और रुचियाँ', pa:'ਸ਼ੌਕ ਅਤੇ ਰੁਚੀਆਂ', bn:'শখ ও আগ্রহ', mr:'छंद आणि आवडी'},
+    cityLabel:{en:'City / village', hi:'शहर / गाँव', pa:'ਸ਼ਹਿਰ / ਪਿੰਡ', bn:'শহর / গ্রাম', mr:'शहर / गाव'},
+    abilityLabel:{en:'Ability level', hi:'क्षमता स्तर', pa:'ਯੋਗਤਾ ਪੱਧਰ', bn:'সক্ষমতার স্তর', mr:'क्षमता पातळी'},
+    saveBtn:{en:'💾 Save profile', hi:'💾 प्रोफ़ाइल सहेजें', pa:'💾 ਪ੍ਰੋਫਾਈਲ ਸੰਭਾਲੋ', bn:'💾 প্রোফাইল সংরক্ষণ করুন', mr:'💾 प्रोफाइल जतन करा'},
+    savedToast:{en:'Saved — YAAD will use this for Grandma Rekha', hi:'सहेजा गया — YAAD इसका उपयोग दादी रेखा के लिए करेगा', pa:'ਸੰਭਾਲਿਆ — YAAD ਇਹ ਦਾਦੀ ਰੇਖਾ ਲਈ ਵਰਤੇਗਾ', bn:'সংরক্ষিত — YAAD এটি রেখা দিদার জন্য ব্যবহার করবে', mr:'जतन केले — YAAD हे आजी रेखासाठी वापरेल'}
+  },
+  builder: {
+    title:{en:'Activity Builder', hi:'गतिविधि निर्माता', pa:'ਗਤੀਵਿਧੀ ਬਿਲਡਰ', bn:'কার্যক্রম নির্মাতা', mr:'क्रियाकलाप निर्माता'},
+    subtitle:{en:'"Create an activity for this person." Tell YAAD a little about them.', hi:'"इस व्यक्ति के लिए एक गतिविधि बनाएँ।" YAAD को उनके बारे में थोड़ा बताएँ।', pa:'"ਇਸ ਵਿਅਕਤੀ ਲਈ ਇੱਕ ਗਤੀਵਿਧੀ ਬਣਾਓ।" YAAD ਨੂੰ ਉਹਨਾਂ ਬਾਰੇ ਥੋੜਾ ਦੱਸੋ।', bn:'"এই ব্যক্তির জন্য একটি কার্যক্রম তৈরি করুন।" YAAD-কে তাদের সম্পর্কে একটু বলুন।', mr:'"या व्यक्तीसाठी एक क्रियाकलाप तयार करा." YAAD ला त्यांच्याबद्दल थोडे सांगा.'},
+    hobbiesLabel:{en:'Hobbies', hi:'शौक', pa:'ਸ਼ੌਕ', bn:'শখ', mr:'छंद'},
+    cultureLabel:{en:'Culture & language', hi:'संस्कृति और भाषा', pa:'ਸੱਭਿਆਚਾਰ ਅਤੇ ਭਾਸ਼ਾ', bn:'সংস্কৃতি ও ভাষা', mr:'संस्कृती आणि भाषा'},
+    hindiSongs:{en:'Hindi songs', hi:'हिंदी गीत', pa:'ਹਿੰਦੀ ਗੀਤ', bn:'হিন্দি গান', mr:'हिंदी गाणी'},
+    memoriesLabel:{en:'Memories to draw from', hi:'याद करने योग्य यादें', pa:'ਯਾਦ ਕਰਨ ਲਈ ਯਾਦਾਂ', bn:'কাজে লাগানোর মতো স্মৃতি', mr:'वापरण्यासाठी आठवणी'},
+    memoriesValue:{en:'Watching cricket at the stadium, 1987', hi:'स्टेडियम में क्रिकेट देखना, 1987', pa:'ਸਟੇਡੀਅਮ ਵਿੱਚ ਕ੍ਰਿਕਟ ਦੇਖਣਾ, 1987', bn:'স্টেডিয়ামে ক্রিকেট দেখা, ১৯৮৭', mr:'स्टेडियममध्ये क्रिकेट पाहणे, 1987'},
+    generateBtn:{en:'✨ Generate activity', hi:'✨ गतिविधि बनाएँ', pa:'✨ ਗਤੀਵਿਧੀ ਬਣਾਓ', bn:'✨ কার্যক্রম তৈরি করুন', mr:'✨ क्रियाकलाप तयार करा'},
+    generating:{en:'✨ Creating...', hi:'✨ बनाया जा रहा है...', pa:'✨ ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ...', bn:'✨ তৈরি হচ্ছে...', mr:'✨ तयार होत आहे...'},
+    resultTitle:{en:'🏏 Cricket Memories', hi:'🏏 क्रिकेट यादें', pa:'🏏 ਕ੍ਰਿਕਟ ਯਾਦਾਂ', bn:'🏏 ক্রিকেট স্মৃতি', mr:'🏏 क्रिकेट आठवणी'},
+    resultDesc:{en:'An old-style cricket photo, followed by two gentle questions — "Which team do you remember watching?" and "Who was your favourite player?" — then a simple matching game with cricket objects.', hi:'एक पुरानी शैली की क्रिकेट तस्वीर, उसके बाद दो सरल प्रश्न — "आपको कौन सी टीम देखना याद है?" और "आपका पसंदीदा खिलाड़ी कौन था?" — फिर क्रिकेट वस्तुओं के साथ एक सरल मिलान खेल।', pa:'ਇੱਕ ਪੁਰਾਣੀ ਸ਼ੈਲੀ ਦੀ ਕ੍ਰਿਕਟ ਤਸਵੀਰ, ਫਿਰ ਦੋ ਸੌਖੇ ਸਵਾਲ — "ਤੁਹਾਨੂੰ ਕਿਹੜੀ ਟੀਮ ਦੇਖਣੀ ਯਾਦ ਹੈ?" ਅਤੇ "ਤੁਹਾਡਾ ਮਨਪਸੰਦ ਖਿਡਾਰੀ ਕੌਣ ਸੀ?" — ਫਿਰ ਕ੍ਰਿਕਟ ਵਸਤੂਆਂ ਨਾਲ ਇੱਕ ਸਧਾਰਨ ਮੇਲ ਖੇਡ।', bn:'একটি পুরনো ধাঁচের ক্রিকেট ছবি, তারপর দুটি সহজ প্রশ্ন — "আপনার কোন দল দেখার কথা মনে আছে?" এবং "আপনার প্রিয় খেলোয়াড় কে ছিলেন?" — তারপর ক্রিকেট বস্তু দিয়ে একটি সহজ মিলানোর খেলা।', mr:'एक जुन्या शैलीचा क्रिकेट फोटो, त्यानंतर दोन सोपे प्रश्न — "तुम्हाला कोणता संघ पाहिल्याचे आठवते?" आणि "तुमचा आवडता खेळाडू कोण होता?" — मग क्रिकेट वस्तूंसह एक सोपा जुळणी खेळ.'},
+    sendBtn:{en:'Send to Grandma Rekha', hi:'दादी रेखा को भेजें', pa:'ਦਾਦੀ ਰੇਖਾ ਨੂੰ ਭੇਜੋ', bn:'রেখা দিদাকে পাঠান', mr:'आजी रेखाला पाठवा'},
+    regenBtn:{en:'Regenerate', hi:'फिर से बनाएँ', pa:'ਦੁਬਾਰਾ ਬਣਾਓ', bn:'পুনরায় তৈরি করুন', mr:'पुन्हा तयार करा'},
+    sentToast:{en:"Sent — it will appear at the top of her Play list", hi:'भेजा गया — यह उसकी Play सूची के शीर्ष पर दिखाई देगा', pa:'ਭੇਜਿਆ — ਇਹ ਉਸਦੀ Play ਸੂਚੀ ਦੇ ਸਿਖਰ \u2019te ਦਿਖਾਈ ਦੇਵੇਗਾ', bn:'পাঠানো হয়েছে — এটি তার Play তালিকার শীর্ষে দেখা যাবে', mr:'पाठवले — हे तिच्या Play यादीच्या वरती दिसेल'}
+  },
+  capsule: {
+    title:{en:'Memory Capsule', hi:'मेमोरी कैप्सूल', pa:'ਮੈਮਰੀ ਕੈਪਸੂਲ', bn:'মেমরি ক্যাপসুল', mr:'मेमरी कॅप्सूल'},
+    subtitle:{en:'Upload a photo, song or memory — YAAD turns it into a gentle activity.', hi:'एक तस्वीर, गीत या याद अपलोड करें — YAAD इसे एक सहज गतिविधि में बदल देता है।', pa:'ਇੱਕ ਤਸਵੀਰ, ਗੀਤ ਜਾਂ ਯਾਦ ਅੱਪਲੋਡ ਕਰੋ — YAAD ਇਸਨੂੰ ਇੱਕ ਸੌਖੀ ਗਤੀਵਿਧੀ ਵਿੱਚ ਬਦਲਦਾ ਹੈ।', bn:'একটি ছবি, গান বা স্মৃতি আপলোড করুন — YAAD এটিকে একটি সহজ কার্যক্রমে পরিণত করে।', mr:'एक फोटो, गाणे किंवा आठवण अपलोड करा — YAAD याचे रूपांतर एका सौम्य क्रियाकलापात करते.'},
+    photo:{en:'Photo', hi:'तस्वीर', pa:'ਤਸਵੀਰ', bn:'ছবি', mr:'फोटो'},
+    song:{en:'Song', hi:'गीत', pa:'ਗੀਤ', bn:'গান', mr:'गाणे'},
+    home:{en:'Home', hi:'घर', pa:'ਘਰ', bn:'বাড়ি', mr:'घर'},
+    family:{en:'Family', hi:'परिवार', pa:'ਪਰਿਵਾਰ', bn:'পরিবার', mr:'कुटुंब'},
+    food:{en:'Food', hi:'खाना', pa:'ਖਾਣਾ', bn:'খাবার', mr:'अन्न'},
+    hometown:{en:'Hometown', hi:'गृहनगर', pa:'ਜੱਦੀ ਸ਼ਹਿਰ', bn:'জন্মস্থান', mr:'गावाकडचे शहर'},
+    createBtn:{en:'✨ Create activity from this', hi:'✨ इससे गतिविधि बनाएँ', pa:'✨ ਇਸ ਤੋਂ ਗਤੀਵਿਧੀ ਬਣਾਓ', bn:'✨ এটি থেকে কার্যক্রম তৈরি করুন', mr:'✨ यावरून क्रियाकलाप तयार करा'},
+    creating:{en:'✨ Creating...', hi:'✨ बनाया जा रहा है...', pa:'✨ ਬਣਾਇਆ ਜਾ ਰਿਹਾ ਹੈ...', bn:'✨ তৈরি হচ্ছে...', mr:'✨ तयार होत आहे...'},
+    sendFamily:{en:'Send to Family screen', hi:'फैमिली स्क्रीन पर भेजें', pa:'ਫੈਮਿਲੀ ਸਕ੍ਰੀਨ \u2019te ਭੇਜੋ', bn:'ফ্যামিলি স্ক্রিনে পাঠান', mr:'फॅमिली स्क्रीनवर पाठवा'},
+    addedToast:{en:"Added to Grandma Rekha's Memory Wall", hi:'दादी रेखा की मेमोरी वॉल में जोड़ा गया', pa:'ਦਾਦੀ ਰੇਖਾ ਦੀ ਮੈਮਰੀ ਵਾਲ ਵਿੱਚ ਜੋੜਿਆ', bn:'রেখা দিদার মেমরি ওয়ালে যোগ করা হয়েছে', mr:'आजी रेखाच्या मेमरी वॉलमध्ये जोडले'},
+    questionsCount:{en:'→ {n} questions', hi:'→ {n} प्रश्न', pa:'→ {n} ਸਵਾਲ', bn:'→ {n}টি প্রশ্ন', mr:'→ {n} प्रश्न'}
+  },
+  caregiverProgress: {
+    title:{en:'Progress & Alerts', hi:'प्रगति और अलर्ट', pa:'ਤਰੱਕੀ ਅਤੇ ਚੇਤਾਵਨੀਆਂ', bn:'অগ্রগতি ও সতর্কতা', mr:'प्रगती आणि सूचना'},
+    subtitle:{en:'How Grandma Rekha is doing this week — trends, not diagnoses.', hi:'इस सप्ताह दादी रेखा कैसा कर रही हैं — रुझान, निदान नहीं।', pa:'ਇਸ ਹਫ਼ਤੇ ਦਾਦੀ ਰੇਖਾ ਕਿਵੇਂ ਕਰ ਰਹੀ ਹੈ — ਰੁਝਾਨ, ਨਿਦਾਨ ਨਹੀਂ।', bn:'এই সপ্তাহে রেখা দিদা কেমন করছেন — প্রবণতা, রোগনির্ণয় নয়।', mr:'या आठवड्यात आजी रेखा कशा करत आहेत — कल, निदान नाही.'},
+    language:{en:'Language', hi:'भाषा', pa:'ਭਾਸ਼ਾ', bn:'ভাষা', mr:'भाषा'},
+    sixDaysUp:{en:'6 days ↑', hi:'6 दिन ↑', pa:'6 ਦਿਨ ↑', bn:'৬ দিন ↑', mr:'6 दिवस ↑'},
+    alertText:{en:'No activity logged 2 days ago. Consider a gentle check-in call.', hi:'2 दिन पहले कोई गतिविधि दर्ज नहीं हुई। एक सहज चेक-इन कॉल पर विचार करें।', pa:'2 ਦਿਨ ਪਹਿਲਾਂ ਕੋਈ ਗਤੀਵਿਧੀ ਦਰਜ ਨਹੀਂ ਹੋਈ। ਇੱਕ ਸੌਖੀ ਚੈੱਕ-ਇਨ ਕਾਲ \u2019te ਵਿਚਾਰ ਕਰੋ।', bn:'২ দিন আগে কোনো কার্যক্রম রেকর্ড হয়নি। একটি সহজ চেক-ইন কল বিবেচনা করুন।', mr:'2 दिवसांपूर्वी कोणतीही क्रियाकलाप नोंदवली गेली नाही. एक सौम्य चेक-इन कॉल विचारात घ्या.'}
+  },
+  connect: {
+    title:{en:'Care Connect', hi:'केयर कनेक्ट', pa:'ਕੇਅਰ ਕਨੈਕਟ', bn:'কেয়ার কানেক্ট', mr:'केअर कनेक्ट'},
+    subtitle:{en:'Therapists, appointments and contacts, all in one place.', hi:'चिकित्सक, अपॉइंटमेंट और संपर्क, सब एक जगह पर।', pa:'ਥੈਰੇਪਿਸਟ, ਮੁਲਾਕਾਤਾਂ ਅਤੇ ਸੰਪਰਕ, ਸਭ ਇੱਕ ਥਾਂ \u2019te।', bn:'থেরাপিস্ট, অ্যাপয়েন্টমেন্ট ও যোগাযোগ, সব একই জায়গায়।', mr:'थेरपिस्ट, भेटी आणि संपर्क, सर्व एकाच ठिकाणी.'},
+    drSharmaRole:{en:'Cognitive therapist · Hindi & English · Delhi', hi:'संज्ञानात्मक चिकित्सक · हिंदी और अंग्रेज़ी · दिल्ली', pa:'ਬੋਧਾਤਮਕ ਥੈਰੇਪਿਸਟ · ਹਿੰਦੀ ਅਤੇ ਅੰਗਰੇਜ਼ੀ · ਦਿੱਲੀ', bn:'কগনিটিভ থেরাপিস্ট · হিন্দি ও ইংরেজি · দিল্লি', mr:'संज्ञानात्मक थेरपिस्ट · हिंदी आणि इंग्रजी · दिल्ली'},
+    viewProfile:{en:'View profile', hi:'प्रोफ़ाइल देखें', pa:'ਪ੍ਰੋਫਾਈਲ ਦੇਖੋ', bn:'প্রোফাইল দেখুন', mr:'प्रोफाइल पहा'},
+    bookAppt:{en:'Book appointment', hi:'अपॉइंटमेंट बुक करें', pa:'ਮੁਲਾਕਾਤ ਬੁੱਕ ਕਰੋ', bn:'অ্যাপয়েন্টমেন্ট বুক করুন', mr:'भेट बुक करा'},
+    priyaVerma:{en:'Priya Verma', hi:'प्रिया वर्मा', pa:'ਪ੍ਰਿਆ ਵਰਮਾ', bn:'প্রিয়া ভার্মা', mr:'प्रिया वर्मा'},
+    priyaRole:{en:'Primary caregiver · Daughter', hi:'प्रमुख देखभालकर्ता · बेटी', pa:'ਮੁੱਖ ਦੇਖਭਾਲ ਕਰਨ ਵਾਲੀ · ਧੀ', bn:'প্রধান পরিচর্যাকারী · মেয়ে', mr:'मुख्य काळजीवाहू · मुलगी'},
+    message:{en:'Message', hi:'संदेश', pa:'ਸੁਨੇਹਾ', bn:'বার্তা', mr:'संदेश'},
+    call:{en:'Call', hi:'कॉल करें', pa:'ਕਾਲ ਕਰੋ', bn:'কল করুন', mr:'कॉल करा'},
+    addContact:{en:'+ Add a contact', hi:'+ संपर्क जोड़ें', pa:'+ ਸੰਪਰਕ ਜੋੜੋ', bn:'+ যোগাযোগ যোগ করুন', mr:'+ संपर्क जोडा'},
+    langNote:{en:'💬 Local-language support available in Hindi, English and 8 regional languages.', hi:'💬 हिंदी, अंग्रेज़ी और 8 क्षेत्रीय भाषाओं में स्थानीय-भाषा सहायता उपलब्ध है।', pa:'💬 ਹਿੰਦੀ, ਅੰਗਰੇਜ਼ੀ ਅਤੇ 8 ਖੇਤਰੀ ਭਾਸ਼ਾਵਾਂ ਵਿੱਚ ਸਥਾਨਕ-ਭਾਸ਼ਾ ਸਹਾਇਤਾ ਉਪਲਬਧ ਹੈ।', bn:'💬 হিন্দি, ইংরেজি ও ৮টি আঞ্চলিক ভাষায় স্থানীয়-ভাষা সহায়তা পাওয়া যায়।', mr:'💬 हिंदी, इंग्रजी आणि 8 प्रादेशिक भाषांमध्ये स्थानिक-भाषा मदत उपलब्ध आहे.'}
+  },
+  hobby: {
+    cricket:{en:'Cricket', hi:'क्रिकेट', pa:'ਕ੍ਰਿਕਟ', bn:'ক্রিকেট', mr:'क्रिकेट'},
+    oldHindiSongs:{en:'Old Hindi songs', hi:'पुराने हिंदी गीत', pa:'ਪੁਰਾਣੇ ਹਿੰਦੀ ਗੀਤ', bn:'পুরনো হিন্দি গান', mr:'जुनी हिंदी गाणी'},
+    gardening:{en:'Gardening', hi:'बागवानी', pa:'ਬਾਗਬਾਨੀ', bn:'বাগান করা', mr:'बागकाम'},
+    cooking:{en:'Cooking', hi:'खाना बनाना', pa:'ਖਾਣਾ ਬਣਾਉਣਾ', bn:'রান্না করা', mr:'स्वयंपाक'},
+    reading:{en:'Reading', hi:'पढ़ना', pa:'ਪੜ੍ਹਨਾ', bn:'পড়া', mr:'वाचन'}
+  },
+  lang: {
+    hindi:{en:'Hindi', hi:'हिंदी', pa:'ਹਿੰਦੀ', bn:'হিন্দি', mr:'हिंदी'},
+    english:{en:'English', hi:'अंग्रेज़ी', pa:'ਅੰਗਰੇਜ਼ੀ', bn:'ইংরেজি', mr:'इंग्रजी'},
+    tamil:{en:'Tamil', hi:'तमिल', pa:'ਤਮਿਲ', bn:'তামিল', mr:'तमिळ'},
+    bengali:{en:'Bengali', hi:'बंगाली', pa:'ਬੰਗਾਲੀ', bn:'বাংলা', mr:'बंगाली'},
+    marathi:{en:'Marathi', hi:'मराठी', pa:'ਮਰਾਠੀ', bn:'মারাঠি', mr:'मराठी'},
+    telugu:{en:'Telugu', hi:'तेलुगु', pa:'ਤੇਲਗੂ', bn:'তেলুগু', mr:'तेलुगू'},
+    kannada:{en:'Kannada', hi:'कन्नड़', pa:'ਕੰਨੜ', bn:'কন্নড়', mr:'कन्नड'}
+  },
+  ability: {
+    independent:{en:'Independent', hi:'स्वतंत्र', pa:'ਸੁਤੰਤਰ', bn:'স্বাধীন', mr:'स्वतंत्र'},
+    needsLight:{en:'Needs light support', hi:'हल्के सहयोग की ज़रूरत', pa:'ਹਲਕੇ ਸਹਿਯੋਗ ਦੀ ਲੋੜ', bn:'হালকা সহায়তা প্রয়োজন', mr:'हलक्या मदतीची गरज'},
+    needsMore:{en:'Needs more support', hi:'अधिक सहयोग की ज़रूरत', pa:'ਵਧੇਰੇ ਸਹਿਯੋਗ ਦੀ ਲੋੜ', bn:'বেশি সহায়তা প্রয়োজন', mr:'जास्त मदतीची गरज'}
+  },
+  place: {
+    delhi:{en:'Delhi', hi:'दिल्ली', pa:'ਦਿੱਲੀ', bn:'দিল্লি', mr:'दिल्ली'}
+  },
+  capsulePrompts: {
+    photo: { icon:'📷',
+      title:{en:'Wedding picture', hi:'शादी की तस्वीर', pa:'ਵਿਆਹ ਦੀ ਤਸਵੀਰ', bn:'বিয়ের ছবি', mr:'लग्नाचा फोटो'},
+      questions:{
+        en:['Who is standing next to you?','What year was this?','What do you remember about that day?','Would you like to tell your family this story?'],
+        hi:['आपके बगल में कौन खड़ा है?','यह किस साल की बात है?','उस दिन के बारे में आपको क्या याद है?','क्या आप अपने परिवार को यह कहानी सुनाना चाहेंगे?'],
+        pa:['ਤੁਹਾਡੇ ਨਾਲ ਕੌਣ ਖੜ੍ਹਾ ਹੈ?','ਇਹ ਕਿਹੜਾ ਸਾਲ ਸੀ?','ਉਸ ਦਿਨ ਬਾਰੇ ਤੁਹਾਨੂੰ ਕੀ ਯਾਦ ਹੈ?','ਕੀ ਤੁਸੀਂ ਆਪਣੇ ਪਰਿਵਾਰ ਨੂੰ ਇਹ ਕਹਾਣੀ ਦੱਸਣਾ ਚਾਹੋਗੇ?'],
+        bn:['আপনার পাশে কে দাঁড়িয়ে আছে?','এটি কোন সালের?','সেই দিন সম্পর্কে আপনার কী মনে আছে?','আপনি কি আপনার পরিবারকে এই গল্প বলতে চান?'],
+        mr:['तुमच्या शेजारी कोण उभे आहे?','हे कोणत्या वर्षीचे आहे?','त्या दिवसाबद्दल तुम्हाला काय आठवते?','तुम्हाला तुमच्या कुटुंबाला ही गोष्ट सांगायला आवडेल का?']
+      }
+    },
+    song: { icon:'🎵',
+      title:{en:'"Lag Ja Gale"', hi:'"लग जा गले"', pa:'"ਲੱਗ ਜਾ ਗਲੇ"', bn:'"লাগ জা গলে"', mr:'"लग जा गले"'},
+      questions:{
+        en:['Where do you remember first hearing this song?','Who did you used to listen to it with?','Does it remind you of a special moment?','Would you like to hum a little of it for the family?'],
+        hi:['आपको याद है यह गीत आपने पहली बार कहाँ सुना था?','आप इसे किसके साथ सुना करते थे?','क्या यह आपको किसी खास पल की याद दिलाता है?','क्या आप परिवार के लिए इसे थोड़ा गुनगुनाना चाहेंगे?'],
+        pa:['ਤੁਹਾਨੂੰ ਯਾਦ ਹੈ ਇਹ ਗੀਤ ਤੁਸੀਂ ਪਹਿਲੀ ਵਾਰ ਕਿੱਥੇ ਸੁਣਿਆ ਸੀ?','ਤੁਸੀਂ ਇਸਨੂੰ ਕਿਸ ਨਾਲ ਸੁਣਿਆ ਕਰਦੇ ਸੀ?','ਕੀ ਇਹ ਤੁਹਾਨੂੰ ਕਿਸੇ ਖਾਸ ਪਲ ਦੀ ਯਾਦ ਦਿਵਾਉਂਦਾ ਹੈ?','ਕੀ ਤੁਸੀਂ ਪਰਿਵਾਰ ਲਈ ਇਸਨੂੰ ਥੋੜਾ ਗੁਣਗੁਣਾਉਣਾ ਚਾਹੋਗੇ?'],
+        bn:['আপনার মনে আছে এই গানটি প্রথম কোথায় শুনেছিলেন?','এটি আপনি কার সাথে শুনতেন?','এটি কি আপনাকে কোনো বিশেষ মুহূর্তের কথা মনে করায়?','আপনি কি পরিবারের জন্য এটি একটু গুনগুন করতে চান?'],
+        mr:['हे गाणे तुम्ही पहिल्यांदा कुठे ऐकले होते ते आठवते का?','तुम्ही हे कोणासोबत ऐकत असत?','हे तुम्हाला एखाद्या खास क्षणाची आठवण करून देते का?','तुम्हाला कुटुंबासाठी हे थोडे गुणगुणायला आवडेल का?']
+      }
+    },
+    home: { icon:'🏠',
+      title:{en:'Childhood home, Delhi', hi:'बचपन का घर, दिल्ली', pa:'ਬਚਪਨ ਦਾ ਘਰ, ਦਿੱਲੀ', bn:'শৈশবের বাড়ি, দিল্লি', mr:'बालपणीचे घर, दिल्ली'},
+      questions:{
+        en:['What did the street outside look like?','Which was your favourite room, and why?','Who else lived there with you?','What sounds or smells do you remember most?'],
+        hi:['बाहर की सड़क कैसी दिखती थी?','आपका पसंदीदा कमरा कौन सा था, और क्यों?','आपके साथ और कौन रहता था?','आपको कौन सी आवाज़ें या खुशबूएँ सबसे ज़्यादा याद हैं?'],
+        pa:['ਬਾਹਰ ਦੀ ਗਲੀ ਕਿਵੇਂ ਦਿਖਦੀ ਸੀ?','ਤੁਹਾਡਾ ਮਨਪਸੰਦ ਕਮਰਾ ਕਿਹੜਾ ਸੀ, ਅਤੇ ਕਿਉਂ?','ਤੁਹਾਡੇ ਨਾਲ ਹੋਰ ਕੌਣ ਰਹਿੰਦਾ ਸੀ?','ਤੁਹਾਨੂੰ ਕਿਹੜੀਆਂ ਆਵਾਜ਼ਾਂ ਜਾਂ ਖੁਸ਼ਬੂਆਂ ਸਭ ਤੋਂ ਵੱਧ ਯਾਦ ਹਨ?'],
+        bn:['বাইরের রাস্তাটি দেখতে কেমন ছিল?','আপনার প্রিয় ঘর কোনটি ছিল, এবং কেন?','আপনার সাথে আর কে থাকত?','আপনার সবচেয়ে বেশি কোন শব্দ বা গন্ধ মনে আছে?'],
+        mr:['बाहेरचा रस्ता कसा दिसायचा?','तुमची आवडती खोली कोणती होती, आणि का?','तुमच्यासोबत आणखी कोण राहत होते?','तुम्हाला कोणते आवाज किंवा वास सर्वात जास्त आठवतात?']
+      }
+    },
+    family: { icon:'👨\u200d👩\u200d👧',
+      title:{en:'Family gathering photo', hi:'पारिवारिक सभा की तस्वीर', pa:'ਪਰਿਵਾਰਕ ਇਕੱਠ ਦੀ ਤਸਵੀਰ', bn:'পারিবারিক সমাবেশের ছবি', mr:'कौटुंबिक मेळाव्याचा फोटो'},
+      questions:{
+        en:['Who is in this photo with you?','What was the occasion?','What was everyone doing that day?','Is there a story behind this moment?'],
+        hi:['इस तस्वीर में आपके साथ कौन है?','यह किस मौके की बात है?','उस दिन सब क्या कर रहे थे?','क्या इस पल के पीछे कोई कहानी है?'],
+        pa:['ਇਸ ਤਸਵੀਰ ਵਿੱਚ ਤੁਹਾਡੇ ਨਾਲ ਕੌਣ ਹੈ?','ਇਹ ਕਿਹੜਾ ਮੌਕਾ ਸੀ?','ਉਸ ਦਿਨ ਸਾਰੇ ਕੀ ਕਰ ਰਹੇ ਸਨ?','ਕੀ ਇਸ ਪਲ ਪਿੱਛੇ ਕੋਈ ਕਹਾਣੀ ਹੈ?'],
+        bn:['এই ছবিতে আপনার সাথে কে আছে?','উপলক্ষটি কী ছিল?','সেদিন সবাই কী করছিল?','এই মুহূর্তের পেছনে কোনো গল্প আছে কি?'],
+        mr:['या फोटोत तुमच्यासोबत कोण आहे?','हा कोणता प्रसंग होता?','त्या दिवशी सर्वजण काय करत होते?','या क्षणामागे काही गोष्ट आहे का?']
+      }
+    },
+    food: { icon:'🍛',
+      title:{en:'Favourite home-cooked dish', hi:'पसंदीदा घर का बना व्यंजन', pa:'ਮਨਪਸੰਦ ਘਰ ਦਾ ਬਣਿਆ ਪਕਵਾਨ', bn:'প্রিয় ঘরে তৈরি খাবার', mr:'आवडता घरगुती पदार्थ'},
+      questions:{
+        en:['Who used to cook this for you?','What made it so special?','Do you remember the smell of it cooking?','Would you like to share the recipe with your family?'],
+        hi:['यह आपके लिए कौन बनाता था?','इसे इतना खास किस बात ने बनाया?','क्या आपको इसे पकते समय की खुशबू याद है?','क्या आप अपने परिवार के साथ यह विधि साझा करना चाहेंगे?'],
+        pa:['ਇਹ ਤੁਹਾਡੇ ਲਈ ਕੌਣ ਬਣਾਉਂਦਾ ਸੀ?','ਇਸਨੂੰ ਇੰਨਾ ਖਾਸ ਕਿਸ ਗੱਲ ਨੇ ਬਣਾਇਆ?','ਕੀ ਤੁਹਾਨੂੰ ਇਸਦੇ ਪਕਣ ਦੀ ਖੁਸ਼ਬੂ ਯਾਦ ਹੈ?','ਕੀ ਤੁਸੀਂ ਆਪਣੇ ਪਰਿਵਾਰ ਨਾਲ ਇਹ ਵਿਧੀ ਸਾਂਝੀ ਕਰਨਾ ਚਾਹੋਗੇ?'],
+        bn:['এটি আপনার জন্য কে রান্না করত?','এটি এত বিশেষ কী কারণে ছিল?','এটি রান্না হওয়ার গন্ধ আপনার মনে আছে কি?','আপনি কি আপনার পরিবারের সাথে রেসিপিটি শেয়ার করতে চান?'],
+        mr:['हे तुमच्यासाठी कोण बनवायचे?','हे इतके खास कशामुळे होते?','हे शिजताना येणारा वास तुम्हाला आठवतो का?','तुम्हाला ही पाककृती कुटुंबासोबत शेअर करायला आवडेल का?']
+      }
+    },
+    hometown: { icon:'📍',
+      title:{en:'Hometown, Delhi', hi:'गृहनगर, दिल्ली', pa:'ਜੱਦੀ ਸ਼ਹਿਰ, ਦਿੱਲੀ', bn:'জন্মস্থান, দিল্লি', mr:'गावाकडचे शहर, दिल्ली'},
+      questions:{
+        en:['What do you remember most about growing up there?','Did you have a favourite spot in town?','Who were your neighbours back then?','Has it changed much since you last visited?'],
+        hi:['वहाँ बड़े होने के बारे में आपको सबसे ज़्यादा क्या याद है?','क्या शहर में आपकी कोई पसंदीदा जगह थी?','उस समय आपके पड़ोसी कौन थे?','क्या आपकी आखिरी यात्रा के बाद से यह बहुत बदल गया है?'],
+        pa:['ਉੱਥੇ ਵੱਡੇ ਹੋਣ ਬਾਰੇ ਤੁਹਾਨੂੰ ਸਭ ਤੋਂ ਵੱਧ ਕੀ ਯਾਦ ਹੈ?','ਕੀ ਸ਼ਹਿਰ ਵਿੱਚ ਤੁਹਾਡੀ ਕੋਈ ਮਨਪਸੰਦ ਥਾਂ ਸੀ?','ਉਸ ਸਮੇਂ ਤੁਹਾਡੇ ਗੁਆਂਢੀ ਕੌਣ ਸਨ?','ਕੀ ਤੁਹਾਡੀ ਆਖਰੀ ਫੇਰੀ ਤੋਂ ਬਾਅਦ ਇਹ ਬਹੁਤ ਬਦਲ ਗਿਆ ਹੈ?'],
+        bn:['সেখানে বড় হওয়ার বিষয়ে আপনার সবচেয়ে বেশি কী মনে আছে?','শহরে আপনার প্রিয় কোনো জায়গা ছিল কি?','তখন আপনার প্রতিবেশী কারা ছিলেন?','আপনার শেষবার যাওয়ার পর থেকে এটি কি অনেক বদলেছে?'],
+        mr:['तिथे मोठे होण्याबद्दल तुम्हाला सर्वात जास्त काय आठवते?','शहरात तुमची आवडती जागा होती का?','त्यावेळी तुमचे शेजारी कोण होते?','तुमच्या शेवटच्या भेटीनंतर ते खूप बदलले आहे का?']
+      }
+    }
+  }
+};
+
+function trGet(key, lang){
+  const parts = key.split('.');
+  let node = TRANSLATIONS;
+  for(const p of parts){ if(node == null) return undefined; node = node[p]; }
+  if(node == null) return undefined;
+  return (typeof node === 'object' && !Array.isArray(node)) ? (node[lang] !== undefined ? node[lang] : node.en) : node;
+}
+function tr(key){
+  const v = trGet(key, LANGS[langIndex]);
+  return v !== undefined ? v : key;
+}
+function trf(key, vars){
+  let s = tr(key);
+  for(const k in vars){ s = s.split('{'+k+'}').join(vars[k]); }
+  return s;
+}
+
+const WEEKDAYS = {
+  en:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+  hi:['रविवार','सोमवार','मंगलवार','बुधवार','गुरुवार','शुक्रवार','शनिवार'],
+  pa:['ਐਤਵਾਰ','ਸੋਮਵਾਰ','ਮੰਗਲਵਾਰ','ਬੁੱਧਵਾਰ','ਵੀਰਵਾਰ','ਸ਼ੁੱਕਰਵਾਰ','ਸ਼ਨੀਵਾਰ'],
+  bn:['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'],
+  mr:['रविवार','सोमवार','मंगळवार','बुधवार','गुरुवार','शुक्रवार','शनिवार']
+};
+const MONTHS = {
+  en:['January','February','March','April','May','June','July','August','September','October','November','December'],
+  hi:['जनवरी','फरवरी','मार्च','अप्रैल','मई','जून','जुलाई','अगस्त','सितंबर','अक्टूबर','नवंबर','दिसंबर'],
+  pa:['ਜਨਵਰੀ','ਫ਼ਰਵਰੀ','ਮਾਰਚ','ਅਪ੍ਰੈਲ','ਮਈ','ਜੂਨ','ਜੁਲਾਈ','ਅਗਸਤ','ਸਤੰਬਰ','ਅਕਤੂਬਰ','ਨਵੰਬਰ','ਦਸੰਬਰ'],
+  bn:['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'],
+  mr:['जानेवारी','फेब्रुवारी','मार्च','एप्रिल','मे','जून','जुलै','ऑगस्ट','सप्टेंबर','ऑक्टोबर','नोव्हेंबर','डिसेंबर']
+};
+
+function applyI18n(){
+  const lang = LANGS[langIndex];
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    const val = trGet(key, lang);
+    if(val !== undefined) el.textContent = val;
+  });
+  document.querySelectorAll('[data-i18n-value]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-value');
+    const val = trGet(key, lang);
+    if(val !== undefined) el.value = val;
+  });
+  updateTodayDate();
+  refreshDynamicLabels();
+}
+
+function refreshDynamicLabels(){
+  const moves = document.getElementById('matchMoves');
+  if(moves) moves.textContent = trf('match.moves', {n: matchState.moves});
+  const found = document.getElementById('matchFound');
+  if(found) found.textContent = trf('match.found', {n: matchState.found});
+}
+
+function cycleLang(){
+  langIndex = (langIndex + 1) % LANGS.length;
+  document.body.classList.remove('lang-hi','lang-pa','lang-bn','lang-mr');
+  const code = LANGS[langIndex];
+  if(code !== 'en'){ document.body.classList.add('lang-' + code); }
+  const btn = document.getElementById('langBtn');
+  if(btn) btn.textContent = LANG_LABELS[code];
+  applyI18n();
+}
+
+function updateTodayDate(){
+  const el = document.getElementById('todayDate');
+  if(!el) return;
+  const lang = LANGS[langIndex];
+  const d = new Date();
+  el.textContent = WEEKDAYS[lang][d.getDay()] + ', ' + d.getDate() + ' ' + MONTHS[lang][d.getMonth()];
+}
+
+function pickMood(btn){
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('moodNote').classList.add('show');
+}
+
+function pickChoice(btn){
+  const parent = btn.parentElement;
+  parent.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('picked'));
+  btn.classList.add('picked');
+  document.getElementById('step1-next').disabled = false;
+}
+
+function showStep(n){
+  for(let i=1;i<=3;i++){ document.getElementById('game-step-'+i).style.display = (i===n) ? 'block':'none'; }
+}
+
+function startListening(){
+  const btn = document.getElementById('micBtn');
+  const status = document.getElementById('micStatus');
+  btn.classList.add('listening');
+  status.textContent = tr('game.listening');
+  setTimeout(()=>{
+    btn.classList.remove('listening');
+    status.textContent = tr('game.gotIt');
+    document.getElementById('answerBubble').classList.add('show');
+    document.getElementById('step2-next').disabled = false;
+  }, 1500);
+}
+
+function toggleChip(chip){
+  chip.classList.toggle('on');
+}
+
+function showToast(id){
+  const t = document.getElementById(id);
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+function generateActivity(){
+  const btn = document.getElementById('genBtn');
+  const result = document.getElementById('activityResult');
+  btn.textContent = tr('builder.generating');
+  btn.disabled = true;
+  result.classList.remove('show');
+  setTimeout(()=>{
+    btn.textContent = tr('builder.generateBtn');
+    btn.disabled = false;
+    result.classList.add('show');
+  }, 900);
+}
+
+/* ===== Memory Match ===== */
+const matchEmojis = ['🪔','🏏','🌿'];
+let matchState = {first:null, second:null, moves:0, found:0, lock:false};
+function startMatch(){
+  const cards = [...matchEmojis, ...matchEmojis].map(v=>({v})).sort(()=>Math.random()-0.5);
+  matchState = {first:null, second:null, moves:0, found:0, lock:false};
+  document.getElementById('matchMoves').textContent = trf('match.moves', {n:0});
+  document.getElementById('matchFound').textContent = trf('match.found', {n:0});
+  const grid = document.getElementById('matchGrid');
+  grid.innerHTML = '';
+  cards.forEach(c=>{
+    const el = document.createElement('div');
+    el.className = 'match-card';
+    el.dataset.v = c.v;
+    el.textContent = c.v;
+    el.onclick = ()=>flipMatchCard(el);
+    grid.appendChild(el);
+  });
+}
+function flipMatchCard(el){
+  if(matchState.lock || el.classList.contains('flipped') || el.classList.contains('matched')) return;
+  el.classList.add('flipped');
+  if(!matchState.first){ matchState.first = el; return; }
+  matchState.second = el;
+  matchState.moves++;
+  document.getElementById('matchMoves').textContent = trf('match.moves', {n: matchState.moves});
+  matchState.lock = true;
+  setTimeout(()=>{
+    if(matchState.first.dataset.v === matchState.second.dataset.v){
+      matchState.first.classList.add('matched');
+      matchState.second.classList.add('matched');
+      matchState.found++;
+      document.getElementById('matchFound').textContent = trf('match.found', {n: matchState.found});
+    } else {
+      matchState.first.classList.remove('flipped');
+      matchState.second.classList.remove('flipped');
+    }
+    matchState.first = null; matchState.second = null; matchState.lock = false;
+  }, 700);
+}
+
+/* ===== Name That Tune ===== */
+function playTune(){
+  const btn = document.getElementById('tuneBtn');
+  const status = document.getElementById('tuneStatus');
+  const clue = document.getElementById('tuneClue');
+  btn.textContent = '⏸';
+  status.textContent = tr('tune.playing');
+  setTimeout(()=>{
+    btn.textContent = '▶';
+    status.textContent = tr('tune.clipFinished');
+    clue.style.display = 'block';
+    document.getElementById('tune-step-1').style.display = 'none';
+    document.getElementById('tune-step-2').style.display = 'block';
+  }, 1400);
+}
+function pickTune(btn, correct){
+  document.querySelectorAll('#tune-step-2 .choice-btn').forEach(b=>b.disabled = true);
+  btn.classList.add('picked');
+  const title = document.getElementById('tuneResultTitle');
+  const text = document.getElementById('tuneResultText');
+  const art = document.getElementById('tuneResultArt');
+  if(correct){
+    art.textContent = '🎉';
+    title.textContent = tr('tune.correctTitle');
+    text.textContent = tr('tune.correctText');
+  } else {
+    art.textContent = '🎵';
+    title.textContent = tr('tune.incorrectTitle');
+    text.textContent = tr('tune.incorrectText');
+  }
+  setTimeout(()=>{
+    document.getElementById('tune-step-2').style.display = 'none';
+    document.getElementById('tune-step-3').style.display = 'block';
+  }, 500);
+}
+
+/* ===== Everyday Decisions ===== */
+let dqScore = 0;
+function pickDecision(step, btn, correct){
+  document.querySelectorAll('#dq-step-'+step+' .choice-btn').forEach(b=>b.disabled = true);
+  btn.classList.add('picked');
+  if(correct) dqScore++;
+  setTimeout(()=>{
+    document.getElementById('dq-step-'+step).style.display = 'none';
+    const next = step + 1;
+    if(next < 3){
+      document.getElementById('dq-step-'+next).style.display = 'block';
+    } else {
+      document.getElementById('dqScoreText').textContent = trf('decisions.scoreText', {n: dqScore});
+      document.getElementById('dq-step-3').style.display = 'block';
+      dqScore = 0;
+    }
+  }, 500);
+}
+
+function resetTune(){
+  document.getElementById('tuneBtn').textContent = '▶';
+  document.getElementById('tuneStatus').textContent = tr('tune.tapToPlay');
+  document.getElementById('tuneClue').style.display = 'none';
+  document.getElementById('tune-step-1').style.display = 'block';
+  document.getElementById('tune-step-2').style.display = 'none';
+  document.getElementById('tune-step-3').style.display = 'none';
+  document.querySelectorAll('#tune-step-2 .choice-btn').forEach(b=>{ b.disabled=false; b.classList.remove('picked'); });
+}
+function resetDecisions(){
+  dqScore = 0;
+  for(let i=0;i<=3;i++){
+    document.getElementById('dq-step-'+i).style.display = (i===0) ? 'block' : 'none';
+  }
+  for(let i=0;i<3;i++){
+    document.querySelectorAll('#dq-step-'+i+' .choice-btn').forEach(b=>{ b.disabled=false; b.classList.remove('picked'); });
+  }
+}
+
+function toggleCapsule(tile){
+  tile.classList.toggle('added');
+  const anyAdded = document.querySelectorAll('.capsule-tile.added').length > 0;
+  document.getElementById('capsuleBtn').disabled = !anyAdded;
+  document.getElementById('capsuleResult').classList.remove('show');
+}
+
+function generateCapsule(){
+  const btn = document.getElementById('capsuleBtn');
+  const selected = Array.from(document.querySelectorAll('.capsule-tile.added')).map(el => el.dataset.type);
+  if(selected.length === 0) return;
+  btn.textContent = tr('capsule.creating');
+  setTimeout(()=>{
+    btn.textContent = tr('capsule.createBtn');
+    const container = document.getElementById('capsuleGenerated');
+    const lang = LANGS[langIndex];
+    container.innerHTML = selected.map(key=>{
+      const item = TRANSLATIONS.capsulePrompts[key];
+      if(!item) return '';
+      const title = item.title[lang] || item.title.en;
+      const questions = item.questions[lang] || item.questions.en;
+      const rows = questions.map((q,i)=>`<div class="q-row"><div class="n">${i+1}</div>${q}</div>`).join('');
+      return `<h3 style="font-size:1rem; margin:16px 0 10px;">${item.icon} ${title} ${trf('capsule.questionsCount',{n:questions.length})}</h3>${rows}`;
+    }).join('');
+    document.getElementById('capsuleResult').classList.add('show');
+  }, 800);
+}
+
+/* Run once everything above (including matchState) is declared */
+applyI18n();
+</script>
+</body>
+</html>
