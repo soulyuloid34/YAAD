@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YAAD — Play. Remember. Connect.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f4e9d8;
+    --cream-deep:#e9dcc3;
+    --card:#fffaf1;
+    --ink:#4a3626;
+    --ink-soft:#8a6a4f;
+    --border:#d9c3a0;
+    --brown:#8b5a3c;
+    --brown-dark:#6b4530;
+    --terracotta:#c46a42;
+    --terracotta-soft:#f0d7c4;
+    --sage:#6e8f57;
+    --sage-soft:#dbe6d1;
+    --blue:#7c94ad;
+    --blue-soft:#dfe6ee;
+    --coral:#c47a6a;
+    --coral-soft:#f2ddd6;
+    --mauve:#96688c;
+    --mauve-soft:#e9dbe6;
+    --gold:#c9932f;
+    --amber-soft:#f6e6c4;
+    --shadow:0 10px 28px rgba(74,54,38,.14);
+    --radius:20px;
+  }
+  *{box-sizing:border-box;}
+  html{font-size:17px;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 8%, #f2e6d0 0%, transparent 45%),
+      radial-gradient(circle at 90% 90%, #ecdcc0 0%, transparent 40%),
+      var(--cream-deep);
+    font-family:'Quicksand', sans-serif;
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    padding:28px 14px;
+  }
+  h1,h2,h3{font-family:'Fraunces', serif; margin:0; font-weight:600; color:var(--brown-dark);}
+  button{font-family:inherit;}
+  :focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:.01ms !important; transition-duration:.01ms !important;} }
+
+  .phone{
+    width:100%;
+    max-width:430px;
+    background:var(--cream);
+    border-radius:28px;
+    box-shadow:var(--shadow);
+    border:1px solid var(--border);
+    overflow:hidden;
+    position:relative;
+    min-height:800px;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* roofline signature motif */
+  .roofline{width:100%; height:14px; display:block;}
+  .roofline svg{width:100%; height:100%; display:block;}
+
+  .view{display:none; flex-direction:column; flex:1; min-height:0;}
+  .view.active{display:flex;}
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 18px 10px;
+    gap:10px;
+  }
+  .topbar .title{font-size:1.28rem;}
+  .icon-btn{
+    width:40px; height:40px; border-radius:50%;
+    border:1px solid var(--border); background:var(--card);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; cursor:pointer; color:var(--ink);
+    transition:transform .12s ease;
+  }
+  .icon-btn:active{transform:scale(.92);}
+  .top-actions{display:flex; gap:8px;}
+  .text-btn{
+    border:1px solid var(--border); background:var(--card); color:var(--ink);
+    border-radius:14px; padding:8px 12px; font-weight:700; cursor:pointer; font-size:.82rem;
+  }
+
+  .content{padding:6px 18px 18px; flex:1; overflow-y:auto;}
+  .content.pad-bottom{padding-bottom:96px;}
+
+  .subtitle{color:var(--ink-soft); font-size:.95rem; margin-top:2px; margin-bottom:14px;}
+
+  /* ROLE SELECT */
+  #view-role .content{display:flex; flex-direction:column; align-items:center; text-align:center; padding-top:26px;}
+  .wordmark{font-size:2.6rem; letter-spacing:1px; color:var(--brown-dark);}
+  .tagline{font-family:'Fraunces', serif; font-style:italic; color:var(--terracotta); margin-top:4px; font-size:1.05rem;}
+  .role-prompt{margin:26px 0 16px; font-size:1.05rem; color:var(--ink-soft);}
+  .role-card{
+    width:100%; background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:20px; display:flex; align-items:center; gap:14px; margin-bottom:14px; cursor:pointer;
+    box-shadow:0 4px 14px rgba(74,54,38,.06); transition:transform .12s ease, box-shadow .12s ease;
+    text-align:left;
+  }
+  .role-card:hover{transform:translateY(-2px); box-shadow:0 10px 20px rgba(74,54,38,.12);}
+  .role-card .emoji{font-size:2.2rem;}
+  .role-card h3{font-size:1.1rem;}
+  .role-card p{margin:4px 0 0; color:var(--ink-soft); font-size:.88rem;}
+  .role-footnote{color:var(--ink-soft); font-size:.8rem; margin-top:10px;}
+
+  /* GREETING */
+  .greeting{padding:2px 18px 14px;}
+  .greeting h2{font-size:1.5rem;}
+  .greeting .date{color:var(--ink-soft); font-size:.85rem; margin-top:2px;}
+
+  /* BIG GRID (elder home) */
+  .big-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:6px;}
+  .big-tile{
+    border-radius:18px; overflow:hidden; cursor:pointer; border:1px solid var(--border);
+    background:var(--card); text-align:left; box-shadow:0 4px 12px rgba(74,54,38,.08);
+    transition:transform .12s ease;
+  }
+  .big-tile:active{transform:scale(.96);}
+  .big-tile .head{padding:20px 14px 34px; color:#fffaf1;}
+  .big-tile .head .emoji{font-size:1.7rem; display:block; margin-bottom:26px;}
+  .big-tile .head .label{font-family:'Fraunces', serif; font-weight:700; font-size:1.05rem; display:block;}
+  .big-tile .sub{padding:8px 14px 12px; font-size:.78rem; color:var(--ink-soft);}
+  .tile-sage .head{background:var(--sage);}
+  .tile-coral .head{background:var(--coral);}
+  .tile-blue .head{background:var(--blue);}
+  .tile-terracotta .head{background:var(--terracotta);}
+  .tile-brown .head{background:var(--brown);}
+  .tile-mauve .head{background:var(--mauve);}
+
+  .hint-card{
+    margin-top:14px; background:var(--card); border:1.5px dashed var(--gold); border-radius:16px;
+    padding:14px; display:flex; align-items:center; gap:12px; cursor:pointer;
+  }
+  .hint-card .emoji{font-size:1.6rem;}
+  .hint-card .txt b{display:block; font-size:.92rem;}
+  .hint-card .txt span{font-size:.78rem; color:var(--ink-soft);}
+
+  .bottom-bar{
+    padding:12px 18px 18px; border-top:1px solid var(--border); background:var(--cream);
+  }
+  .help-btn{
+    width:100%; background:var(--brown-dark); color:#fffaf1; border:none; border-radius:16px;
+    padding:14px; font-weight:700; font-size:1rem; display:flex; align-items:center; justify-content:center; gap:8px;
+    cursor:pointer;
+  }
+  .switch-link{
+    text-align:center; font-size:.78rem; color:var(--ink-soft); margin-top:10px; text-decoration:underline; cursor:pointer;
+  }
+
+  /* LIST ROWS (play list, memory list, etc) */
+  .list-row{
+    display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--border);
+    border-radius:16px; padding:12px 14px; margin-bottom:10px;
+  }
+  .list-row .ico{
+    width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-size:1.3rem; flex-shrink:0;
+  }
+  .list-row .info{flex:1; min-width:0;}
+  .list-row .info b{display:block; font-size:.98rem;}
+  .list-row .info span{font-size:.78rem; color:var(--ink-soft);}
+  .badge{
+    display:inline-block; font-size:.66rem; font-weight:700; background:var(--sage-soft); color:var(--brown-dark);
+    padding:2px 7px; border-radius:8px; margin-left:6px; vertical-align:middle;
+  }
+  .pill-btn{
+    border:none; border-radius:14px; padding:9px 16px; font-weight:700; font-size:.85rem; cursor:pointer; color:#fffaf1;
+    background:var(--terracotta); flex-shrink:0;
+  }
+  .pill-btn.ghost{background:transparent; color:var(--terracotta); border:1.5px solid var(--terracotta);}
+
+  /* MOOD ROW */
+  .mood-row{display:flex; gap:10px; margin:10px 0 18px;}
+  .mood-btn{
+    flex:1; background:var(--card); border:2px solid var(--border); border-radius:16px; padding:14px 0;
+    font-size:1.6rem; cursor:pointer; text-align:center;
+  }
+  .mood-btn.selected{border-color:var(--sage); background:var(--sage-soft);}
+  .mood-note{background:var(--sage-soft); border-radius:12px; padding:10px 14px; font-size:.85rem; color:var(--brown-dark); display:none;}
+  .mood-note.show{display:block;}
+
+  /* TIMELINE */
+  .timeline{margin-top:4px;}
+  .tl-row{display:flex; gap:12px; align-items:flex-start; margin-bottom:14px;}
+  .tl-dot{width:12px; height:12px; border-radius:50%; background:var(--terracotta); margin-top:5px; flex-shrink:0;}
+  .tl-row .time{font-size:.78rem; color:var(--ink-soft); width:56px; flex-shrink:0;}
+  .tl-row .what{font-weight:700; font-size:.92rem;}
+
+  .prompt-card{
+    background:var(--terracotta-soft); border-radius:16px; padding:16px; margin-top:6px;
+  }
+  .prompt-card p{margin:0 0 10px; font-size:.92rem; color:var(--brown-dark); font-weight:600;}
+
+  /* FAMILY */
+  .voice-card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:16px;}
+  .voice-card .who{font-weight:700; display:flex; align-items:center; gap:8px; margin-bottom:10px;}
+  .waveform{display:flex; align-items:center; gap:10px;}
+  .play-circle{
+    width:38px; height:38px; border-radius:50%; background:var(--brown); color:#fffaf1; border:none;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:.9rem;
+  }
+  .bars-track{flex:1; height:8px; background:var(--border); border-radius:6px; overflow:hidden;}
+  .bars-fill{height:100%; width:64%; background:var(--terracotta); border-radius:6px;}
+  .voice-card blockquote{margin:12px 0 0; font-style:italic; color:var(--ink-soft); font-size:.88rem;}
+
+  .memory-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .memory-tile{
+    border-radius:16px; overflow:hidden; background:var(--card); border:1px solid var(--border); cursor:pointer;
+  }
+  .memory-tile .thumb{
+    height:78px; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:#fffaf1;
+  }
+  .memory-tile .cap{padding:8px 10px 12px;}
+  .memory-tile .cap b{display:block; font-size:.85rem;}
+  .memory-tile .cap span{font-size:.72rem; color:var(--ink-soft);}
+  .memory-tile.add{
+    display:flex; align-items:center; justify-content:center; border:1.5px dashed var(--gold); min-height:120px;
+    color:var(--ink-soft); font-size:.82rem; text-align:center; flex-direction:column; gap:6px;
+  }
+
+  /* PROGRESS */
+  .bar-row{margin-bottom:18px;}
+  .bar-row .lbl{display:flex; justify-content:space-between; font-size:.9rem; font-weight:700; margin-bottom:6px;}
+  .bar-row .lbl .trend{color:var(--sage); font-weight:700;}
+  .bar-track{height:16px; background:var(--border); border-radius:10px; overflow:hidden;}
+  .bar-fill{height:100%; width:0%; border-radius:10px; transition:width 1s ease;}
+  .bar-mem .bar-fill{background:var(--sage);}
+  .bar-att .bar-fill{background:var(--blue);}
+  .bar-lang .bar-fill{background:var(--gold);}
+  .bar-con .bar-fill{background:var(--coral);}
+
+  .stat-strip{display:flex; gap:10px; margin:14px 0 20px;}
+  .stat-box{flex:1; background:var(--card); border:1px solid var(--border); border-radius:14px; padding:12px; text-align:center;}
+  .stat-box b{display:block; font-size:1.15rem; color:var(--brown-dark);}
+  .stat-box span{font-size:.7rem; color:var(--ink-soft);}
+
+  .recommend-card{
+    background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px;
+    display:flex; align-items:center; gap:12px; margin-top:6px;
+  }
+  .recommend-card .emoji{font-size:1.7rem;}
+  .recommend-card b{display:block; font-size:.95rem;}
+  .recommend-card span{font-size:.78rem; color:var(--ink-soft);}
+
+  /* HELP */
+  .help-row{
+    display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--border);
+    border-radius:16px; padding:14px; margin-bottom:12px;
+  }
+  .help-row .ico{
+    width:48px; height:48px; border-radius:50%; background:var(--coral-soft); display:flex; align-items:center;
+    justify-content:center; font-size:1.3rem; flex-shrink:0;
+  }
+  .help-row .info b{display:block; font-size:.95rem;}
+  .help-row .info span{font-size:.78rem; color:var(--ink-soft);}
+  .call-btn{
+    margin-left:auto; width:42px; height:42px; border-radius:50%; background:var(--sage); color:#fffaf1;
+    border:none; display:flex; align-items:center; justify-content:center; font-size:1.05rem; cursor:pointer; text-decoration:none;
+  }
+  .lang-note{
+    background:var(--blue-soft); border-radius:12px; padding:12px 14px; font-size:.82rem; color:var(--brown-dark); margin-top:6px;
+  }
+
+  /* CAREGIVER */
+  .snapshot-card{
+    background:var(--card); border:1px solid var(--border); border-radius:18px; padding:16px; margin-bottom:14px;
+    display:flex; gap:14px; align-items:center;
+  }
+  .snapshot-card .avatar{
+    width:56px; height:56px; border-radius:50%; background:var(--brown); color:#fffaf1; display:flex;
+    align-items:center; justify-content:center; font-size:1.5rem; flex-shrink:0;
+  }
+  .snapshot-card b{display:block; font-size:1.05rem;}
+  .snapshot-card .status{font-size:.78rem; color:var(--sage); font-weight:700; margin-top:2px;}
+  .mini-stats{display:flex; gap:16px; margin-top:8px;}
+  .mini-stats div{font-size:.72rem; color:var(--ink-soft); text-align:center;}
+  .mini-stats b{display:block; font-size:.95rem; color:var(--brown-dark);}
+
+  .alert-banner{
+    background:var(--amber-soft); border:1px solid #e0c37a; border-radius:14px; padding:12px 14px; margin-bottom:16px;
+    font-size:.85rem; color:var(--brown-dark); display:flex; gap:10px; align-items:flex-start;
+  }
+
+  .tool-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+
+  .form-group{margin-bottom:16px;}
+  .form-group label{display:block; font-weight:700; font-size:.88rem; margin-bottom:7px;}
+  .form-group input[type=text]{
+    width:100%; padding:11px 13px; border-radius:12px; border:1px solid var(--border); font-family:inherit;
+    font-size:.92rem; background:var(--card); color:var(--ink);
+  }
+  .chip-set{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    border:1.5px solid var(--border); background:var(--card); border-radius:20px; padding:7px 13px; font-size:.82rem;
+    cursor:pointer; color:var(--ink-soft); font-weight:600;
+  }
+  .chip.on{background:var(--sage); border-color:var(--sage); color:#fffaf1;}
+
+  .save-btn, .generate-btn{
+    width:100%; border:none; border-radius:14px; padding:14px; font-weight:700; font-size:.95rem;
+    background:var(--brown-dark); color:#fffaf1; cursor:pointer; margin-top:6px;
+  }
+  .toast{
+    display:none; margin-top:12px; background:var(--sage-soft); color:var(--brown-dark); border-radius:12px;
+    padding:10px 14px; font-size:.85rem; text-align:center; font-weight:700;
+  }
+  .toast.show{display:block;}
+
+  .capsule-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px;}
+  .capsule-tile{
+    border:1.5px dashed var(--gold); border-radius:14px; padding:14px 6px; text-align:center; cursor:pointer;
+    font-size:.76rem; color:var(--ink-soft); background:var(--card);
+  }
+  .capsule-tile .emoji{display:block; font-size:1.5rem; margin-bottom:6px;}
+  .capsule-tile.added{border-style:solid; border-color:var(--sage); background:var(--sage-soft); color:var(--brown-dark);}
+
+  .result-block{display:none; margin-top:8px;}
+  .result-block.show{display:block; animation:fadein .3s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+
+  .activity-result{
+    background:var(--sage-soft); border-radius:16px; padding:16px; margin-top:14px;
+  }
+  .activity-result h3{font-size:1.05rem; margin-bottom:6px;}
+  .activity-result p{font-size:.88rem; color:var(--brown-dark); line-height:1.5; margin:0 0 12px;}
+  .activity-actions{display:flex; gap:10px;}
+  .activity-actions button{flex:1;}
+
+  .q-row{
+    display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:11px 14px; margin-bottom:9px; font-size:.86rem;
+  }
+  .q-row .n{
+    width:24px; height:24px; border-radius:50%; background:var(--terracotta); color:#fffaf1; font-size:.72rem;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:700;
+  }
+
+  .connect-row{
+    background:var(--card); border:1px solid var(--border); border-radius:16px; padding:14px; margin-bottom:12px;
+  }
+  .connect-row b{font-size:.95rem;}
+  .connect-row .role{font-size:.76rem; color:var(--ink-soft); display:block; margin:2px 0 8px;}
+  .connect-row .actions{display:flex; gap:8px;}
+  .connect-row .actions .pill-btn{padding:7px 12px; font-size:.78rem;}
+  .add-contact-btn{
+    width:100%; border:1.5px dashed var(--gold); background:transparent; color:var(--brown-dark); font-weight:700;
+    border-radius:14px; padding:12px; cursor:pointer; font-size:.88rem; margin-top:4px;
+  }
+
+  /* MIC / VOICE */
+  .mic-wrap{display:flex; align-items:center; gap:12px; margin-top:14px;}
+  .mic-btn{
+    width:56px; height:56px; border-radius:50%; background:var(--terracotta); color:#fffaf1; border:none;
+    font-size:1.3rem; cursor:pointer; flex-shrink:0; transition:transform .15s ease;
+  }
+  .mic-btn.listening{animation:pulse 1s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(196,106,66,.5);} 70%{box-shadow:0 0 0 16px rgba(196,106,66,0);} 100%{box-shadow:0 0 0 0 rgba(196,106,66,0);}}
+  .mic-status{font-size:.85rem; color:var(--ink-soft);}
+  .answer-bubble{
+    display:none; background:var(--blue-soft); border-radius:14px; padding:10px 14px; margin-top:12px; font-size:.9rem; font-weight:700;
+  }
+  .answer-bubble.show{display:block;}
+
+  .game-card{
+    background:var(--card); border:1px solid var(--border); border-radius:20px; padding:20px; text-align:center;
+  }
+  .game-card .art{font-size:3rem; margin-bottom:10px;}
+  .game-card h3{font-size:1.1rem; margin-bottom:16px;}
+  .choice-btn{
+    display:block; width:100%; background:var(--card); border:1.5px solid var(--border); border-radius:14px;
+    padding:13px; margin-bottom:10px; font-size:.92rem; font-weight:700; cursor:pointer; color:var(--ink);
+  }
+  .choice-btn:hover{border-color:var(--sage);}
+  .choice-btn.picked{background:var(--sage-soft); border-color:var(--sage);}
+  .next-btn{
+    width:100%; border:none; border-radius:14px; padding:13px; font-weight:700; background:var(--terracotta);
+    color:#fffaf1; margin-top:6px; cursor:pointer;
+  }
+  .next-btn:disabled{opacity:.4; cursor:not-allowed;}
+
+  [data-hi]{display:none;}
+  body.lang-hi [data-hi]{display:inline;}
+  body.lang-hi [data-en]{display:none;}
+
+/* ---- Tier 1 additions ---- */
+.setup-note{font-size:.85rem;color:var(--ink-soft);margin:0 0 16px;line-height:1.5}
+.trail-grid{position:relative;height:300px;background:var(--cream-deep);border-radius:16px;margin:10px 0}
+.trail-dot{position:absolute;width:52px;height:52px;border-radius:50%;border:2px solid var(--brown);background:var(--card);font-weight:700;font-size:1.1rem;color:var(--brown-dark);cursor:pointer}
+.trail-dot.done{background:var(--sage);border-color:var(--sage);color:#fffaf1}
+.sort-item{font-size:3rem;margin:6px 0 10px}
+.sort-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.list-row.soon{opacity:.55}
+.feedback{min-height:1.4em;font-weight:700;font-size:.9rem;margin:8px 0;color:var(--sage)}
+.feedback.no{color:var(--coral)}
+.match-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.match-card{aspect-ratio:1;border-radius:14px;border:2px solid var(--border);background:linear-gradient(155deg,var(--terracotta),var(--brown));font-size:1.8rem;color:transparent;cursor:pointer}
+.match-card.up,.match-card.ok{background:var(--card);color:var(--ink);border-color:var(--gold)}
+.match-card.ok{background:var(--sage-soft);border-color:var(--sage)}
+.mem-user{background:var(--sage)}
+
+.langsel{position:absolute;top:10px;right:12px;z-index:6;border:1px solid var(--border);background:var(--card);color:var(--ink);border-radius:12px;padding:6px 8px;font:inherit;font-weight:700;font-size:.8rem}
+.speak-btn{position:absolute;bottom:14px;left:14px;z-index:6;width:48px;height:48px;border-radius:50%;border:none;background:var(--brown-dark);color:#fffaf1;font-size:1.3rem;cursor:pointer;box-shadow:var(--shadow)}
+.mem-img{width:100%;height:78px;object-fit:cover;display:block}
+
+body.hc{--cream:#fff;--cream-deep:#fff;--card:#fff;--ink:#000;--ink-soft:#1a1a1a;--border:#000;--brown-dark:#000;--brown:#222;--terracotta:#8a2d0a;--sage:#1d5a1d;--coral:#8a2d0a;--blue:#1b3f6b;--gold:#7a4b00;--sage-soft:#e6f2e6;--terracotta-soft:#f7e4dc;--blue-soft:#e3ecf7;--coral-soft:#f7e4dc;--amber-soft:#fff3cc}
+.icon-btn{width:48px;height:48px}.text-btn,.pill-btn,.choice-btn,.next-btn{min-height:44px}
+.hcbtn{position:absolute;top:10px;right:118px;z-index:6;border:1px solid var(--border);background:var(--card);color:var(--ink);border-radius:12px;padding:6px 10px;font:inherit;font-weight:700;font-size:.8rem;cursor:pointer}
+.tick{width:34px;height:34px;border-radius:50%;border:2px solid var(--terracotta);background:var(--card);color:#fff;font-size:1rem;flex-shrink:0;cursor:pointer;margin-top:-4px}
+.tick[aria-pressed=true]{background:var(--sage);border-color:var(--sage)}
+.tl-row.done .what{text-decoration:line-through;opacity:.6}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.week div{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 0;font-size:1.3rem}
+.week span{display:block;font-size:.66rem;color:var(--ink-soft)}
+.r-row{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:8px 12px;margin-bottom:8px;font-size:.88rem}
+.r-row button{margin-left:auto;border:none;background:transparent;font-size:1.1rem;cursor:pointer;color:var(--coral)}
+.r-add{display:flex;gap:8px}.r-add input{padding:10px;border-radius:12px;border:1px solid var(--border);font:inherit;background:var(--card);color:var(--ink)}
+
+.tools{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--cream-deep);border-bottom:1px solid var(--border);flex-shrink:0}
+.tools .hcbtn,.tools .langsel{position:static;min-height:40px;padding:6px 10px}
+.tools .langsel{margin-left:auto}
+a.pill-btn{text-decoration:none;display:inline-flex;align-items:center}
+.cc-form{display:grid;gap:8px;margin-top:6px}.cc-form input{padding:10px;border-radius:12px;border:1px solid var(--border);font:inherit;background:var(--card);color:var(--ink);min-width:0}
+</style>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4e9d8"><link rel="icon" href="icon.svg">
+</head>
+<body>
+<div class="phone" id="phone">
+<div class="tools" role="toolbar" aria-label="Accessibility and language">
+<button class="hcbtn" id="speakBtn" onclick="readScreen()" aria-label="Read this screen aloud">&#128266; Read aloud</button>
+<button class="hcbtn" id="syncBtn" onclick="openSync()">Sync</button>
+<button class="hcbtn" id="hcBtn" onclick="toggleHC()" aria-pressed="false">Contrast</button>
+<select class="langsel" id="langSel" aria-label="Language" onchange="setLang(this.value)"><option value="en">English</option><option value="hi">हिन्दी</option><option value="ta">தமிழ்</option><option value="te">తెలుగు</option><option value="kn">ಕನ್ನಡ</option><option value="bn">বাংলা</option><option value="mr">मराठी</option></select>
+</div>
+<input type="file" id="photoIn" accept="image/*" hidden>
+<div id="syncPanel" role="dialog" aria-modal="true" aria-label="Family sync" style="display:none;position:absolute;inset:0;z-index:8;background:rgba(60,40,25,.5);padding:18px;overflow:auto">
+ <div style="background:var(--card);border-radius:20px;padding:18px;margin-top:30px">
+  <h3 style="margin:0 0 8px">Family sync</h3>
+  <p id="syncInfo" class="setup-note"></p>
+  <div id="syncCodeBox" style="font:700 1.6rem monospace;letter-spacing:.15em;margin:6px 0 12px"></div>
+  <div class="cc-form">
+   <input id="syncUrlIn" placeholder="Server address, e.g. https://yaad.example.com" aria-label="Server address">
+   <button class="pill-btn" type="button" onclick="createSync()">Create a family code</button>
+   <input id="syncJoinIn" placeholder="Or enter a family code" maxlength="8" aria-label="Family code" style="text-transform:uppercase">
+   <button class="pill-btn" type="button" onclick="joinSync()">Join with this code</button>
+   <button class="pill-btn ghost" type="button" onclick="stopSync()">Stop syncing on this device</button>
+   <button class="next-btn" type="button" onclick="closeSync()">Close</button>
+  </div>
+ </div>
+</div>
+<div id="reminder" role="alert" onclick="this.style.display='none'" style="display:none;position:absolute;top:0;left:0;right:0;z-index:7;background:var(--gold);color:#fff;padding:16px;font-weight:700;text-align:center;cursor:pointer"></div>
+
+  <!-- ============ ROLE SELECT ============ -->
+  <section class="view active" id="view-role">
+    <div class="roofline"><svg viewBox="0 0 400 14" preserveAspectRatio="none"><polyline points="0,14 20,2 40,14 60,2 80,14 100,2 120,14 140,2 160,14 180,2 200,14 220,2 240,14 260,2 280,14 300,2 320,14 340,2 360,14 380,2 400,14" fill="none" stroke="#8b5a3c" stroke-width="2" opacity=".35"/></svg></div>
+    <div class="content">
+      <div class="wordmark">YAAD</div>
+      <div class="tagline">Play. Remember. Connect.</div>
+      <div class="role-prompt">Who's using YAAD right now?</div>
+
+      <div class="role-card" onclick="enter('elder-home')">
+        <div class="emoji">👵</div>
+        <div>
+          <h3>I'm using it myself</h3>
+          <p>Games, family memories &amp; a gentle daily routine</p>
+        </div>
+      </div>
+
+      <div class="role-card" onclick="enter('caregiver-home')">
+        <div class="emoji">🤝</div>
+        <div>
+          <h3>I'm a caregiver / family member</h3>
+          <p>Set up activities, add memories &amp; keep track</p>
+        </div>
+      </div>
+
+      <div class="role-footnote">You can switch anytime from the home screen.</div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: HOME ============ -->
+  <section class="view" id="view-elder-home">
+    <div class="topbar">
+      <div style="font-family:'Fraunces',serif; font-weight:700; color:var(--brown-dark);">YAAD</div>
+      <div class="top-actions">
+        <button class="text-btn" onclick="toggleLang()"><span data-en>अ</span><span data-hi>A</span></button>
+        <button class="text-btn" onclick="cycleFont()">A+</button>
+      </div>
+    </div>
+    <div class="greeting">
+      <h2><span data-en>Good morning, Grandpa Verma 🌼</span><span data-hi>सुप्रभात, दादा वर्मा जी 🌼</span></h2>
+      <div class="date"></div>
+    </div>
+    <div class="content pad-bottom">
+      <div class="big-grid">
+        <div class="big-tile tile-sage" onclick="goto('elder-play')">
+          <div class="head"><span class="emoji">🧠</span><span class="label"><span data-en>PLAY</span><span data-hi>खेलें</span></span></div>
+          <div class="sub">Games &amp; exercises</div>
+        </div>
+        <div class="big-tile tile-coral" onclick="goto('elder-day')">
+          <div class="head"><span class="emoji">❤️</span><span class="label"><span data-en>MY DAY</span><span data-hi>मेरा दिन</span></span></div>
+          <div class="sub">Routine &amp; mood</div>
+        </div>
+        <div class="big-tile tile-blue" onclick="goto('elder-family')">
+          <div class="head"><span class="emoji">👨‍👩‍👧</span><span class="label"><span data-en>FAMILY</span><span data-hi>परिवार</span></span></div>
+          <div class="sub">Photos &amp; voices</div>
+        </div>
+        <div class="big-tile tile-terracotta" onclick="goto('elder-progress')">
+          <div class="head"><span class="emoji">📊</span><span class="label"><span data-en>MY PROGRESS</span><span data-hi>मेरी प्रगति</span></span></div>
+          <div class="sub">How you're doing</div>
+        </div>
+      </div>
+
+      <div class="hint-card" onclick="goto('elder-play')">
+        <div class="emoji">✨</div>
+        <div class="txt">
+          <b>Cricket Memories is ready</b>
+          <span>Made for you by Priya — tap Play to try it</span>
+        </div>
+      </div>
+
+      <div class="switch-link" onclick="goto('role')">Not Grandpa Verma? Switch user</div>
+    </div>
+    <div class="bottom-bar">
+      <button class="help-btn" onclick="goto('elder-help')">☎ <span data-en>Get Help</span><span data-hi>मदद लें</span></button>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: PLAY ============ -->
+  <section class="view" id="view-elder-play">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title">Play</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="subtitle">A few minutes a day keeps the mind active</div>
+      <div id="sentList"></div>
+      <div class="list-row" onclick="goto('elder-photo');startPhoto()"><div class="ico" style="background:var(--amber-soft)">&#128247;</div><div class="info"><b>Photo Memory</b><span>Who is in the photo?</span></div><button class="pill-btn">Play</button></div>
+
+      <div class="list-row" onclick="goto('elder-game')">
+        <div class="ico" style="background:var(--sage-soft);">🏏</div>
+        <div class="info"><b>Cricket Memories<span class="badge">Made for you</span></b><span>A personal activity from Priya</span></div>
+        <button class="pill-btn">Play</button>
+      </div>
+
+      <div class="list-row" onclick="goto('elder-match');startMatch()">
+        <div class="ico" style="background:var(--blue-soft);">🧩</div>
+        <div class="info"><b>Memory Match</b><span>Find the matching pairs</span></div>
+        <button class="pill-btn">Play</button>
+      </div>
+
+      <div class="list-row soon">
+        <div class="ico" style="background:var(--coral-soft);">🎵</div>
+        <div class="info"><b>Name That Tune</b><span>Coming soon: needs audio</span></div>
+        <button class="pill-btn ghost" disabled>Soon</button>
+      </div>
+
+      <div class="list-row" onclick="goto('elder-trail');startTrail()">
+        <div class="ico" style="background:var(--terracotta-soft);">🔢</div>
+        <div class="info"><b>Number Trail</b><span>Tap numbers in order</span></div>
+        <button class="pill-btn">Play</button>
+      </div>
+
+      <div class="list-row" onclick="goto('elder-sort');startSort()">
+        <div class="ico" style="background:var(--mauve-soft);">🧺</div>
+        <div class="info"><b>Sort It</b><span>Kitchen, clothes or garden?</span></div>
+        <button class="pill-btn">Play</button>
+      </div>
+
+      <div class="list-row" onclick="goto('elder-decisions');startDec()">
+        <div class="ico" style="background:var(--sage-soft);">☂️</div>
+        <div class="info"><b>Everyday Decisions</b><span>It's raining — what do you take?</span></div>
+        <button class="pill-btn">Play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: GAME (Cricket Memories demo) ============ -->
+  <section class="view" id="view-elder-game">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">←</button>
+      <div class="title">Cricket Memories</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div id="game-step-1" class="game-card">
+        <div class="art">🏏</div>
+        <h3>Which team do you remember watching?</h3>
+        <button class="choice-btn" onclick="pickChoice(this)">India</button>
+        <button class="choice-btn" onclick="pickChoice(this)">Delhi Daredevils</button>
+        <button class="choice-btn" onclick="pickChoice(this)">Not sure</button>
+        <button class="next-btn" id="step1-next" disabled onclick="showStep(2)">Next question</button>
+      </div>
+
+      <div id="game-step-2" class="game-card" style="display:none;">
+        <div class="art">🎙️</div>
+        <h3>Who was your favourite player?</h3>
+        <p style="font-size:.85rem; color:var(--ink-soft); margin:-8px 0 4px;">Say your answer, or tap to type instead</p>
+        <div class="mic-wrap" style="justify-content:center;">
+          <button class="mic-btn" id="micBtn" onclick="startListening()">🎤</button>
+          <div class="mic-status" id="micStatus">Tap the mic and speak</div>
+        </div>
+        <div class="answer-bubble" id="answerBubble">You said: "Kapil Dev" 🏏</div>
+        <button class="next-btn" id="step2-next" disabled onclick="showStep(3)" style="margin-top:16px;">Finish</button>
+      </div>
+
+      <div id="game-step-3" class="game-card" style="display:none;">
+        <div class="art">🎉</div>
+        <h3>Wonderful, Grandpa Verma!</h3>
+        <p style="font-size:.88rem; color:var(--ink-soft); margin-bottom:16px;">You've completed today's activity. Priya will love hearing about Kapil Dev.</p>
+        <button class="next-btn" onclick="goto('elder-play')">Back to Play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: MY DAY ============ -->
+  <section class="view" id="view-elder-day">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title">My Day</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="subtitle">How are you feeling today?</div>
+      <div class="mood-row">
+        <button class="mood-btn" onclick="pickMood(this)">😊</button>
+        <button class="mood-btn" onclick="pickMood(this)">🙂</button>
+        <button class="mood-btn" onclick="pickMood(this)">😐</button>
+        <button class="mood-btn" onclick="pickMood(this)">😔</button>
+      </div>
+      <div class="mood-note" id="moodNote">Thank you for sharing. Priya will see this. 💛</div>
+
+      <h3 style="font-size:1rem; margin:20px 0 12px;">Today's routine</h3>
+      <div class="timeline">
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">7:00</div><div class="what">Wake up &amp; stretch</div></div>
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">8:00</div><div class="what">Breakfast</div></div>
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">9:30</div><div class="what">Short walk</div></div>
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">1:00</div><div class="what">Lunch</div></div>
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">6:00</div><div class="what">Call with family</div></div>
+      </div>
+
+      <div class="prompt-card">
+        <p>🌤️ Would you like to do a 5-minute memory activity now?</p>
+        <button class="pill-btn" onclick="goto('elder-play')" style="width:100%;">Yes, let's play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: FAMILY ============ -->
+  <section class="view" id="view-elder-family">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title">Family</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="voice-card">
+        <div class="who">🎙️ Voice message from Priya</div>
+        <div class="waveform">
+          <button class="play-circle">▶</button>
+          <div class="bars-track"><div class="bars-fill"></div></div>
+        </div>
+        <blockquote>"Papa, we're coming to Delhi this weekend — save some kachoris for us!"</blockquote>
+      </div>
+
+      <h3 style="font-size:1rem; margin:4px 0 12px;">Memory album</h3>
+      <div class="memory-grid">
+        <div class="memory-tile"><div class="thumb" style="background:var(--gold);">🪔</div><div class="cap"><b>Diwali, 2019</b><span>Whole family, Delhi</span></div></div>
+        <div class="memory-tile"><div class="thumb" style="background:var(--sage);">🏏</div><div class="cap"><b>At the stadium</b><span>With Ramesh, 1987</span></div></div>
+        <div class="memory-tile"><div class="thumb" style="background:var(--coral);">💍</div><div class="cap"><b>Wedding day</b><span>You &amp; Kamla, 1975</span></div></div>
+        <div class="memory-tile"><div class="thumb" style="background:var(--blue);">🎓</div><div class="cap"><b>Priya's graduation</b><span>2015</span></div></div>
+        <div id="userMems" style="display:contents"></div><div class="memory-tile add">
+          <div>💌</div>
+          <div>Ask your family to add more memories</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: PROGRESS ============ -->
+  <section class="view" id="view-elder-progress">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title">My Progress</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="subtitle">Here's how this week is going — just gentle trends, nothing to worry about.</div>
+
+      <div class="bar-row">
+        <div class="lbl"><span>Memory</span><span class="trend">82% ↑</span></div>
+        <div class="bar-track bar-mem"><div class="bar-fill" data-pct="82"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span>Attention</span><span class="trend">90% ↑</span></div>
+        <div class="bar-track bar-att"><div class="bar-fill" data-pct="90"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span>Consistency</span><span class="trend">71% ↑</span></div>
+        <div class="bar-track bar-con"><div class="bar-fill" data-pct="71"></div></div>
+      </div>
+
+      <div class="stat-strip">
+        <div class="stat-box"><b>3/4</b><span>Activities today</span></div>
+        <div class="stat-box"><b>6 days</b><span>Playing streak</span></div>
+      </div>
+
+      <div class="recommend-card">
+        <div class="emoji">🧩</div>
+        <div><b>Today's recommendation</b><span>Picture Memory · 5 minutes · Easy</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: HELP ============ -->
+  <section class="view" id="view-elder-help">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title">Get Help</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="help-row">
+        <div class="ico">👩</div>
+        <div class="info"><b>Priya (daughter)</b><span>Usually replies within minutes</span></div>
+        <a class="call-btn" href="tel:+911234567890">📞</a>
+      </div>
+      <div class="help-row">
+        <div class="ico">🩺</div>
+        <div class="info"><b>Dr. Sharma</b><span>Cognitive therapist · Hindi &amp; English</span></div>
+        <a class="call-btn" href="tel:+911234567891">📞</a>
+      </div>
+      <div class="help-row">
+        <div class="ico">🚨</div>
+        <div class="info"><b>Emergency contact</b><span>For urgent situations</span></div>
+        <a class="call-btn" href="tel:112">📞</a>
+      </div>
+      <div class="lang-note">💬 Support is available in Hindi, English and other regional languages.</div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: HOME ============ -->
+  <section class="view" id="view-caregiver-home">
+    <div class="topbar">
+      <div style="font-family:'Fraunces',serif; font-weight:700; color:var(--brown-dark);">YAAD <span style="font-family:'Quicksand'; font-weight:700; font-size:.68rem; color:var(--ink-soft); background:var(--card); border:1px solid var(--border); padding:2px 8px; border-radius:8px; vertical-align:middle;">Caregiver</span></div>
+    </div>
+    <div class="content">
+      <h2 style="font-size:1.35rem; margin-bottom:14px;">Welcome back, Priya 👋</h2>
+
+      <div class="snapshot-card">
+        <div class="avatar">👴</div>
+        <div style="flex:1;">
+          <b>Grandpa Verma</b>
+          <div class="status">● Active today, 9:12 AM</div>
+          <div class="mini-stats">
+            <div><b>3/4</b>Today</div>
+            <div><b>6🔥</b>Streak</div>
+            <div><b>🙂</b>Mood</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert-banner">
+        ⚠️ <div>No activity was logged the day before yesterday. A quick call might help.</div>
+      </div>
+
+      <div class="tool-grid">
+        <div class="big-tile tile-brown" onclick="goto('caregiver-profile')">
+          <div class="head"><span class="emoji">👤</span><span class="label">Profile &amp; Preferences</span></div>
+          <div class="sub">Update who they are</div>
+        </div>
+        <div class="big-tile tile-terracotta" onclick="goto('caregiver-builder')">
+          <div class="head"><span class="emoji">🎯</span><span class="label">Activity Builder</span></div>
+          <div class="sub">Create a personal activity</div>
+        </div>
+        <div class="big-tile tile-mauve" onclick="goto('caregiver-capsule')">
+          <div class="head"><span class="emoji">🎁</span><span class="label">Memory Capsule</span></div>
+          <div class="sub">Add photos, songs &amp; places</div>
+        </div>
+        <div class="big-tile tile-sage" onclick="goto('caregiver-progress')">
+          <div class="head"><span class="emoji">📈</span><span class="label">Progress &amp; Alerts</span></div>
+          <div class="sub">See how they're doing</div>
+        </div>
+      </div>
+      <div class="big-tile tile-blue" style="margin-top:12px;" onclick="goto('caregiver-connect')">
+        <div class="head"><span class="emoji">☎️</span><span class="label">Care Connect</span></div>
+        <div class="sub">Therapists &amp; appointments</div>
+      </div>
+
+      <div class="switch-link" onclick="goto('role')">Switch user</div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: PROFILE ============ -->
+  <section class="view" id="view-caregiver-profile">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title">Profile &amp; Preferences</div>
+    </div>
+    <div class="content">
+      <div class="subtitle">This helps YAAD personalise everything Grandpa Verma sees.</div>
+
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" value="Grandpa Verma">
+      </div>
+      <div class="form-group">
+        <label>Preferred language</label>
+        <div class="chip-set">
+          <div class="chip on" onclick="toggleChip(this)">Hindi</div>
+          <div class="chip" onclick="toggleChip(this)">English</div>
+          <div class="chip" onclick="toggleChip(this)">Tamil</div>
+          <div class="chip" onclick="toggleChip(this)">Bengali</div>
+          <div class="chip" onclick="toggleChip(this)">Marathi</div>
+          <div class="chip" onclick="toggleChip(this)">Telugu</div>
+          <div class="chip" onclick="toggleChip(this)">Kannada</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Hobbies &amp; interests</label>
+        <div class="chip-set">
+          <div class="chip on" onclick="toggleChip(this)">Cricket</div>
+          <div class="chip on" onclick="toggleChip(this)">Old Hindi songs</div>
+          <div class="chip" onclick="toggleChip(this)">Gardening</div>
+          <div class="chip" onclick="toggleChip(this)">Cooking</div>
+          <div class="chip" onclick="toggleChip(this)">Reading</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>City / village</label>
+        <input type="text" value="Delhi">
+      </div>
+      <div class="form-group">
+        <label>Ability level</label>
+        <div class="chip-set">
+          <div class="chip" onclick="toggleChip(this)">Independent</div>
+          <div class="chip on" onclick="toggleChip(this)">Needs light support</div>
+          <div class="chip" onclick="toggleChip(this)">Needs more support</div>
+        </div>
+      </div>
+
+      <button class="save-btn" onclick="showToast('profileToast')">💾 Save profile</button>
+      <div class="toast" id="profileToast">Saved — YAAD will use this for Grandpa Verma</div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: ACTIVITY BUILDER ============ -->
+  <section class="view" id="view-caregiver-builder">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title">Activity Builder</div>
+    </div>
+    <div class="content">
+      <div class="subtitle">"Create an activity for this person." Tell YAAD a little about them.</div>
+
+      <div class="form-group">
+        <label>Hobbies</label>
+        <div class="chip-set">
+          <div class="chip on" onclick="toggleChip(this)">Cricket</div>
+          <div class="chip" onclick="toggleChip(this)">Gardening</div>
+          <div class="chip" onclick="toggleChip(this)">Cooking</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Culture &amp; language</label>
+        <div class="chip-set">
+          <div class="chip on" onclick="toggleChip(this)">Delhi</div>
+          <div class="chip on" onclick="toggleChip(this)">Hindi songs</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Memories to draw from</label>
+        <input type="text" value="Watching cricket at the stadium, 1987">
+      </div>
+
+      <button class="generate-btn" id="genBtn" onclick="generateActivity()">✨ Generate activity</button>
+
+      <div class="activity-result result-block" id="activityResult">
+        <div class="activity-result">
+          <h3>🏏 Cricket Memories</h3>
+          <p>An old-style cricket photo, followed by two gentle questions — "Which team do you remember watching?" and "Who was your favourite player?" — then a simple matching game with cricket objects.</p>
+          <div class="activity-actions">
+            <button class="pill-btn" onclick="showToast('sendToast')">Send to Grandpa Verma</button>
+            <button class="pill-btn ghost" onclick="generateActivity()">Regenerate</button>
+          </div>
+        </div>
+        <div class="toast" id="sendToast">Sent — it will appear at the top of their Play list</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: MEMORY CAPSULE ============ -->
+  <section class="view" id="view-caregiver-capsule">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title">Memory Capsule</div>
+    </div>
+    <div class="content">
+      <div class="subtitle">Upload a photo, song or memory — YAAD turns it into a gentle activity.</div>
+
+      <div class="capsule-grid">
+        <div class="capsule-tile" onclick="toggleCapsule(this)"><span class="emoji">📷</span>Photo</div>
+        <div class="capsule-tile" onclick="toggleCapsule(this)"><span class="emoji">🎵</span>Song</div>
+        <div class="capsule-tile" onclick="toggleCapsule(this)"><span class="emoji">🏠</span>Home</div>
+        <div class="capsule-tile" onclick="toggleCapsule(this)"><span class="emoji">👨‍👩‍👧</span>Family</div>
+        <div class="capsule-tile" onclick="toggleCapsule(this)"><span class="emoji">🍛</span>Food</div>
+        <div class="capsule-tile" onclick="toggleCapsule(this)"><span class="emoji">📍</span>Hometown</div>
+      </div>
+
+      <div class="form-group"><label for="photoLabel">Who or what is in the photo? (used in the Photo Memory game)</label><input type="text" id="photoLabel" placeholder="e.g. Ramesh at the stadium"></div>
+      <div class="form-group"><button class="pill-btn" id="recBtn" type="button" onclick="toggleRec()">&#127897;&#65039; Record voice message</button><div class="feedback" id="recFb" role="status"></div></div>
+      <button class="generate-btn" id="capsuleBtn" disabled onclick="generateCapsule()">✨ Create activity from this</button>
+
+      <div class="result-block" id="capsuleResult">
+        <h3 style="font-size:1rem; margin:16px 0 10px;">📷 Wedding picture → 4 questions</h3>
+        <div class="q-row"><div class="n">1</div>Who is standing next to you?</div>
+        <div class="q-row"><div class="n">2</div>What year was this?</div>
+        <div class="q-row"><div class="n">3</div>What do you remember about that day?</div>
+        <div class="q-row"><div class="n">4</div>Would you like to tell your family this story?</div>
+        <button class="pill-btn" style="width:100%; margin-top:6px;" onclick="showToast('capsuleToast')">Send to Family screen</button>
+        <div class="toast" id="capsuleToast">Added to Grandpa Verma's Memory Wall</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: PROGRESS & ALERTS ============ -->
+  <section class="view" id="view-caregiver-progress">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title">Progress &amp; Alerts</div>
+    </div>
+    <div class="content">
+      <div class="subtitle">How Grandpa Verma is doing this week — trends, not diagnoses.</div>
+
+      <div class="bar-row">
+        <div class="lbl"><span>Memory</span><span class="trend">78% ↑</span></div>
+        <div class="bar-track bar-mem"><div class="bar-fill" data-pct="78"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span>Attention</span><span class="trend">84% ↑</span></div>
+        <div class="bar-track bar-att"><div class="bar-fill" data-pct="84"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span>Language</span><span class="trend" style="color:var(--ink-soft);">72% →</span></div>
+        <div class="bar-track bar-lang"><div class="bar-fill" data-pct="72"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span>Consistency</span><span class="trend">6 days ↑</span></div>
+        <div class="bar-track bar-con"><div class="bar-fill" data-pct="80"></div></div>
+      </div>
+
+      <div class="recommend-card" style="margin-bottom:16px;">
+        <div class="emoji">🧩</div>
+        <div><b>Today's recommendation</b><span>Picture Memory · 5 minutes · Easy</span></div>
+      </div>
+
+      <div class="alert-banner">
+        ⚠️ <div>No activity logged 2 days ago. Consider a gentle check-in call.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: CARE CONNECT ============ -->
+  <section class="view" id="view-caregiver-connect">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title">Care Connect</div>
+    </div>
+    <div class="content">
+      <div class="subtitle">Therapists, appointments and contacts, all in one place.</div>
+
+      <div class="connect-row">
+        <b>Dr. Sharma</b>
+        <span class="role">Cognitive therapist · Hindi &amp; English · Delhi</span>
+        <div class="actions">
+          <button class="pill-btn">View profile</button>
+          <button class="pill-btn ghost">Book appointment</button>
+        </div>
+      </div>
+
+      <div class="connect-row">
+        <b>Priya Verma</b>
+        <span class="role">Primary caregiver · Daughter</span>
+        <div class="actions">
+          <button class="pill-btn">Message</button>
+          <button class="pill-btn ghost">Call</button>
+        </div>
+      </div>
+
+      <button class="add-contact-btn">+ Add a contact</button>
+      <div class="lang-note" style="margin-top:16px;">💬 Local-language support available in Hindi, English and 8 regional languages.</div>
+    </div>
+  </section>
+  <section class="view" id="view-setup">
+    <div class="topbar"><div class="title">Welcome to YAAD</div></div>
+    <div class="content">
+      <p class="setup-note">Tell us who YAAD is for. Every screen will use these names.</p>
+      <div class="form-group"><label for="setElder">Who will be playing?</label><input type="text" id="setElder" placeholder="e.g. Grandma Rekha"></div>
+      <div class="form-group"><label for="setCare">Who is the caregiver?</label><input type="text" id="setCare" placeholder="e.g. Priya"></div>
+      <button class="save-btn" onclick="finishSetup()">Save and continue</button>
+    </div>
+  </section>
+
+  <section class="view" id="view-elder-trail">
+    <div class="topbar"><button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">&larr;</button><div class="title">Number Trail</div><button class="text-btn" onclick="cycleFont()">A+</button></div>
+    <div class="content"><div class="game-card">
+      <h3 id="trailH">Tap the numbers from 1 to 8</h3>
+      <div class="trail-grid" id="trailGrid"></div>
+      <div class="feedback" id="trailFb"></div>
+      <button class="next-btn" onclick="startTrail()">Start again</button>
+    </div></div>
+  </section>
+
+  <section class="view" id="view-elder-sort">
+    <div class="topbar"><button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">&larr;</button><div class="title">Sort It</div><button class="text-btn" onclick="cycleFont()">A+</button></div>
+    <div class="content"><div class="game-card">
+      <div class="sort-item" id="sortItem"></div>
+      <h3 id="sortQ">Where does this belong?</h3>
+      <div class="sort-opts">
+        <button class="choice-btn" onclick="pickSort('kitchen')">Kitchen</button>
+        <button class="choice-btn" onclick="pickSort('clothes')">Clothes</button>
+        <button class="choice-btn" onclick="pickSort('garden')">Garden</button>
+      </div>
+      <div class="feedback" id="sortFb"></div>
+    </div></div>
+  </section>
+
+  <section class="view" id="view-elder-decisions">
+    <div class="topbar"><button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">&larr;</button><div class="title">Everyday Decisions</div><button class="text-btn" onclick="cycleFont()">A+</button></div>
+    <div class="content"><div class="game-card" id="decCard"></div></div>
+  </section>
+
+  <section class="view" id="view-elder-match">
+    <div class="topbar"><button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">&larr;</button><div class="title">Memory Match</div><button class="text-btn" onclick="cycleFont()">A+</button></div>
+    <div class="content"><div class="game-card">
+      <h3>Find the three matching pairs</h3>
+      <div class="match-stats" style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--ink-soft)"><span id="mMoves">Moves: 0</span><span id="mFound">Found: 0 / 3</span></div>
+      <div class="match-grid" id="matchGrid"></div>
+      <button class="next-btn" onclick="startMatch()">Shuffle again</button>
+    </div></div>
+  </section>
+  <section class="view" id="view-elder-photo">
+    <div class="topbar"><button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">&larr;</button><div class="title">Photo Memory</div><button class="text-btn" onclick="cycleFont()">A+</button></div>
+    <div class="content"><div class="game-card" id="photoCard"></div></div>
+  </section>
+
+
+
+</div>
+
+<script>
+function goto(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const target = document.getElementById('view-'+id);
+  target.classList.add('active');
+  document.getElementById('phone').scrollTop = 0;
+  const content = target.querySelector('.content');
+  if(content) content.scrollTop = 0;
+  animateBars(target);
+}
+
+function animateBars(scope){
+  const fills = scope.querySelectorAll('.bar-fill');
+  fills.forEach(f=>{
+    f.style.width='0%';
+    const pct = f.getAttribute('data-pct');
+    requestAnimationFrame(()=>{ setTimeout(()=>{ f.style.width = pct+'%'; }, 60); });
+  });
+}
+
+let fontStep = 0;
+const fontSizes = ['17px','19px','21px'];
+function cycleFont(){
+  fontStep = (fontStep+1) % fontSizes.length;
+  document.documentElement.style.fontSize = fontSizes[fontStep];
+}
+
+function toggleLang(){
+  document.body.classList.toggle('lang-hi');
+}
+
+function pickMood(btn){
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('moodNote').classList.add('show');
+}
+
+function pickChoice(btn){
+  const parent = btn.parentElement;
+  parent.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('picked'));
+  btn.classList.add('picked');
+  document.getElementById('step1-next').disabled = false;
+}
+
+function showStep(n){
+  for(let i=1;i<=3;i++){ document.getElementById('game-step-'+i).style.display = (i===n) ? 'block':'none'; }
+}
+
+function startListening(){
+  const btn = document.getElementById('micBtn');
+  const status = document.getElementById('micStatus');
+  btn.classList.add('listening');
+  status.textContent = 'Listening...';
+  setTimeout(()=>{
+    btn.classList.remove('listening');
+    status.textContent = 'Got it!';
+    document.getElementById('answerBubble').classList.add('show');
+    document.getElementById('step2-next').disabled = false;
+  }, 1500);
+}
+
+function toggleChip(chip){
+  chip.classList.toggle('on');
+}
+
+function showToast(id){
+  const t = document.getElementById(id);
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+function generateActivity(){
+  const btn = document.getElementById('genBtn');
+  const result = document.getElementById('activityResult');
+  btn.textContent = '✨ Creating...';
+  btn.disabled = true;
+  result.classList.remove('show');
+  setTimeout(()=>{
+    btn.textContent = '✨ Generate activity';
+    btn.disabled = false;
+    result.classList.add('show');
+  }, 900);
+}
+
+function toggleCapsule(tile){
+  tile.classList.toggle('added');
+  const anyAdded = document.querySelectorAll('.capsule-tile.added').length > 0;
+  document.getElementById('capsuleBtn').disabled = !anyAdded;
+}
+
+function generateCapsule(){
+  const btn = document.getElementById('capsuleBtn');
+  btn.textContent = '✨ Creating...';
+  setTimeout(()=>{
+    btn.textContent = '✨ Create activity from this';
+    document.getElementById('capsuleResult').classList.add('show');
+  }, 800);
+}
+
+/* ===== Tier 1: persistence, linked roles, names, games ===== */
+const DB={
+  get(k,d){try{const v=localStorage.getItem('yaad:'+k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('yaad:'+k,JSON.stringify(v))}catch(e){}}
+};
+let ELDER=DB.get('elder',null), CARE=DB.get('care',null);
+const OLD_E=/Grandma Rekha|Grandpa Verma|Rekha|Verma/g, OLD_C=/Priya/g;
+function personalise(root){
+  if(!ELDER||!CARE) return;
+  const w=document.createTreeWalker(root||document.body,NodeFilter.SHOW_TEXT);
+  let n; while(n=w.nextNode()){ const t=n.nodeValue; if(OLD_E.test(t)||OLD_C.test(t)){ OLD_E.lastIndex=0;OLD_C.lastIndex=0; n.nodeValue=t.replace(OLD_E,ELDER).replace(OLD_C,CARE);} OLD_E.lastIndex=0;OLD_C.lastIndex=0;}
+  document.querySelectorAll('input[type=text]').forEach(i=>{ if(OLD_E.test(i.value)){i.value=ELDER} OLD_E.lastIndex=0;});
+}
+function enter(view){ (ELDER&&CARE)?(goto(view),personalise()):(window._after=view,goto('setup')); }
+function finishSetup(){
+  const e=document.getElementById('setElder').value.trim(), c=document.getElementById('setCare').value.trim();
+  if(!e||!c){ alert('Please enter both names.'); return; }
+  ELDER=e;CARE=c;DB.set('elder',e);DB.set('care',c);
+  personalise(); goto(window._after||'elder-home'); personalise();
+}
+
+/* stats + streak */
+function stats(){return DB.get('stats',{plays:{},days:[]});}
+function record(game,pct){
+  const st=stats(); const g=st.plays[game]||{n:0,best:0,last:0};
+  g.n++; g.last=pct; g.best=Math.max(g.best,pct); st.plays[game]=g;
+  const today=new Date().toISOString().slice(0,10);
+  if(!st.days.includes(today)) st.days.push(today);
+  DB.set('stats',st);
+}
+function streak(){
+  const d=new Set(stats().days); let n=0; const t=new Date();
+  while(d.has(t.toISOString().slice(0,10))){n++;t.setDate(t.getDate()-1);} return n;
+}
+function avg(keys){const p=stats().plays;const v=keys.filter(k=>p[k]).map(k=>p[k].last);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):null;}
+function liveBars(){
+  const set=(cls,v)=>{ if(v==null)return; document.querySelectorAll('.'+cls+' .bar-fill').forEach(f=>f.setAttribute('data-pct',v)); };
+  set('bar-mem',avg(['match','cricket','decisions','photo'])); set('bar-att',avg(['trail']));
+  set('bar-lang',avg(['sort','cricket'])); set('bar-con',Math.min(100,streak()*15));
+  const today=new Date().toISOString().slice(0,10), played=stats().days.includes(today)?1:0;
+  document.querySelectorAll('.stat-box b').forEach(b=>{ if(/days?/.test(b.textContent)) b.textContent=streak()+' days'; });
+}
+const _goto=goto;
+goto=function(id){ if(id==='elder-play') renderSent(); if(id==='elder-family') renderMems(); liveBars(); _goto(id); personalise(); };
+
+/* mood */
+const _pm=pickMood;
+pickMood=function(btn){ _pm(btn); const all=[...document.querySelectorAll('.mood-btn')]; const log=DB.get('moods',[]); log.push({t:Date.now(),m:all.indexOf(btn)}); DB.set('moods',log); };
+
+/* profile chips persist */
+function saveChips(){ DB.set('chips',[...document.querySelectorAll('#view-caregiver-profile .chip')].map(c=>c.classList.contains('on'))); }
+function loadChips(){ const v=DB.get('chips',null); if(!v)return; document.querySelectorAll('#view-caregiver-profile .chip').forEach((c,i)=>c.classList.toggle('on',!!v[i])); }
+const _tc=toggleChip;
+toggleChip=function(c){ _tc(c); if(c.closest('#view-caregiver-profile')) saveChips(); };
+// profile Language: single choice, Hindi switches elder UI text
+document.querySelectorAll('#view-caregiver-profile .form-group').forEach(g=>{
+  if(/language/i.test(g.querySelector('label')?.textContent||'')){
+    g.querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>{ g.querySelectorAll('.chip').forEach(o=>{ if(o!==ch)o.classList.remove('on'); }); ch.classList.add('on'); saveChips(); document.body.classList.toggle('lang-hi',/hindi/i.test(ch.textContent)); }));
+  }
+});
+
+/* caregiver -> elder link */
+function generateActivity(){
+  const btn=document.getElementById('genBtn'),res=document.getElementById('activityResult');
+  btn.disabled=true; btn.textContent='Creating...'; res.classList.remove('show');
+  const picks=[...document.querySelectorAll('#view-caregiver-builder .chip.on')].map(c=>c.textContent.trim());
+  const mem=(document.querySelector('#view-caregiver-builder input[type=text]')||{}).value||'a happy memory';
+  const hobby=picks[0]||'Memories';
+  const act=Object.assign({id:Date.now(),from:CARE||'Family'},localGenerate(picks,mem,CUR));
+  window._pending=act;
+  setTimeout(()=>{
+    btn.disabled=false; btn.textContent='Generate activity';
+    const h=res.querySelector('h3'),p=res.querySelector('p');
+    if(h)h.textContent=act.title; if(p)p.textContent='Two gentle questions: "'+act.q[0]+'" and "'+act.q[1]+'"';
+    res.classList.add('show');
+  },700);
+}
+function sendActivity(){
+  if(!window._pending)return; const l=DB.get('inbox',[]); l.unshift(window._pending); DB.set('inbox',l); showToast('sendToast');
+}
+function renderSent(){
+  const box=document.getElementById('sentList'); if(!box)return;
+  box.innerHTML=DB.get('inbox',[]).map(a=>`<div class="list-row" onclick="playSent(${a.id})"><div class="ico" style="background:var(--sage-soft)">&#127775;</div><div class="info"><b>${esc(a.title)}<span class="badge">New</span></b><span>From ${esc(a.from)}</span></div><button class="pill-btn">Play</button></div>`).join('');
+}
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function playSent(id){
+  const a=DB.get('inbox',[]).find(x=>x.id===id); if(!a)return;
+  const ans=[]; let i=0;
+  const card=document.getElementById('decCard'); goto('elder-decisions');
+  (function ask(){
+    if(i>=a.q.length){ card.innerHTML=`<div class="art">&#127881;</div><h3>Wonderful, ${esc(ELDER)}!</h3><p style="font-size:.88rem;color:var(--ink-soft)">${esc(a.from)} will love hearing your answers.</p><button class="next-btn" onclick="goto('elder-play')">Back to Play</button>`; record('cricket',100); DB.set('answers',[...DB.get('answers',[]),{act:a.title,ans,t:Date.now()}]); return; }
+    card.innerHTML=`<h3>${esc(a.q[i])}</h3><textarea id="sa" rows="3" style="width:100%;border-radius:12px;border:1px solid var(--border);padding:10px;font:inherit"></textarea><button class="next-btn" onclick="window._sa()">Next</button>`;
+    window._sa=()=>{ans.push(document.getElementById('sa').value);i++;ask();};
+  })();
+}
+function addCapsuleMemory(){
+  const types=[...document.querySelectorAll('.capsule-tile.added')].map(t=>({e:t.querySelector('.emoji').textContent,n:t.textContent.trim()}));
+  const m=DB.get('mems',[]); types.forEach(t=>m.push({e:t.e,n:t.n,by:CARE})); DB.set('mems',m); showToast('capsuleToast');
+}
+function renderMems(){
+  const box=document.getElementById('userMems'); if(!box)return;
+  box.innerHTML=DB.get('mems',[]).map(m=>`<div class="memory-tile"><div class="thumb mem-user">${m.e}</div><div class="cap"><b>${esc(m.n)}</b><span>Added by ${esc(m.by)}</span></div></div>`).join('');
+}
+document.querySelectorAll('#view-caregiver-builder .pill-btn').forEach(b=>{ if(/^send/i.test(b.textContent.trim())) b.onclick=sendActivity; });
+document.querySelectorAll('#view-caregiver-capsule .pill-btn').forEach(b=>{ if(/^send/i.test(b.textContent.trim())) b.onclick=addCapsuleMemory; });
+const saveBtn=document.querySelector('#view-caregiver-profile .save-btn'); if(saveBtn) saveBtn.addEventListener('click',saveChips);
+
+/* Cricket Memories saves answer */
+const _ss=showStep; showStep=function(n){ _ss(n); if(n===3) record('cricket',100); };
+
+/* Number Trail */
+let trailNext=1,trailT0=0;
+function startTrail(){
+  const g=document.getElementById('trailGrid'); g.innerHTML=''; trailNext=1; trailT0=Date.now(); document.getElementById('trailFb').textContent='';
+  const spots=[]; while(spots.length<TRAIL_N){ const p={x:Math.random()*78+2,y:Math.random()*76+2}; if(spots.every(q=>Math.hypot((q.x-p.x)*3,(q.y-p.y)*3)>22)) spots.push(p); }
+  spots.forEach((p,i)=>{ const b=document.createElement('button'); b.className='trail-dot'; b.textContent=i+1; b.style.left=p.x+'%'; b.style.top=p.y+'%';
+    b.onclick=()=>{ const fb=document.getElementById('trailFb'); if(i+1===trailNext){ b.classList.add('done'); fb.className='feedback'; fb.textContent=''; trailNext++; if(trailNext>TRAIL_N){ const sec=Math.round((Date.now()-trailT0)/1000); record('trail',Math.max(40,Math.min(100,100-Math.max(0,sec-20)*2))); fb.textContent=tf('Well done! {n} seconds.',{n:sec}); } } else { fb.className='feedback no'; fb.textContent=tf('Look for number {n}',{n:trailNext}); } };
+    g.appendChild(b); });
+}
+
+/* Sort It */
+const SORT=[['🍳','kitchen'],['👕','clothes'],['🌷','garden'],['🥄','kitchen'],['🧦','clothes'],['🪴','garden'],['🍚','kitchen'],['🧣','clothes'],['🚿','garden']];
+let sortI=0,sortOk=0,sortOrder=[];
+function startSort(){ sortOrder=SORT.slice().sort(()=>Math.random()-.5).slice(0,6); sortI=0;sortOk=0; showSort(); }
+function showSort(){ document.getElementById('sortFb').textContent=''; document.getElementById('sortItem').textContent=sortOrder[sortI][0]; }
+function pickSort(c){
+  const fb=document.getElementById('sortFb'),ok=c===sortOrder[sortI][1]; if(ok)sortOk++;
+  fb.className='feedback'+(ok?'':' no'); fb.textContent=ok?t('Yes!'):tf('Nearly. It goes in the {x}.',{x:t(sortOrder[sortI][1][0].toUpperCase()+sortOrder[sortI][1].slice(1)).toLowerCase()});
+  setTimeout(()=>{ sortI++; if(sortI>=sortOrder.length){ record('sort',Math.round(sortOk/sortOrder.length*100)); document.getElementById('sortItem').textContent='🎉'; document.getElementById('sortQ').textContent=tf('You got {n} of {m}',{n:sortOk,m:sortOrder.length}); fb.textContent=''; setTimeout(()=>goto('elder-play'),1800);} else showSort(); },900);
+}
+/* Everyday Decisions */
+const DEC=[['It is raining outside. What should you take?',['An umbrella','Sunglasses','A football'],0],['You feel hungry before lunch. A good choice?',['A banana','Skip until dinner','A cold soda'],0],['The doorbell rings unexpectedly. What first?',['Ask who it is','Open at once','Ignore it'],0]];
+let decI=0,decOk=0;
+function startDec(){decI=0;decOk=0;showDec();}
+function showDec(){
+  const c=document.getElementById('decCard');
+  if(decI>=DEC.length){ record('decisions',Math.round(decOk/DEC.length*100)); c.innerHTML=`<div class="art">&#127881;</div><h3>Well done, ${esc(ELDER||'friend')}!</h3><p>${esc(tf('You chose well {n} of {m} times.',{n:decOk,m:DEC.length}))}</p><button class="next-btn" onclick="goto('elder-play')">Back to Play</button>`; return; }
+  const d=DEC[decI]; c.innerHTML='<h3>'+esc(d[0])+'</h3>'+d[1].map((o,i)=>`<button class="choice-btn" onclick="pickDec(${i})">${esc(o)}</button>`).join('')+'<div class="feedback" id="decFb"></div>';
+}
+function pickDec(i){ const ok=i===DEC[decI][2]; if(ok)decOk++; const f=document.getElementById('decFb'); f.className='feedback'+(ok?'':' no'); f.textContent=ok?t('Good choice!'):tf('The safest choice was: {x}',{x:DEC[decI][1][DEC[decI][2]]}); setTimeout(()=>{decI++;showDec();},1100); }
+
+/* Memory Match (3 pairs = 6 cards, 3x2 grid) */
+let mFirst=null,mLock=false,mMoves=0,mFound=0;
+function startMatch(){
+  const sym=['🌼','🏏','🪔']; const deck=[...sym,...sym].sort(()=>Math.random()-.5); mFirst=null;mLock=false;mMoves=0;mFound=0;
+  const g=document.getElementById('matchGrid'); g.innerHTML='';
+  deck.forEach(s=>{ const b=document.createElement('button'); b.className='match-card'; b.textContent=s; b.dataset.s=s; b.onclick=()=>flip(b); g.appendChild(b); });
+  document.getElementById('mMoves').textContent=tf('Moves: {n}',{n:0}); document.getElementById('mFound').textContent=tf('Found: {n} / 3',{n:0});
+}
+function flip(b){
+  if(mLock||b.classList.contains('up')||b.classList.contains('ok'))return; b.classList.add('up');
+  if(!mFirst){mFirst=b;return;}
+  mMoves++; document.getElementById('mMoves').textContent=tf('Moves: {n}',{n:mMoves});
+  if(mFirst.dataset.s===b.dataset.s){ mFirst.classList.replace('up','ok'); b.classList.replace('up','ok'); mFound++; document.getElementById('mFound').textContent=tf('Found: {n} / 3',{n:mFound}); mFirst=null; if(mFound===3) record('match',Math.max(40,100-(mMoves-3)*12)); }
+  else { mLock=true; const a=mFirst; mFirst=null; setTimeout(()=>{a.classList.remove('up');b.classList.remove('up');mLock=false;},900); }
+}
+
+/* Caregiver snapshot: live mood + streak */
+function snapshot(){
+  const moods=DB.get('moods',[]), face=['😊','🙂','😐','😔'];
+  document.querySelectorAll('.mini-stats div').forEach(d=>{ const b=d.querySelector('b'); if(!b)return; const l=d.textContent.toLowerCase();
+    if(l.includes('streak')) b.textContent=streak()+'🔥'; if(l.includes('mood')&&moods.length) b.textContent=face[moods[moods.length-1].m]; });
+}
+const _g2=goto; goto=function(id){ _g2(id); if(id.startsWith('caregiver')) snapshot(); };
+
+/* restore on load */
+loadChips(); personalise(); liveBars();
+if(ELDER&&CARE){ const f=document.getElementById('setElder'); if(f)f.value=ELDER; const c=document.getElementById('setCare'); if(c)c.value=CARE; }
+
+/* ===== Tier 2 (part 1): translations, read-aloud, speech, photos, AI hook ===== */
+const I18N={"Play": {"hi": "खेलें", "ta": "விளையாடு", "te": "ఆడండి", "kn": "ಆಡಿ", "bn": "খেলুন", "mr": "खेळा"}, "My Day": {"hi": "मेरा दिन", "ta": "என் நாள்", "te": "నా రోజు", "kn": "ನನ್ನ ದಿನ", "bn": "আমার দিন", "mr": "माझा दिवस"}, "Family": {"hi": "परिवार", "ta": "குடும்பம்", "te": "కుటుంబం", "kn": "ಕುಟುಂಬ", "bn": "পরিবার", "mr": "कुटुंब"}, "My Progress": {"hi": "मेरी प्रगति", "ta": "என் முன்னேற்றம்", "te": "నా పురోగతి", "kn": "ನನ್ನ ಪ್ರಗತಿ", "bn": "আমার অগ্রগতি", "mr": "माझी प्रगती"}, "Get Help": {"hi": "मदद लें", "ta": "உதவி பெறு", "te": "సహాయం పొందండి", "kn": "ಸಹಾಯ ಪಡೆಯಿರಿ", "bn": "সাহায্য নিন", "mr": "मदत घ्या"}, "Games & exercises": {"hi": "खेल और अभ्यास", "ta": "விளையாட்டுகள் & பயிற்சிகள்", "te": "ఆటలు & వ్యాయామాలు", "kn": "ಆಟಗಳು & ವ್ಯಾಯಾಮಗಳು", "bn": "খেলা ও ব্যায়াম", "mr": "खेळ आणि व्यायाम"}, "Routine & mood": {"hi": "दिनचर्या और मूड", "ta": "வழக்கம் & மனநிலை", "te": "దినచర్య & మూడ్", "kn": "ದಿನಚರಿ & ಮನಸ್ಥಿತಿ", "bn": "রুটিন ও মেজাজ", "mr": "दिनक्रम आणि मनःस्थिती"}, "Photos & voices": {"hi": "तस्वीरें और आवाज़ें", "ta": "புகைப்படங்கள் & குரல்கள்", "te": "ఫోటోలు & స్వరాలు", "kn": "ಫೋಟೋಗಳು & ಧ್ವನಿಗಳು", "bn": "ছবি ও কণ্ঠস্বর", "mr": "फोटो आणि आवाज"}, "How you're doing": {"hi": "आप कैसे हैं", "ta": "நீங்கள் எப்படி இருக்கிறீர்கள்", "te": "మీరు ఎలా ఉన్నారు", "kn": "ನೀವು ಹೇಗಿದ್ದೀರಿ", "bn": "আপনি কেমন আছেন", "mr": "तुम्ही कसे आहात"}, "How are you feeling today?": {"hi": "आज आप कैसा महसूस कर रहे हैं?", "ta": "இன்று எப்படி உணர்கிறீர்கள்?", "te": "ఈ రోజు మీకు ఎలా అనిపిస్తోంది?", "kn": "ಇಂದು ನಿಮಗೆ ಹೇಗನಿಸುತ್ತಿದೆ?", "bn": "আজ আপনার কেমন লাগছে?", "mr": "आज तुम्हाला कसे वाटते?"}, "Today's routine": {"hi": "आज की दिनचर्या", "ta": "இன்றைய வழக்கம்", "te": "నేటి దినచర్య", "kn": "ಇಂದಿನ ದಿನಚರಿ", "bn": "আজকের রুটিন", "mr": "आजचा दिनक्रम"}, "Breakfast": {"hi": "नाश्ता", "ta": "காலை உணவு", "te": "అల్పాహారం", "kn": "ಉಪಾಹಾರ", "bn": "সকালের খাবার", "mr": "न्याहारी"}, "Lunch": {"hi": "दोपहर का खाना", "ta": "மதிய உணவு", "te": "మధ్యాహ్న భోజనం", "kn": "ಮಧ್ಯಾಹ್ನದ ಊಟ", "bn": "দুপুরের খাবার", "mr": "दुपारचे जेवण"}, "Memory album": {"hi": "यादों का एल्बम", "ta": "நினைவு ஆல்பம்", "te": "జ్ఞాపకాల ఆల్బమ్", "kn": "ನೆನಪಿನ ಆಲ್ಬಮ್", "bn": "স্মৃতির অ্যালবাম", "mr": "आठवणींचा अल्बम"}, "Memory": {"hi": "याददाश्त", "ta": "நினைவாற்றல்", "te": "జ్ఞాపకశక్తి", "kn": "ನೆನಪು", "bn": "স্মৃতি", "mr": "स्मरणशक्ती"}, "Attention": {"hi": "ध्यान", "ta": "கவனம்", "te": "శ్రద్ధ", "kn": "ಗಮನ", "bn": "মনোযোগ", "mr": "लक्ष"}, "Next question": {"hi": "अगला सवाल", "ta": "அடுத்த கேள்வி", "te": "తదుపరి ప్రశ్న", "kn": "ಮುಂದಿನ ಪ್ರಶ್ನೆ", "bn": "পরের প্রশ্ন", "mr": "पुढील प्रश्न"}, "Finish": {"hi": "समाप्त", "ta": "முடி", "te": "ముగించు", "kn": "ಮುಗಿಸಿ", "bn": "শেষ", "mr": "पूर्ण करा"}, "Back to Play": {"hi": "खेल पर वापस", "ta": "விளையாட்டுக்குத் திரும்பு", "te": "ఆటలకు తిరిగి", "kn": "ಆಟಕ್ಕೆ ಹಿಂತಿರುಗಿ", "bn": "খেলায় ফিরুন", "mr": "खेळाकडे परत"}, "Which team do you remember watching?": {"hi": "आपको कौन-सी टीम देखना याद है?", "ta": "எந்த அணியைப் பார்த்தது நினைவிருக்கிறது?", "te": "మీరు ఏ జట్టును చూసినట్లు గుర్తుంది?", "kn": "ನೀವು ಯಾವ ತಂಡವನ್ನು ನೋಡಿದ್ದು ನೆನಪಿದೆ?", "bn": "কোন দলকে খেলতে দেখেছিলেন মনে আছে?", "mr": "तुम्हाला कोणता संघ पाहिल्याचे आठवते?"}, "Who was your favourite player?": {"hi": "आपका पसंदीदा खिलाड़ी कौन था?", "ta": "உங்களுக்குப் பிடித்த வீரர் யார்?", "te": "మీ అభిమాన ఆటగాడు ఎవరు?", "kn": "ನಿಮ್ಮ ಮೆಚ್ಚಿನ ಆಟಗಾರ ಯಾರು?", "bn": "আপনার প্রিয় খেলোয়াড় কে ছিলেন?", "mr": "तुमचा आवडता खेळाडू कोण होता?"}, "Tap the mic and speak": {"hi": "माइक दबाएँ और बोलें", "ta": "மைக்கைத் தட்டிப் பேசுங்கள்", "te": "మైక్ నొక్కి మాట్లాడండి", "kn": "ಮೈಕ್ ಒತ್ತಿ ಮಾತನಾಡಿ", "bn": "মাইক চাপুন ও বলুন", "mr": "माइक दाबा आणि बोला"}, "Cricket Memories": {"hi": "क्रिकेट की यादें", "ta": "கிரிக்கெட் நினைவுகள்", "te": "క్రికెట్ జ్ఞాపకాలు", "kn": "ಕ್ರಿಕೆಟ್ ನೆನಪುಗಳು", "bn": "ক্রিকেটের স্মৃতি", "mr": "क्रिकेटच्या आठवणी"}, "Memory Match": {"hi": "मेमोरी मैच", "ta": "நினைவு பொருத்தம்", "te": "మెమరీ మ్యాచ్", "kn": "ನೆನಪಿನ ಹೊಂದಾಣಿಕೆ", "bn": "স্মৃতি মেলানো", "mr": "आठवण जुळवा"}, "Number Trail": {"hi": "संख्या पथ", "ta": "எண் பாதை", "te": "సంఖ్యల దారి", "kn": "ಸಂಖ್ಯೆ ಹಾದಿ", "bn": "সংখ্যার পথ", "mr": "अंकांची वाट"}, "Sort It": {"hi": "छाँटिए", "ta": "வரிசைப்படுத்து", "te": "విభజించండి", "kn": "ವಿಂಗಡಿಸಿ", "bn": "গুছিয়ে রাখুন", "mr": "वर्गीकरण करा"}, "Everyday Decisions": {"hi": "रोज़ के फ़ैसले", "ta": "அன்றாட முடிவுகள்", "te": "రోజువారీ నిర్ణయాలు", "kn": "ದಿನನಿತ್ಯದ ನಿರ್ಧಾರಗಳು", "bn": "প্রতিদিনের সিদ্ধান্ত", "mr": "रोजचे निर्णय"}, "Photo Memory": {"hi": "फ़ोटो की याद", "ta": "புகைப்பட நினைவு", "te": "ఫోటో జ్ఞాపకం", "kn": "ಫೋಟೋ ನೆನಪು", "bn": "ছবির স্মৃতি", "mr": "फोटोची आठवण"}, "Made for you": {"hi": "आपके लिए बनाया", "ta": "உங்களுக்காக", "te": "మీ కోసం", "kn": "ನಿಮಗಾಗಿ", "bn": "আপনার জন্য", "mr": "तुमच्यासाठी"}, "Emergency contact": {"hi": "आपातकालीन संपर्क", "ta": "அவசரத் தொடர்பு", "te": "అత్యవసర సంప్రదింపు", "kn": "ತುರ್ತು ಸಂಪರ್ಕ", "bn": "জরুরি যোগাযোগ", "mr": "आणीबाणी संपर्क"}, "Play. Remember. Connect.": {"hi": "खेलें। याद करें। जुड़ें।", "ta": "விளையாடு. நினை. இணை.", "te": "ఆడండి. గుర్తుచేసుకోండి. కలవండి.", "kn": "ಆಡಿ. ನೆನಪಿಸಿ. ಬೆಸೆಯಿರಿ.", "bn": "খেলুন। মনে করুন। যুক্ত হন।", "mr": "खेळा. आठवा. जोडा."}, "Who's using YAAD right now?": {"hi": "अभी YAAD कौन इस्तेमाल कर रहा है?", "ta": "இப்போது YAAD ஐ யார் பயன்படுத்துகிறார்?", "te": "ఇప్పుడు YAAD ని ఎవరు వాడుతున్నారు?", "kn": "ಈಗ YAAD ಬಳಸುತ್ತಿರುವವರು ಯಾರು?", "bn": "এখন কে YAAD ব্যবহার করছেন?", "mr": "आता YAAD कोण वापरत आहे?"}, "I'm using it myself": {"hi": "मैं खुद इस्तेमाल कर रहा हूँ", "ta": "நானே பயன்படுத்துகிறேன்", "te": "నేనే వాడుతున్నాను", "kn": "ನಾನೇ ಬಳಸುತ್ತಿದ್ದೇನೆ", "bn": "আমি নিজেই ব্যবহার করছি", "mr": "मी स्वतः वापरत आहे"}, "I'm a caregiver / family member": {"hi": "मैं देखभालकर्ता / परिवार का सदस्य हूँ", "ta": "நான் பராமரிப்பாளர் / குடும்ப உறுப்பினர்", "te": "నేను సంరక్షకుడిని / కుటుంబ సభ్యుడిని", "kn": "ನಾನು ಆರೈಕೆದಾರ / ಕುಟುಂಬ ಸದಸ್ಯ", "bn": "আমি যত্নকারী / পরিবারের সদস্য", "mr": "मी काळजीवाहक / कुटुंबातील सदस्य आहे"}, "Read aloud": {"hi": "पढ़कर सुनाएँ", "ta": "படித்துக் காட்டு", "te": "చదివి వినిపించు", "kn": "ಓದಿ ಹೇಳಿ", "bn": "পড়ে শোনান", "mr": "वाचून दाखवा"}, "Contrast": {"hi": "कंट्रास्ट", "ta": "மாறுபாடு", "te": "కాంట్రాస్ట్", "kn": "ಕಾಂಟ್ರಾಸ್ಟ್", "bn": "কনট্রাস্ট", "mr": "कॉन्ट्रास्ट"}, "Good morning, {e} 🌼": {"hi": "सुप्रभात, {e} 🌼", "ta": "காலை வணக்கம், {e} 🌼", "te": "శుభోదయం, {e} 🌼", "kn": "ಶುಭೋದಯ, {e} 🌼", "bn": "সুপ্রভাত, {e} 🌼", "mr": "सुप्रभात, {e} 🌼"}, "Wonderful, {e}!": {"hi": "बहुत बढ़िया, {e}!", "ta": "அருமை, {e}!", "te": "అద్భుతం, {e}!", "kn": "ಅದ್ಭುತ, {e}!", "bn": "চমৎকার, {e}!", "mr": "खूप छान, {e}!"}, "Welcome back, {c} 👋": {"hi": "वापसी पर स्वागत, {c} 👋", "ta": "மீண்டும் வருக, {c} 👋", "te": "తిరిగి స్వాగతం, {c} 👋", "kn": "ಮರಳಿ ಸ್ವಾಗತ, {c} 👋", "bn": "আবার স্বাগতম, {c} 👋", "mr": "पुन्हा स्वागत, {c} 👋"}, "Cricket Memories is ready": {"hi": "क्रिकेट की यादें तैयार हैं", "ta": "கிரிக்கெட் நினைவுகள் தயார்", "te": "క్రికెట్ జ్ఞాపకాలు సిద్ధం", "kn": "ಕ್ರಿಕೆಟ್ ನೆನಪುಗಳು ಸಿದ್ಧ", "bn": "ক্রিকেটের স্মৃতি তৈরি", "mr": "क्रिकेटच्या आठवणी तयार आहेत"}, "Yes, let's play": {"hi": "हाँ, खेलते हैं", "ta": "ஆம், விளையாடலாம்", "te": "అవును, ఆడదాం", "kn": "ಹೌದು, ಆಡೋಣ", "bn": "হ্যাঁ, খেলি", "mr": "हो, खेळूया"}, "Not sure": {"hi": "पक्का नहीं", "ta": "உறுதியாகத் தெரியவில்லை", "te": "ఖచ్చితంగా తెలియదు", "kn": "ಖಚಿತವಿಲ್ಲ", "bn": "নিশ্চিত না", "mr": "नक्की नाही"}, "Kitchen": {"hi": "रसोई", "ta": "சமையலறை", "te": "వంటగది", "kn": "ಅಡುಗೆಮನೆ", "bn": "রান্নাঘর", "mr": "स्वयंपाकघर"}, "Clothes": {"hi": "कपड़े", "ta": "உடைகள்", "te": "బట్టలు", "kn": "ಬಟ್ಟೆ", "bn": "পোশাক", "mr": "कपडे"}, "Garden": {"hi": "बगीचा", "ta": "தோட்டம்", "te": "తోట", "kn": "ತೋಟ", "bn": "বাগান", "mr": "बाग"}, "Where does this belong?": {"hi": "यह कहाँ रखा जाता है?", "ta": "இது எங்கே சேரும்?", "te": "ఇది ఎక్కడ ఉంటుంది?", "kn": "ಇದು ಎಲ್ಲಿ ಸೇರುತ್ತದೆ?", "bn": "এটা কোথায় থাকে?", "mr": "हे कुठे ठेवतात?"}, "Start again": {"hi": "फिर से शुरू करें", "ta": "மீண்டும் தொடங்கு", "te": "మళ్ళీ మొదలుపెట్టండి", "kn": "ಮತ್ತೆ ಪ್ರಾರಂಭಿಸಿ", "bn": "আবার শুরু করুন", "mr": "पुन्हा सुरू करा"}, "Shuffle again": {"hi": "फिर से मिलाएँ", "ta": "மீண்டும் கலக்கு", "te": "మళ్ళీ కలపండి", "kn": "ಮತ್ತೆ ಕಲಸಿ", "bn": "আবার মেশান", "mr": "पुन्हा मिसळा"}, "Switch user": {"hi": "उपयोगकर्ता बदलें", "ta": "பயனரை மாற்று", "te": "వినియోగదారుని మార్చండి", "kn": "ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ", "bn": "ব্যবহারকারী বদলান", "mr": "वापरकर्ता बदला"}, "Welcome to YAAD": {"hi": "YAAD में आपका स्वागत है", "ta": "YAAD க்கு வரவேற்கிறோம்", "te": "YAAD కు స్వాగతం", "kn": "YAAD ಗೆ ಸ್ವಾಗತ", "bn": "YAAD-এ স্বাগতম", "mr": "YAAD मध्ये स्वागत"}, "Who will be playing?": {"hi": "कौन खेलेगा?", "ta": "யார் விளையாடுவார்?", "te": "ఎవరు ఆడతారు?", "kn": "ಯಾರು ಆಡುತ್ತಾರೆ?", "bn": "কে খেলবেন?", "mr": "कोण खेळणार?"}, "Who is the caregiver?": {"hi": "देखभालकर्ता कौन है?", "ta": "பராமரிப்பாளர் யார்?", "te": "సంరక్షకుడు ఎవరు?", "kn": "ಆರೈಕೆದಾರರು ಯಾರು?", "bn": "যত্নকারী কে?", "mr": "काळजीवाहक कोण?"}, "Save and continue": {"hi": "सहेजें और आगे बढ़ें", "ta": "சேமித்துத் தொடர்க", "te": "సేవ్ చేసి కొనసాగించండి", "kn": "ಉಳಿಸಿ ಮುಂದುವರಿಸಿ", "bn": "সংরক্ষণ করে এগিয়ে যান", "mr": "जतन करून पुढे जा"}, "Profile & Preferences": {"hi": "प्रोफ़ाइल और पसंद", "ta": "சுயவிவரம் & விருப்பங்கள்", "te": "ప్రొఫైల్ & ప్రాధాన్యతలు", "kn": "ಪ್ರೊಫೈಲ್ & ಆದ್ಯತೆಗಳು", "bn": "প্রোফাইল ও পছন্দ", "mr": "प्रोफाइल आणि आवडीनिवडी"}, "Activity Builder": {"hi": "गतिविधि बनाएँ", "ta": "செயல்பாடு உருவாக்கி", "te": "యాక్టివిటీ బిల్డర్", "kn": "ಚಟುವಟಿಕೆ ರಚಕ", "bn": "কার্যকলাপ নির্মাতা", "mr": "उपक्रम तयार करा"}, "Memory Capsule": {"hi": "यादों का कैप्सूल", "ta": "நினைவு காப்ஸ்யூல்", "te": "జ్ఞాపకాల క్యాప్సూల్", "kn": "ನೆನಪಿನ ಕ್ಯಾಪ್ಸೂಲ್", "bn": "স্মৃতির ক্যাপসুল", "mr": "आठवणींचे कॅप्सूल"}, "Progress & Alerts": {"hi": "प्रगति और अलर्ट", "ta": "முன்னேற்றம் & எச்சரிக்கைகள்", "te": "పురోగతి & హెచ్చరికలు", "kn": "ಪ್ರಗತಿ & ಎಚ್ಚರಿಕೆಗಳು", "bn": "অগ্রগতি ও সতর্কতা", "mr": "प्रगती आणि सूचना"}, "Care Connect": {"hi": "केयर कनेक्ट", "ta": "கேர் கனெக்ட்", "te": "కేర్ కనెక్ట్", "kn": "ಕೇರ್ ಕನೆಕ್ಟ್", "bn": "কেয়ার কানেক্ট", "mr": "केअर कनेक्ट"}, "Consistency": {"hi": "निरंतरता", "ta": "தொடர்ச்சி", "te": "నిలకడ", "kn": "ಸ್ಥಿರತೆ", "bn": "ধারাবাহিকতা", "mr": "सातत्य"}, "Today": {"hi": "आज", "ta": "இன்று", "te": "ఈ రోజు", "kn": "ಇಂದು", "bn": "আজ", "mr": "आज"}, "Name": {"hi": "नाम", "ta": "பெயர்", "te": "పేరు", "kn": "ಹೆಸರು", "bn": "নাম", "mr": "नाव"}, "Call": {"hi": "कॉल करें", "ta": "அழை", "te": "కాల్ చేయండి", "kn": "ಕರೆ ಮಾಡಿ", "bn": "কল করুন", "mr": "कॉल करा"}, "Message": {"hi": "संदेश", "ta": "செய்தி", "te": "సందేశం", "kn": "ಸಂದೇಶ", "bn": "বার্তা", "mr": "संदेश"}, "Yes!": {"hi": "हाँ!", "ta": "ஆம்!", "te": "అవును!", "kn": "ಹೌದು!", "bn": "হ্যাঁ!", "mr": "होय!"}, "Good choice!": {"hi": "अच्छा चुनाव!", "ta": "நல்ல தேர்வு!", "te": "మంచి ఎంపిక!", "kn": "ಒಳ್ಳೆಯ ಆಯ್ಕೆ!", "bn": "ভালো পছন্দ!", "mr": "छान निवड!"}, "Today's recommendation": {"hi": "आज का सुझाव", "ta": "இன்றைய பரிந்துரை", "te": "నేటి సూచన", "kn": "ಇಂದಿನ ಸಲಹೆ", "bn": "আজকের পরামর্শ", "mr": "आजची शिफारस"}, "Language": {"hi": "भाषा", "ta": "மொழி", "te": "భాష", "kn": "ಭಾಷೆ", "bn": "ভাষা", "mr": "भाषा"}, "Photo": {"hi": "फ़ोटो", "ta": "புகைப்படம்", "te": "ఫోటో", "kn": "ಫೋಟೋ", "bn": "ছবি", "mr": "फोटो"}, "Song": {"hi": "गीत", "ta": "பாடல்", "te": "పాట", "kn": "ಹಾಡು", "bn": "গান", "mr": "गाणे"}, "Food": {"hi": "खाना", "ta": "உணவு", "te": "ఆహారం", "kn": "ಆಹಾರ", "bn": "খাবার", "mr": "जेवण"}, "PLAY": {"hi": "खेलें", "ta": "விளையாடு", "te": "ఆడండి", "kn": "ಆಡಿ", "bn": "খেলুন", "mr": "खेळा"}, "MY DAY": {"hi": "मेरा दिन", "ta": "என் நாள்", "te": "నా రోజు", "kn": "ನನ್ನ ದಿನ", "bn": "আমার দিন", "mr": "माझा दिवस"}, "FAMILY": {"hi": "परिवार", "ta": "குடும்பம்", "te": "కుటుంబం", "kn": "ಕುಟುಂಬ", "bn": "পরিবার", "mr": "कुटुंब"}, "MY PROGRESS": {"hi": "मेरी प्रगति", "ta": "என் முன்னேற்றம்", "te": "నా పురోగతి", "kn": "ನನ್ನ ಪ್ರಗತಿ", "bn": "আমার অগ্রগতি", "mr": "माझी प्रगती"}, "Games, family memories & a gentle daily routine": {"hi": "खेल, परिवार की यादें और एक सुकून भरी दिनचर्या", "ta": "விளையாட்டுகள், குடும்ப நினைவுகள் & அமைதியான தினசரி வழக்கம்", "te": "ఆటలు, కుటుంబ జ్ఞాపకాలు & ప్రశాంతమైన దినచర్య", "kn": "ಆಟಗಳು, ಕುಟುಂಬದ ನೆನಪುಗಳು & ನೆಮ್ಮದಿಯ ದಿನಚರಿ", "bn": "খেলা, পারিবারিক স্মৃতি ও শান্ত দৈনন্দিন রুটিন", "mr": "खेळ, कुटुंबाच्या आठवणी आणि शांत दिनक्रम"}, "You can switch anytime from the home screen.": {"hi": "आप होम स्क्रीन से कभी भी बदल सकते हैं।", "ta": "முகப்புத் திரையிலிருந்து எப்போது வேண்டுமானாலும் மாற்றலாம்.", "te": "హోమ్ స్క్రీన్ నుండి ఎప్పుడైనా మార్చవచ్చు.", "kn": "ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ನಿಂದ ಯಾವಾಗ ಬೇಕಾದರೂ ಬದಲಿಸಬಹುದು.", "bn": "হোম স্ক্রিন থেকে যেকোনো সময় বদলাতে পারেন।", "mr": "होम स्क्रीनवरून कधीही बदलता येईल."}, "Made for you by {c} — tap Play to try it": {"hi": "{c} ने आपके लिए बनाया है — खेलने के लिए दबाएँ", "ta": "{c} உங்களுக்காக உருவாக்கியது — விளையாடத் தட்டுங்கள்", "te": "{c} మీ కోసం చేశారు — ఆడటానికి నొక్కండి", "kn": "{c} ನಿಮಗಾಗಿ ಮಾಡಿದ್ದಾರೆ — ಆಡಲು ಒತ್ತಿ", "bn": "{c} আপনার জন্য বানিয়েছেন — খেলতে চাপুন", "mr": "{c} यांनी तुमच्यासाठी बनवले — खेळण्यासाठी दाबा"}, "Not {e}? Switch user": {"hi": "{e} नहीं हैं? उपयोगकर्ता बदलें", "ta": "{e} இல்லையா? பயனரை மாற்று", "te": "{e} కాదా? వినియోగదారుని మార్చండి", "kn": "{e} ಅಲ್ಲವೇ? ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ", "bn": "{e} নন? ব্যবহারকারী বদলান", "mr": "{e} नाहीत? वापरकर्ता बदला"}, "A few minutes a day keeps the mind active": {"hi": "दिन में कुछ मिनट मन को सक्रिय रखते हैं", "ta": "தினமும் சில நிமிடங்கள் மனதை சுறுசுறுப்பாக வைக்கும்", "te": "రోజుకు కొన్ని నిమిషాలు మనసును చురుకుగా ఉంచుతాయి", "kn": "ದಿನಕ್ಕೆ ಕೆಲವು ನಿಮಿಷ ಮನಸ್ಸನ್ನು ಚುರುಕಾಗಿಡುತ್ತದೆ", "bn": "দিনে কয়েক মিনিট মনকে সক্রিয় রাখে", "mr": "दिवसातील काही मिनिटे मन सक्रिय ठेवतात"}, "Who is in the photo?": {"hi": "फ़ोटो में कौन है?", "ta": "புகைப்படத்தில் யார் இருக்கிறார்?", "te": "ఫోటోలో ఎవరు ఉన్నారు?", "kn": "ಫೋಟೋದಲ್ಲಿ ಯಾರಿದ್ದಾರೆ?", "bn": "ছবিতে কে আছেন?", "mr": "फोटोमध्ये कोण आहे?"}, "A personal activity from {c}": {"hi": "{c} की ओर से एक खास गतिविधि", "ta": "{c} அனுப்பிய தனிப்பட்ட செயல்பாடு", "te": "{c} నుండి ప్రత్యేక యాక్టివిటీ", "kn": "{c} ಅವರಿಂದ ವಿಶೇಷ ಚಟುವಟಿಕೆ", "bn": "{c}-এর পক্ষ থেকে বিশেষ কার্যকলাপ", "mr": "{c} यांच्याकडून खास उपक्रम"}, "Find the matching pairs": {"hi": "मेल खाती जोड़ियाँ ढूँढिए", "ta": "பொருந்தும் ஜோடிகளைக் கண்டுபிடியுங்கள்", "te": "సరిపోయే జతలను కనుగొనండి", "kn": "ಹೊಂದುವ ಜೋಡಿಗಳನ್ನು ಹುಡುಕಿ", "bn": "মিলে যাওয়া জোড়া খুঁজুন", "mr": "जुळणाऱ्या जोड्या शोधा"}, "Find the three matching pairs": {"hi": "तीन मेल खाती जोड़ियाँ ढूँढिए", "ta": "பொருந்தும் மூன்று ஜோடிகளைக் கண்டுபிடியுங்கள்", "te": "సరిపోయే మూడు జతలను కనుగొనండి", "kn": "ಹೊಂದುವ ಮೂರು ಜೋಡಿಗಳನ್ನು ಹುಡುಕಿ", "bn": "মিলে যাওয়া তিনটি জোড়া খুঁজুন", "mr": "जुळणाऱ्या तीन जोड्या शोधा"}, "Name That Tune": {"hi": "गाना पहचानिए", "ta": "பாடலைக் கண்டுபிடி", "te": "పాటను గుర్తించండి", "kn": "ಹಾಡನ್ನು ಗುರುತಿಸಿ", "bn": "গানটি চিনুন", "mr": "गाणे ओळखा"}, "Coming soon: needs audio": {"hi": "जल्द आ रहा है: ऑडियो चाहिए", "ta": "விரைவில்: ஒலி தேவை", "te": "త్వరలో: ఆడియో కావాలి", "kn": "ಶೀಘ್ರದಲ್ಲಿ: ಆಡಿಯೋ ಬೇಕು", "bn": "শীঘ্রই আসছে: অডিও লাগবে", "mr": "लवकरच: ऑडिओ हवा"}, "Soon": {"hi": "जल्द", "ta": "விரைவில்", "te": "త్వరలో", "kn": "ಶೀಘ್ರ", "bn": "শীঘ্রই", "mr": "लवकरच"}, "Tap numbers in order": {"hi": "संख्याएँ क्रम से दबाएँ", "ta": "எண்களை வரிசையாகத் தட்டுங்கள்", "te": "సంఖ్యలను వరుసగా నొక్కండి", "kn": "ಸಂಖ್ಯೆಗಳನ್ನು ಕ್ರಮವಾಗಿ ಒತ್ತಿ", "bn": "সংখ্যাগুলো ক্রমে চাপুন", "mr": "अंक क्रमाने दाबा"}, "Kitchen, clothes or garden?": {"hi": "रसोई, कपड़े या बगीचा?", "ta": "சமையலறை, உடை அல்லது தோட்டம்?", "te": "వంటగది, బట్టలు లేదా తోట?", "kn": "ಅಡುಗೆಮನೆ, ಬಟ್ಟೆ ಅಥವಾ ತೋಟ?", "bn": "রান্নাঘর, পোশাক না বাগান?", "mr": "स्वयंपाकघर, कपडे की बाग?"}, "It's raining — what do you take?": {"hi": "बारिश हो रही है — आप क्या लेंगे?", "ta": "மழை பெய்கிறது — எதை எடுத்துச் செல்வீர்கள்?", "te": "వర్షం పడుతోంది — మీరు ఏమి తీసుకుంటారు?", "kn": "ಮಳೆ ಬರುತ್ತಿದೆ — ನೀವು ಏನು ತೆಗೆದುಕೊಳ್ಳುತ್ತೀರಿ?", "bn": "বৃষ্টি হচ্ছে — আপনি কী নেবেন?", "mr": "पाऊस पडतोय — तुम्ही काय घ्याल?"}, "Say your answer, or tap to type instead": {"hi": "अपना जवाब बोलें, या टाइप करने के लिए दबाएँ", "ta": "உங்கள் பதிலைச் சொல்லுங்கள், அல்லது தட்டச்சு செய்ய தட்டுங்கள்", "te": "మీ సమాధానం చెప్పండి, లేదా టైప్ చేయడానికి నొక్కండి", "kn": "ನಿಮ್ಮ ಉತ್ತರ ಹೇಳಿ, ಅಥವಾ ಟೈಪ್ ಮಾಡಲು ಒತ್ತಿ", "bn": "আপনার উত্তর বলুন, অথবা টাইপ করতে চাপুন", "mr": "तुमचे उत्तर सांगा, किंवा टाइप करण्यासाठी दाबा"}, "You've completed today's activity. {c} will love hearing about Kapil Dev.": {"hi": "आपने आज की गतिविधि पूरी कर ली। {c} को कपिल देव के बारे में सुनकर अच्छा लगेगा।", "ta": "இன்றைய செயல்பாட்டை முடித்துவிட்டீர்கள். கபில் தேவ் பற்றி கேட்க {c} மகிழ்வார்.", "te": "మీరు ఈ రోజు యాక్టివిటీ పూర్తి చేశారు. కపిల్ దేవ్ గురించి వినడానికి {c} సంతోషిస్తారు.", "kn": "ನೀವು ಇಂದಿನ ಚಟುವಟಿಕೆ ಪೂರ್ಣಗೊಳಿಸಿದ್ದೀರಿ. ಕಪಿಲ್ ದೇವ್ ಬಗ್ಗೆ ಕೇಳಿ {c} ಖುಷಿಪಡುತ್ತಾರೆ.", "bn": "আপনি আজকের কার্যকলাপ শেষ করেছেন। কপিল দেবের কথা শুনে {c} খুশি হবেন।", "mr": "तुम्ही आजचा उपक्रम पूर्ण केला. कपिल देव यांच्याबद्दल ऐकून {c} यांना आनंद होईल."}, "Thank you for sharing. {c} will see this. 💛": {"hi": "साझा करने के लिए धन्यवाद। {c} इसे देखेंगे। 💛", "ta": "பகிர்ந்ததற்கு நன்றி. {c} இதைப் பார்ப்பார். 💛", "te": "పంచుకున్నందుకు ధన్యవాదాలు. {c} దీన్ని చూస్తారు. 💛", "kn": "ಹಂಚಿಕೊಂಡಿದ್ದಕ್ಕೆ ಧನ್ಯವಾದ. {c} ಇದನ್ನು ನೋಡುತ್ತಾರೆ. 💛", "bn": "শেয়ার করার জন্য ধন্যবাদ। {c} এটা দেখবেন। 💛", "mr": "शेअर केल्याबद्दल धन्यवाद. {c} हे पाहतील. 💛"}, "Wake up & stretch": {"hi": "उठें और थोड़ा स्ट्रेच करें", "ta": "எழுந்து உடலை நீட்டுங்கள்", "te": "నిద్రలేచి శరీరాన్ని సాగదీయండి", "kn": "ಎದ್ದು ಮೈ ಹಿಗ್ಗಿಸಿ", "bn": "ঘুম থেকে উঠে শরীর টান করুন", "mr": "उठा आणि अंग ताणा"}, "Short walk": {"hi": "थोड़ी सैर", "ta": "சிறிது நடை", "te": "కొద్దిసేపు నడక", "kn": "ಸ್ವಲ್ಪ ನಡಿಗೆ", "bn": "অল্প হাঁটা", "mr": "थोडे फिरणे"}, "Call with family": {"hi": "परिवार से बात", "ta": "குடும்பத்துடன் அழைப்பு", "te": "కుటుంబంతో కాల్", "kn": "ಕುಟುಂಬದೊಂದಿಗೆ ಕರೆ", "bn": "পরিবারের সঙ্গে ফোন", "mr": "कुटुंबाशी फोन"}, "🌤️ Would you like to do a 5-minute memory activity now?": {"hi": "🌤️ क्या आप अभी 5 मिनट की याद वाली गतिविधि करना चाहेंगे?", "ta": "🌤️ இப்போது 5 நிமிட நினைவு செயல்பாடு செய்ய விரும்புகிறீர்களா?", "te": "🌤️ ఇప్పుడు 5 నిమిషాల జ్ఞాపక యాక్టివిటీ చేయాలనుకుంటున్నారా?", "kn": "🌤️ ಈಗ 5 ನಿಮಿಷದ ನೆನಪಿನ ಚಟುವಟಿಕೆ ಮಾಡಲು ಬಯಸುವಿರಾ?", "bn": "🌤️ এখন ৫ মিনিটের স্মৃতির কার্যকলাপ করবেন?", "mr": "🌤️ आता ५ मिनिटांचा आठवणींचा उपक्रम करायचा का?"}, "🎙️ Voice message from {c}": {"hi": "🎙️ {c} का वॉइस संदेश", "ta": "🎙️ {c} அனுப்பிய குரல் செய்தி", "te": "🎙️ {c} నుండి వాయిస్ సందేశం", "kn": "🎙️ {c} ಅವರ ಧ್ವನಿ ಸಂದೇಶ", "bn": "🎙️ {c}-এর ভয়েস বার্তা", "mr": "🎙️ {c} यांचा आवाज संदेश"}, "Ask your family to add more memories": {"hi": "परिवार से और यादें जोड़ने को कहें", "ta": "மேலும் நினைவுகளைச் சேர்க்க குடும்பத்தினரிடம் கேளுங்கள்", "te": "మరిన్ని జ్ఞాపకాలు జోడించమని కుటుంబాన్ని అడగండి", "kn": "ಇನ್ನಷ್ಟು ನೆನಪುಗಳನ್ನು ಸೇರಿಸಲು ಕುಟುಂಬವನ್ನು ಕೇಳಿ", "bn": "আরও স্মৃতি যোগ করতে পরিবারকে বলুন", "mr": "आणखी आठवणी जोडण्यास कुटुंबाला सांगा"}, "Here's how this week is going — just gentle trends, nothing to worry about.": {"hi": "देखिए इस हफ़्ते कैसा चल रहा है — बस हल्के रुझान, चिंता की कोई बात नहीं।", "ta": "இந்த வாரம் எப்படி போகிறது — மெல்லிய போக்குகள் மட்டுமே, கவலை வேண்டாம்.", "te": "ఈ వారం ఎలా సాగుతోందో చూడండి — సున్నితమైన ధోరణులు మాత్రమే, ఆందోళన అవసరం లేదు.", "kn": "ಈ ವಾರ ಹೇಗೆ ನಡೆಯುತ್ತಿದೆ ನೋಡಿ — ಸೌಮ್ಯ ಪ್ರವೃತ್ತಿಗಳು ಮಾತ್ರ, ಚಿಂತೆ ಬೇಡ.", "bn": "এই সপ্তাহ কেমন যাচ্ছে দেখুন — শুধু হালকা প্রবণতা, চিন্তার কিছু নেই।", "mr": "या आठवड्यात कसे चालले आहे ते पहा — फक्त सौम्य कल, काळजीचे काही नाही."}, "Activities today": {"hi": "आज की गतिविधियाँ", "ta": "இன்றைய செயல்பாடுகள்", "te": "నేటి యాక్టివిటీలు", "kn": "ಇಂದಿನ ಚಟುವಟಿಕೆಗಳು", "bn": "আজকের কার্যকলাপ", "mr": "आजचे उपक्रम"}, "Playing streak": {"hi": "लगातार खेलने के दिन", "ta": "தொடர்ச்சியாக விளையாடிய நாட்கள்", "te": "వరుసగా ఆడిన రోజులు", "kn": "ಸತತವಾಗಿ ಆಡಿದ ದಿನಗಳು", "bn": "টানা খেলার দিন", "mr": "सलग खेळलेले दिवस"}, "For urgent situations": {"hi": "आपात स्थिति के लिए", "ta": "அவசர சூழல்களுக்கு", "te": "అత్యవసర పరిస్థితులకు", "kn": "ತುರ್ತು ಸಂದರ್ಭಗಳಿಗೆ", "bn": "জরুরি পরিস্থিতির জন্য", "mr": "तातडीच्या परिस्थितीसाठी"}, "💬 Support is available in Hindi, English and other regional languages.": {"hi": "💬 सहायता हिंदी, अंग्रेज़ी और अन्य क्षेत्रीय भाषाओं में उपलब्ध है।", "ta": "💬 உதவி இந்தி, ஆங்கிலம் மற்றும் பிற பிராந்திய மொழிகளில் கிடைக்கும்.", "te": "💬 సహాయం హిందీ, ఇంగ్లీష్ మరియు ఇతర ప్రాంతీయ భాషల్లో అందుబాటులో ఉంది.", "kn": "💬 ಸಹಾಯ ಹಿಂದಿ, ಇಂಗ್ಲಿಷ್ ಮತ್ತು ಇತರ ಪ್ರಾದೇಶಿಕ ಭಾಷೆಗಳಲ್ಲಿ ಲಭ್ಯ.", "bn": "💬 সাহায্য হিন্দি, ইংরেজি ও অন্যান্য আঞ্চলিক ভাষায় পাওয়া যায়।", "mr": "💬 मदत हिंदी, इंग्रजी आणि इतर प्रादेशिक भाषांमध्ये उपलब्ध आहे."}, "Listening...": {"hi": "सुन रहा हूँ...", "ta": "கேட்கிறேன்...", "te": "వింటున్నాను...", "kn": "ಕೇಳುತ್ತಿದ್ದೇನೆ...", "bn": "শুনছি...", "mr": "ऐकत आहे..."}, "Got it!": {"hi": "समझ गया!", "ta": "புரிந்தது!", "te": "అర్థమైంది!", "kn": "ಅರ್ಥವಾಯಿತು!", "bn": "বুঝেছি!", "mr": "समजले!"}, "You said: \"{x}\"": {"hi": "आपने कहा: \"{x}\"", "ta": "நீங்கள் சொன்னது: \"{x}\"", "te": "మీరు చెప్పింది: \"{x}\"", "kn": "ನೀವು ಹೇಳಿದ್ದು: \"{x}\"", "bn": "আপনি বললেন: \"{x}\"", "mr": "तुम्ही म्हणालात: \"{x}\""}, "Could not hear you. Please type instead.": {"hi": "सुन नहीं पाया। कृपया टाइप करें।", "ta": "கேட்க முடியவில்லை. தயவுசெய்து தட்டச்சு செய்யுங்கள்.", "te": "వినపడలేదు. దయచేసి టైప్ చేయండి.", "kn": "ಕೇಳಿಸಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಟೈಪ್ ಮಾಡಿ.", "bn": "শুনতে পাইনি। দয়া করে টাইপ করুন।", "mr": "ऐकू आले नाही. कृपया टाइप करा."}, "Type your answer": {"hi": "अपना जवाब टाइप करें", "ta": "உங்கள் பதிலைத் தட்டச்சு செய்யுங்கள்", "te": "మీ సమాధానం టైప్ చేయండి", "kn": "ನಿಮ್ಮ ಉತ್ತರವನ್ನು ಟೈಪ್ ಮಾಡಿ", "bn": "আপনার উত্তর টাইপ করুন", "mr": "तुमचे उत्तर टाइप करा"}, "Look for number {n}": {"hi": "संख्या {n} ढूँढिए", "ta": "எண் {n} ஐத் தேடுங்கள்", "te": "సంఖ్య {n} కోసం చూడండి", "kn": "ಸಂಖ್ಯೆ {n} ಹುಡುಕಿ", "bn": "সংখ্যা {n} খুঁজুন", "mr": "अंक {n} शोधा"}, "Well done! {n} seconds.": {"hi": "शाबाश! {n} सेकंड।", "ta": "சபாஷ்! {n} விநாடிகள்.", "te": "భేష్! {n} సెకన్లు.", "kn": "ಭೇಷ್! {n} ಸೆಕೆಂಡ್.", "bn": "সাবাস! {n} সেকেন্ড।", "mr": "शाब्बास! {n} सेकंद."}, "Tap the numbers from 1 to {n}": {"hi": "1 से {n} तक संख्याएँ दबाएँ", "ta": "1 முதல் {n} வரை எண்களைத் தட்டுங்கள்", "te": "1 నుండి {n} వరకు సంఖ్యలను నొక్కండి", "kn": "1 ರಿಂದ {n} ವರೆಗೆ ಸಂಖ್ಯೆಗಳನ್ನು ಒತ್ತಿ", "bn": "১ থেকে {n} পর্যন্ত সংখ্যাগুলো চাপুন", "mr": "१ ते {n} पर्यंत अंक दाबा"}, "Nearly. It goes in the {x}.": {"hi": "लगभग सही। यह {x} में जाता है।", "ta": "கிட்டத்தட்ட. இது {x} இல் வரும்.", "te": "దాదాపు సరైనది. ఇది {x} లో ఉంటుంది.", "kn": "ಹತ್ತಿರವಿತ್ತು. ಇದು {x} ನಲ್ಲಿ ಇರುತ್ತದೆ.", "bn": "প্রায় ঠিক। এটা {x}-এ থাকে।", "mr": "जवळपास बरोबर. हे {x} मध्ये ठेवतात."}, "You got {n} of {m}": {"hi": "आपने {m} में से {n} सही किए", "ta": "{m} இல் {n} சரியாகச் சொன்னீர்கள்", "te": "{m} లో {n} సరిగ్గా చెప్పారు", "kn": "{m} ರಲ್ಲಿ {n} ಸರಿಯಾಗಿ ಹೇಳಿದ್ದೀರಿ", "bn": "{m}-এর মধ্যে {n}টি ঠিক", "mr": "{m} पैकी {n} बरोबर"}, "The safest choice was: {x}": {"hi": "सबसे सुरक्षित चुनाव था: {x}", "ta": "பாதுகாப்பான தேர்வு: {x}", "te": "అత్యంత సురక్షితమైన ఎంపిక: {x}", "kn": "ಅತ್ಯಂತ ಸುರಕ್ಷಿತ ಆಯ್ಕೆ: {x}", "bn": "সবচেয়ে নিরাপদ পছন্দ ছিল: {x}", "mr": "सर्वात सुरक्षित निवड: {x}"}, "You chose well {n} of {m} times.": {"hi": "आपने {m} में से {n} बार अच्छा चुना।", "ta": "{m} இல் {n} முறை நன்றாகத் தேர்ந்தெடுத்தீர்கள்.", "te": "{m} సార్లలో {n} సార్లు బాగా ఎంచుకున్నారు.", "kn": "{m} ಬಾರಿಯಲ್ಲಿ {n} ಬಾರಿ ಚೆನ್ನಾಗಿ ಆರಿಸಿದ್ದೀರಿ.", "bn": "{m} বারের মধ্যে {n} বার ভালো বেছেছেন।", "mr": "{m} पैकी {n} वेळा छान निवड केली."}, "Well done, {e}!": {"hi": "शाबाश, {e}!", "ta": "சபாஷ், {e}!", "te": "భేష్, {e}!", "kn": "ಭೇಷ್, {e}!", "bn": "সাবাস, {e}!", "mr": "शाब्बास, {e}!"}, "No photos yet": {"hi": "अभी कोई फ़ोटो नहीं", "ta": "இன்னும் புகைப்படங்கள் இல்லை", "te": "ఇంకా ఫోటోలు లేవు", "kn": "ಇನ್ನೂ ಫೋಟೋಗಳಿಲ್ಲ", "bn": "এখনও কোনো ছবি নেই", "mr": "अजून फोटो नाहीत"}, "Ask your family to add a photo with a name in Memory Capsule.": {"hi": "परिवार से मेमोरी कैप्सूल में नाम के साथ फ़ोटो जोड़ने को कहें।", "ta": "நினைவு காப்ஸ்யூலில் பெயருடன் புகைப்படம் சேர்க்க குடும்பத்தினரிடம் கேளுங்கள்.", "te": "జ్ఞాపకాల క్యాప్సూల్‌లో పేరుతో ఫోటో జోడించమని కుటుంబాన్ని అడగండి.", "kn": "ನೆನಪಿನ ಕ್ಯಾಪ್ಸೂಲ್‌ನಲ್ಲಿ ಹೆಸರಿನೊಂದಿಗೆ ಫೋಟೋ ಸೇರಿಸಲು ಕುಟುಂಬವನ್ನು ಕೇಳಿ.", "bn": "স্মৃতির ক্যাপসুলে নামসহ ছবি যোগ করতে পরিবারকে বলুন।", "mr": "आठवणींच्या कॅप्सूलमध्ये नावासह फोटो जोडण्यास कुटुंबाला सांगा."}, "Lovely memories, {e}!": {"hi": "सुंदर यादें, {e}!", "ta": "அழகான நினைவுகள், {e}!", "te": "అందమైన జ్ఞాపకాలు, {e}!", "kn": "ಸುಂದರ ನೆನಪುಗಳು, {e}!", "bn": "সুন্দর স্মৃতি, {e}!", "mr": "सुंदर आठवणी, {e}!"}, "You named {n} of {m}.": {"hi": "आपने {m} में से {n} के नाम बताए।", "ta": "{m} இல் {n} பெயர்களைச் சொன்னீர்கள்.", "te": "{m} లో {n} పేర్లు చెప్పారు.", "kn": "{m} ರಲ್ಲಿ {n} ಹೆಸರುಗಳನ್ನು ಹೇಳಿದ್ದೀರಿ.", "bn": "{m}-এর মধ্যে {n}টির নাম বলেছেন।", "mr": "{m} पैकी {n} नावे सांगितली."}, "Who or what is in this photo?": {"hi": "इस फ़ोटो में कौन या क्या है?", "ta": "இந்தப் புகைப்படத்தில் யார் அல்லது என்ன இருக்கிறது?", "te": "ఈ ఫోటోలో ఎవరు లేదా ఏమి ఉంది?", "kn": "ಈ ಫೋಟೋದಲ್ಲಿ ಯಾರು ಅಥವಾ ಏನಿದೆ?", "bn": "এই ছবিতে কে বা কী আছে?", "mr": "या फोटोमध्ये कोण किंवा काय आहे?"}, "Yes, that is right!": {"hi": "हाँ, बिल्कुल सही!", "ta": "ஆம், சரியே!", "te": "అవును, సరిగ్గా చెప్పారు!", "kn": "ಹೌದು, ಸರಿಯಾಗಿದೆ!", "bn": "হ্যাঁ, ঠিক বলেছেন!", "mr": "होय, अगदी बरोबर!"}, "It was: {x}. What a lovely photo.": {"hi": "यह था: {x}। कितनी सुंदर फ़ोटो है।", "ta": "இது: {x}. எவ்வளவு அழகான புகைப்படம்.", "te": "ఇది: {x}. ఎంత అందమైన ఫోటో.", "kn": "ಇದು: {x}. ಎಷ್ಟು ಸುಂದರ ಫೋಟೋ.", "bn": "এটা ছিল: {x}। কী সুন্দর ছবি।", "mr": "हे होते: {x}. किती सुंदर फोटो."}, "Moves: {n}": {"hi": "चालें: {n}", "ta": "நகர்வுகள்: {n}", "te": "కదలికలు: {n}", "kn": "ನಡೆಗಳು: {n}", "bn": "চাল: {n}", "mr": "चाली: {n}"}, "Found: {n} / 3": {"hi": "मिले: {n} / 3", "ta": "கண்டுபிடித்தவை: {n} / 3", "te": "దొరికినవి: {n} / 3", "kn": "ಸಿಕ್ಕಿದ್ದು: {n} / 3", "bn": "পেয়েছেন: {n} / 3", "mr": "सापडले: {n} / 3"}, "Time for: {x}": {"hi": "{x} का समय", "ta": "{x} நேரம்", "te": "{x} సమయం", "kn": "{x} ಸಮಯ", "bn": "{x}-এর সময়", "mr": "{x} ची वेळ"}, "tap to close": {"hi": "बंद करने के लिए दबाएँ", "ta": "மூட தட்டுங்கள்", "te": "మూసివేయడానికి నొక్కండి", "kn": "ಮುಚ್ಚಲು ಒತ್ತಿ", "bn": "বন্ধ করতে চাপুন", "mr": "बंद करण्यासाठी दाबा"}, "{c} will love hearing your answers.": {"hi": "{c} को आपके जवाब सुनकर अच्छा लगेगा।", "ta": "உங்கள் பதில்களைக் கேட்க {c} மகிழ்வார்.", "te": "మీ సమాధానాలు వినడానికి {c} సంతోషిస్తారు.", "kn": "ನಿಮ್ಮ ಉತ್ತರಗಳನ್ನು ಕೇಳಿ {c} ಖುಷಿಪಡುತ್ತಾರೆ.", "bn": "আপনার উত্তর শুনে {c} খুশি হবেন।", "mr": "तुमची उत्तरे ऐकून {c} यांना आनंद होईल."}, "Next": {"hi": "आगे", "ta": "அடுத்து", "te": "తదుపరి", "kn": "ಮುಂದೆ", "bn": "পরবর্তী", "mr": "पुढे"}, "Caregiver": {"hi": "देखभालकर्ता", "ta": "பராமரிப்பாளர்", "te": "సంరక్షకుడు", "kn": "ಆರೈಕೆದಾರ", "bn": "যত্নকারী", "mr": "काळजीवाहक"}, "Streak": {"hi": "लगातार दिन", "ta": "தொடர் நாட்கள்", "te": "వరుస రోజులు", "kn": "ಸತತ ದಿನಗಳು", "bn": "টানা দিন", "mr": "सलग दिवस"}, "Mood": {"hi": "मूड", "ta": "மனநிலை", "te": "మూడ్", "kn": "ಮನಸ್ಥಿತಿ", "bn": "মেজাজ", "mr": "मनःस्थिती"}, "Update who they are": {"hi": "उनके बारे में जानकारी बदलें", "ta": "அவர்களைப் பற்றிய விவரங்களைப் புதுப்பிக்கவும்", "te": "వారి వివరాలను నవీకరించండి", "kn": "ಅವರ ವಿವರಗಳನ್ನು ನವೀಕರಿಸಿ", "bn": "তাদের তথ্য আপডেট করুন", "mr": "त्यांची माहिती अद्ययावत करा"}, "Create a personal activity": {"hi": "एक निजी गतिविधि बनाएँ", "ta": "தனிப்பட்ட செயல்பாட்டை உருவாக்குங்கள்", "te": "వ్యక్తిగత యాక్టివిటీ సృష్టించండి", "kn": "ವೈಯಕ್ತಿಕ ಚಟುವಟಿಕೆ ರಚಿಸಿ", "bn": "একটি ব্যক্তিগত কার্যকলাপ তৈরি করুন", "mr": "वैयक्तिक उपक्रम तयार करा"}, "Add photos, songs & places": {"hi": "तस्वीरें, गाने और जगहें जोड़ें", "ta": "புகைப்படங்கள், பாடல்கள் & இடங்களைச் சேர்க்கவும்", "te": "ఫోటోలు, పాటలు & ప్రదేశాలను జోడించండి", "kn": "ಫೋಟೋ, ಹಾಡು ಮತ್ತು ಸ್ಥಳಗಳನ್ನು ಸೇರಿಸಿ", "bn": "ছবি, গান ও জায়গা যোগ করুন", "mr": "फोटो, गाणी आणि ठिकाणे जोडा"}, "See how they're doing": {"hi": "देखें वे कैसे हैं", "ta": "அவர்கள் எப்படி இருக்கிறார்கள் என்று பாருங்கள்", "te": "వారు ఎలా ఉన్నారో చూడండి", "kn": "ಅವರು ಹೇಗಿದ್ದಾರೆ ನೋಡಿ", "bn": "তারা কেমন আছেন দেখুন", "mr": "ते कसे आहेत ते पहा"}, "Therapists & appointments": {"hi": "थेरेपिस्ट और अपॉइंटमेंट", "ta": "சிகிச்சையாளர்கள் & சந்திப்புகள்", "te": "థెరపిస్ట్‌లు & అపాయింట్‌మెంట్లు", "kn": "ಥೆರಪಿಸ್ಟ್‌ಗಳು & ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗಳು", "bn": "থেরাপিস্ট ও অ্যাপয়েন্টমেন্ট", "mr": "थेरपिस्ट आणि भेटी"}, "● Active today": {"hi": "● आज सक्रिय", "ta": "● இன்று செயலில்", "te": "● ఈ రోజు యాక్టివ్", "kn": "● ಇಂದು ಸಕ್ರಿಯ", "bn": "● আজ সক্রিয়", "mr": "● आज सक्रिय"}, "● Last active {n} days ago": {"hi": "● {n} दिन पहले सक्रिय", "ta": "● {n} நாட்களுக்கு முன் செயலில்", "te": "● {n} రోజుల క్రితం యాక్టివ్", "kn": "● {n} ದಿನಗಳ ಹಿಂದೆ ಸಕ್ರಿಯ", "bn": "● {n} দিন আগে সক্রিয়", "mr": "● {n} दिवसांपूर्वी सक्रिय"}, "● No activity yet": {"hi": "● अभी कोई गतिविधि नहीं", "ta": "● இன்னும் செயல்பாடு இல்லை", "te": "● ఇంకా యాక్టివిటీ లేదు", "kn": "● ಇನ್ನೂ ಚಟುವಟಿಕೆ ಇಲ್ಲ", "bn": "● এখনও কোনো কার্যকলাপ নেই", "mr": "● अजून उपक्रम नाही"}, "No activity for {n} days. A quick call might help.": {"hi": "{n} दिन से कोई गतिविधि नहीं। एक छोटा फ़ोन कॉल मदद कर सकता है।", "ta": "{n} நாட்களாக செயல்பாடு இல்லை. ஒரு சிறிய அழைப்பு உதவலாம்.", "te": "{n} రోజులుగా యాక్టివిటీ లేదు. ఒక చిన్న కాల్ సహాయపడవచ్చు.", "kn": "{n} ದಿನಗಳಿಂದ ಚಟುವಟಿಕೆ ಇಲ್ಲ. ಒಂದು ಸಣ್ಣ ಕರೆ ಸಹಾಯ ಮಾಡಬಹುದು.", "bn": "{n} দিন ধরে কোনো কার্যকলাপ নেই। একটা ছোট ফোন সাহায্য করতে পারে।", "mr": "{n} दिवसांपासून उपक्रम नाही. एक छोटा फोन मदत करू शकतो."}, "Preferred language": {"hi": "पसंदीदा भाषा", "ta": "விருப்பமான மொழி", "te": "ఇష్టమైన భాష", "kn": "ಆದ್ಯತೆಯ ಭಾಷೆ", "bn": "পছন্দের ভাষা", "mr": "पसंतीची भाषा"}, "Hobbies & interests": {"hi": "शौक और रुचियाँ", "ta": "பொழுதுபோக்கு & ஆர்வங்கள்", "te": "అభిరుచులు & ఆసక్తులు", "kn": "ಹವ್ಯಾಸ & ಆಸಕ್ತಿಗಳು", "bn": "শখ ও আগ্রহ", "mr": "छंद आणि आवडी"}, "City / village": {"hi": "शहर / गाँव", "ta": "நகரம் / கிராமம்", "te": "నగరం / గ్రామం", "kn": "ನಗರ / ಹಳ್ಳಿ", "bn": "শহর / গ্রাম", "mr": "शहर / गाव"}, "Ability level": {"hi": "क्षमता स्तर", "ta": "திறன் நிலை", "te": "సామర్థ్య స్థాయి", "kn": "ಸಾಮರ್ಥ್ಯ ಮಟ್ಟ", "bn": "সক্ষমতার স্তর", "mr": "क्षमता पातळी"}, "Independent": {"hi": "स्वतंत्र", "ta": "சுதந்திரமாக", "te": "స్వతంత్రంగా", "kn": "ಸ್ವತಂತ್ರ", "bn": "স্বাধীন", "mr": "स्वतंत्र"}, "Needs light support": {"hi": "थोड़ी मदद चाहिए", "ta": "சிறிது உதவி தேவை", "te": "కొద్దిగా సహాయం కావాలి", "kn": "ಸ್ವಲ್ಪ ಸಹಾಯ ಬೇಕು", "bn": "সামান্য সাহায্য লাগে", "mr": "थोडी मदत हवी"}, "Needs more support": {"hi": "ज़्यादा मदद चाहिए", "ta": "அதிக உதவி தேவை", "te": "ఎక్కువ సహాయం కావాలి", "kn": "ಹೆಚ್ಚು ಸಹಾಯ ಬೇಕು", "bn": "বেশি সাহায্য লাগে", "mr": "अधिक मदत हवी"}, "Save profile": {"hi": "प्रोफ़ाइल सहेजें", "ta": "சுயவிவரத்தைச் சேமி", "te": "ప్రొఫైల్ సేవ్ చేయండి", "kn": "ಪ್ರೊಫೈಲ್ ಉಳಿಸಿ", "bn": "প্রোফাইল সংরক্ষণ করুন", "mr": "प्रोफाइल जतन करा"}, "Hobbies": {"hi": "शौक", "ta": "பொழுதுபோக்குகள்", "te": "అభిరుచులు", "kn": "ಹವ್ಯಾಸಗಳು", "bn": "শখ", "mr": "छंद"}, "Culture & language": {"hi": "संस्कृति और भाषा", "ta": "கலாச்சாரம் & மொழி", "te": "సంస్కృతి & భాష", "kn": "ಸಂಸ್ಕೃತಿ & ಭಾಷೆ", "bn": "সংস্কৃতি ও ভাষা", "mr": "संस्कृती आणि भाषा"}, "Memories to draw from": {"hi": "जिन यादों से बनाना है", "ta": "எடுத்துக்கொள்ள வேண்டிய நினைவுகள்", "te": "ఆధారంగా తీసుకునే జ్ఞాపకాలు", "kn": "ಆಧರಿಸಬೇಕಾದ ನೆನಪುಗಳು", "bn": "যে স্মৃতি থেকে বানাবেন", "mr": "ज्या आठवणींवरून बनवायचे"}, "Generate activity": {"hi": "गतिविधि बनाएँ", "ta": "செயல்பாட்டை உருவாக்கு", "te": "యాక్టివిటీ రూపొందించండి", "kn": "ಚಟುವಟಿಕೆ ರಚಿಸಿ", "bn": "কার্যকলাপ তৈরি করুন", "mr": "उपक्रम तयार करा"}, "Send to {e}": {"hi": "{e} को भेजें", "ta": "{e} க்கு அனுப்பு", "te": "{e} కు పంపండి", "kn": "{e} ಅವರಿಗೆ ಕಳುಹಿಸಿ", "bn": "{e}-কে পাঠান", "mr": "{e} यांना पाठवा"}, "Regenerate": {"hi": "दोबारा बनाएँ", "ta": "மீண்டும் உருவாக்கு", "te": "మళ్ళీ రూపొందించండి", "kn": "ಮತ್ತೆ ರಚಿಸಿ", "bn": "আবার তৈরি করুন", "mr": "पुन्हा तयार करा"}, "Record voice message": {"hi": "आवाज़ संदेश रिकॉर्ड करें", "ta": "குரல் செய்தியைப் பதிவு செய்", "te": "వాయిస్ సందేశం రికార్డ్ చేయండి", "kn": "ಧ್ವನಿ ಸಂದೇಶ ರೆಕಾರ್ಡ್ ಮಾಡಿ", "bn": "ভয়েস বার্তা রেকর্ড করুন", "mr": "आवाज संदेश रेकॉर्ड करा"}, "Create activity from this": {"hi": "इससे गतिविधि बनाएँ", "ta": "இதிலிருந்து செயல்பாட்டை உருவாக்கு", "te": "దీని నుండి యాక్టివిటీ సృష్టించండి", "kn": "ಇದರಿಂದ ಚಟುವಟಿಕೆ ರಚಿಸಿ", "bn": "এটি থেকে কার্যকলাপ তৈরি করুন", "mr": "यातून उपक्रम तयार करा"}, "Send to Family screen": {"hi": "परिवार स्क्रीन पर भेजें", "ta": "குடும்பத் திரைக்கு அனுப்பு", "te": "కుటుంబ స్క్రీన్‌కు పంపండి", "kn": "ಕುಟುಂಬ ಪರದೆಗೆ ಕಳುಹಿಸಿ", "bn": "পরিবার স্ক্রিনে পাঠান", "mr": "कुटुंब स्क्रीनवर पाठवा"}, "Recent answers": {"hi": "हाल के जवाब", "ta": "சமீபத்திய பதில்கள்", "te": "ఇటీవలి సమాధానాలు", "kn": "ಇತ್ತೀಚಿನ ಉತ್ತರಗಳು", "bn": "সাম্প্রতিক উত্তর", "mr": "अलीकडची उत्तरे"}, "Mood this week": {"hi": "इस हफ़्ते का मूड", "ta": "இந்த வார மனநிலை", "te": "ఈ వారం మూడ్", "kn": "ಈ ವಾರದ ಮನಸ್ಥಿತಿ", "bn": "এই সপ্তাহের মেজাজ", "mr": "या आठवड्याची मनःस्थिती"}, "Add a contact": {"hi": "संपर्क जोड़ें", "ta": "தொடர்பைச் சேர்", "te": "సంప్రదింపు జోడించండి", "kn": "ಸಂಪರ್ಕ ಸೇರಿಸಿ", "bn": "যোগাযোগ যোগ করুন", "mr": "संपर्क जोडा"}, "Save contact": {"hi": "संपर्क सहेजें", "ta": "தொடர்பைச் சேமி", "te": "సంప్రదింపు సేవ్ చేయండి", "kn": "ಸಂಪರ್ಕ ಉಳಿಸಿ", "bn": "যোগাযোগ সংরক্ষণ করুন", "mr": "संपर्क जतन करा"}, "Appointments": {"hi": "अपॉइंटमेंट", "ta": "சந்திப்புகள்", "te": "అపాయింట్‌మెంట్లు", "kn": "ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್‌ಗಳು", "bn": "অ্যাপয়েন্টমেন্ট", "mr": "भेटी"}, "Add appointment": {"hi": "अपॉइंटमेंट जोड़ें", "ta": "சந்திப்பைச் சேர்", "te": "అపాయింట్‌మెంట్ జోడించండి", "kn": "ಅಪಾಯಿಂಟ್‌ಮೆಂಟ್ ಸೇರಿಸಿ", "bn": "অ্যাপয়েন্টমেন্ট যোগ করুন", "mr": "भेट जोडा"}, "Remove": {"hi": "हटाएँ", "ta": "நீக்கு", "te": "తొలగించండి", "kn": "ತೆಗೆಯಿರಿ", "bn": "সরান", "mr": "काढा"}, "Add": {"hi": "जोड़ें", "ta": "சேர்", "te": "జోడించండి", "kn": "ಸೇರಿಸಿ", "bn": "যোগ করুন", "mr": "जोडा"}};
+const LANGS={en:{v:'en-IN'},hi:{v:'hi-IN'},ta:{v:'ta-IN'},te:{v:'te-IN'},kn:{v:'kn-IN'},bn:{v:'bn-IN'},mr:{v:'mr-IN'}};
+let CUR=DB.get('lang','en');
+const norm=t=>{let x=t.trim(); if(ELDER) x=x.split(ELDER).join('{e}'); if(CARE) x=x.split(CARE).join('{c}'); return x;};
+const t=k=>(CUR!=='en'&&I18N[k]&&I18N[k][CUR])||k;
+function setDate(){ const e=document.querySelector('#view-elder-home .date'); if(e) e.textContent=new Date().toLocaleDateString(LANGS[CUR].v,{weekday:'long',day:'numeric',month:'long'}); }
+const tf=(k,v={})=>t(k).replace(/\{(\w+)\}/g,(m,x)=>x==='e'?ELDER:x==='c'?CARE:(v[x]!==undefined?v[x]:m));
+function applyLang(){
+  const w=document.createTreeWalker(document.getElementById('phone'),NodeFilter.SHOW_TEXT); let n;
+  const find=r=>{ const f=norm(r); if(I18N[f]) return [f,'']; const m=/^([^\p{L}\p{N}{"]+)(.*)$/su.exec(f); return m&&I18N[m[2]]?[m[2],m[1]]:null; };
+  while(n=w.nextNode()){
+    const raw=n.__en!==undefined?n.__en:n.nodeValue, hit=find(raw);
+    if(!hit){ if(n.__en!==undefined) n.nodeValue=n.__en; continue; }
+    if(n.__en===undefined) n.__en=raw;
+    const d=I18N[hit[0]];
+    n.nodeValue=CUR==='en'?raw:raw.replace(raw.trim(),hit[1]+(d[CUR]||hit[0]).replace(/\{e\}/g,ELDER).replace(/\{c\}/g,CARE));
+  }
+}
+const _al=applyLang; applyLang=function(){ _al(); setDate(); if(typeof statusLine==='function') statusLine(); };
+['decCard','photoCard'].forEach(id=>{const e=document.getElementById(id); if(e) new MutationObserver(()=>applyLang()).observe(e,{childList:true});});
+function setLang(c){
+  CUR=c; DB.set('lang',c); document.getElementById('langSel').value=c;
+  document.body.classList.toggle('lang-hi',c==='hi'); document.documentElement.lang=c; applyLang();
+}
+const _g3=goto; goto=function(id){ _g3(id); applyLang(); };
+document.querySelectorAll('#view-caregiver-profile .chip').forEach(ch=>ch.addEventListener('click',()=>{
+  const m={hindi:'hi',english:'en',tamil:'ta',telugu:'te',kannada:'kn',bengali:'bn',marathi:'mr'}[ch.textContent.trim().toLowerCase()]; if(m&&ch.classList.contains('on')) setLang(m);
+}));
+
+/* read aloud */
+function readScreen(){
+  if(!('speechSynthesis' in window)){ alert('Read aloud is not supported in this browser.'); return; }
+  speechSynthesis.cancel();
+  const v=document.querySelector('.view.active'); if(!v)return;
+  const txt=[...v.querySelectorAll('.greeting h2,.subtitle,.game-card:not([style*="none"]) h3,.list-row .info b,.big-tile .label,.tl-row')].map(e=>e.textContent.replace(/\s+/g,' ').trim()).filter(Boolean).join('. ');
+  const u=new SpeechSynthesisUtterance(txt); u.lang=LANGS[CUR].v; u.rate=.85; speechSynthesis.speak(u);
+}
+
+/* real speech recognition with typed fallback */
+function saveAns(t){ const a=DB.get('answers',[]); a.push({act:'Cricket Memories',ans:[t],t:Date.now()}); DB.set('answers',a); }
+startListening=function(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const btn=document.getElementById('micBtn'),st=document.getElementById('micStatus'),bub=document.getElementById('answerBubble');
+  const done=t=>{ btn.classList.remove('listening'); st.textContent=tf('Got it!'); bub.textContent=tf('You said: "{x}"',{x:t}); bub.classList.add('show'); document.getElementById('step2-next').disabled=false; saveAns(t); };
+  const typed=()=>{ const t=prompt(tf('Type your answer')); if(t) done(t); else { btn.classList.remove('listening'); st.textContent=tf('Tap the mic and speak'); } };
+  if(!SR){ typed(); return; }
+  const r=new SR(); r.lang=LANGS[CUR].v; btn.classList.add('listening'); st.textContent=tf('Listening...');
+  r.onresult=e=>done(e.results[0][0].transcript);
+  r.onerror=()=>{ st.textContent=tf('Could not hear you. Please type instead.'); typed(); };
+  r.onend=()=>btn.classList.remove('listening');
+  try{ r.start(); }catch(e){ typed(); }
+};
+
+/* photo upload in Memory Capsule */
+const _tcap=toggleCapsule;
+toggleCapsule=function(t){ _tcap(t); if(t.dataset.type==='photo'&&t.classList.contains('added')) document.getElementById('photoIn').click(); };
+document.getElementById('photoIn').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f)return; const img=new Image(), rd=new FileReader();
+  rd.onload=()=>{ img.onload=()=>{ const c=document.createElement('canvas'),k=360/Math.max(img.width,img.height,360); c.width=img.width*k; c.height=img.height*k; c.getContext('2d').drawImage(img,0,0,c.width,c.height); window._photo=c.toDataURL('image/jpeg',.7); }; img.src=rd.result; };
+  rd.readAsDataURL(f); e.target.value='';
+});
+addCapsuleMemory=function(){
+  const m=DB.get('mems',[]);
+  document.querySelectorAll('.capsule-tile.added').forEach(t=>{ const o={e:t.querySelector('.emoji').textContent,n:t.textContent.trim(),by:CARE}; if(t.dataset.type==='photo'&&window._photo){o.img=window._photo;window._photo=null;o.label=(document.getElementById('photoLabel').value||'').trim();document.getElementById('photoLabel').value='';} m.push(o); });
+  DB.set('mems',m); showToast('capsuleToast');
+};
+renderMems=function(){
+  const box=document.getElementById('userMems'); if(!box)return;
+  box.innerHTML=DB.get('mems',[]).map(m=>`<div class="memory-tile">${m.img?'<img class="mem-img" alt="'+esc(m.n)+'" src="'+m.img+'">':'<div class="thumb mem-user">'+m.e+'</div>'}<div class="cap"><b>${esc(m.n)}</b><span>Added by ${esc(m.by)}</span></div></div>`).join('');
+};
+
+/* optional AI: set window.YAAD_AI_URL to your own backend that proxies an LLM */
+const _ga=generateActivity;
+generateActivity=async function(){
+  _ga(); if(!window.YAAD_AI_URL) return;
+  try{
+    const picks=[...document.querySelectorAll('#view-caregiver-builder .chip.on')].map(c=>c.textContent.trim());
+    const mem=document.querySelector('#view-caregiver-builder input[type=text]').value;
+    const r=await fetch(window.YAAD_AI_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({interests:picks,memory:mem,language:CUR})});
+    const j=await r.json();
+    if(j.title&&Array.isArray(j.q)){ window._pending=Object.assign({},window._pending,{title:j.title,q:j.q});
+      setTimeout(()=>{ const res=document.getElementById('activityResult'); const h=res.querySelector('h3'),p=res.querySelector('p'); if(h)h.textContent=j.title; if(p)p.textContent=j.q.join(' / '); },900); }
+  }catch(e){}
+};
+setLang(CUR);
+
+/* ===== Tier 2 (part 2): backend URL, voice notes, adaptive trail, alerts, journal ===== */
+if(location.protocol.startsWith('http')) window.YAAD_AI_URL=window.YAAD_AI_URL||'/api/activity';
+
+let TRAIL_N=DB.get('lvl:trail',6);
+const _rec=record;
+record=function(game,pct){
+  _rec(game,pct);
+  if(game==='trail'){ TRAIL_N=Math.max(4,Math.min(12,TRAIL_N+(pct>=85?1:pct<=50?-1:0))); DB.set('lvl:trail',TRAIL_N); }
+};
+const _st=startTrail;
+startTrail=function(){ const h=document.getElementById('trailH'); if(h) h.textContent=tf('Tap the numbers from 1 to {n}',{n:TRAIL_N}); _st(); };
+
+/* voice notes (caregiver records, elder plays) */
+let MR=null,chunks=[],recTimer=null;
+async function toggleRec(){
+  const btn=document.getElementById('recBtn'),fb=document.getElementById('recFb');
+  if(MR&&MR.state==='recording'){ MR.stop(); return; }
+  if(!navigator.mediaDevices||!window.MediaRecorder){ fb.className='feedback no'; fb.textContent='Recording is not supported in this browser.'; return; }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    MR=new MediaRecorder(stream); chunks=[];
+    MR.ondataavailable=e=>chunks.push(e.data);
+    MR.onstop=()=>{
+      clearTimeout(recTimer); stream.getTracks().forEach(t=>t.stop()); btn.innerHTML='&#127897;&#65039; Record voice message';
+      const rd=new FileReader(); rd.onload=()=>{ try{ localStorage.setItem('yaad:voice',JSON.stringify({url:rd.result,by:CARE,t:Date.now()})); syncPush('voice'); fb.className='feedback'; fb.textContent='Saved. It is now on the Family screen.'; }catch(e){ fb.className='feedback no'; fb.textContent='Too long to save. Try a shorter message.'; } };
+      rd.readAsDataURL(new Blob(chunks,{type:MR.mimeType}));
+    };
+    MR.start(); btn.textContent='Stop recording'; fb.className='feedback'; fb.textContent='Recording. It stops by itself after 30 seconds.';
+    recTimer=setTimeout(()=>MR.state==='recording'&&MR.stop(),30000);
+  }catch(e){ fb.className='feedback no'; fb.textContent='Microphone access was blocked. Allow it in your browser settings.'; }
+}
+let audioEl=null;
+function playVoice(){
+  const v=DB.get('voice',null); if(!v){ return; }
+  if(audioEl&&!audioEl.paused){ audioEl.pause(); return; }
+  audioEl=new Audio(v.url); audioEl.play();
+  const fill=document.querySelector('#view-elder-family .bars-fill'); if(fill){ audioEl.ontimeupdate=()=>fill.style.width=(audioEl.currentTime/(audioEl.duration||1)*100)+'%'; }
+}
+document.querySelectorAll('#view-elder-family .play-circle').forEach(b=>b.onclick=playVoice);
+function voiceCard(){
+  const v=DB.get('voice',null); if(!v) return;
+  const who=document.querySelector('#view-elder-family .voice-card .who'), q=document.querySelector('#view-elder-family .voice-card blockquote');
+  if(who) who.textContent=t('\uD83C\uDF99\uFE0F Voice message from {c}').replace('{c}',v.by);
+  if(q) q.textContent='Recorded '+new Date(v.t).toLocaleDateString()+'. Tap play to listen.';
+}
+
+/* computed alert + answer journal for the caregiver */
+function daysSince(){ const d=stats().days; if(!d.length) return null; const last=new Date(d[d.length-1]); return Math.floor((new Date(new Date().toISOString().slice(0,10))-last)/864e5); }
+function caregiverLive(){
+  const b=document.querySelector('#view-caregiver-home .alert-banner'), n=daysSince();
+  if(b){ const t=b.querySelector('div'); if(n===null){ b.style.display='flex'; if(t) t.textContent='No activity yet. Send a first activity from Activity Builder.'; }
+    else if(n>=2){ b.style.display='flex'; if(t) t.textContent=tf('No activity for {n} days. A quick call might help.',{n:n}); } else b.style.display='none'; }
+  const host=document.querySelector('#view-caregiver-progress .content'); if(!host) return;
+  let j=document.getElementById('journal'); if(!j){ j=document.createElement('div'); j.id='journal'; host.appendChild(j); }
+  const a=DB.get('answers',[]).slice(-5).reverse();
+  j.innerHTML='<h3 style="font-size:1rem;margin:18px 0 10px">Recent answers</h3>'+(a.length?a.map(x=>`<div class="q-row"><div><b>${esc(x.act)}</b><br>${x.ans.map(esc).join(' / ')||'(no answer)'}<br><span style="font-size:.72rem;color:var(--ink-soft)">${new Date(x.t).toLocaleString()}</span></div></div>`).join(''):'<p class="setup-note">Answers will appear here after '+esc(ELDER||'they')+' plays Cricket Memories or an activity you sent.</p>');
+}
+const _g4=goto; goto=function(id){ _g4(id); if(id==='elder-family') voiceCard(); if(id.startsWith('caregiver')) caregiverLive(); };
+
+/* ===== On-device activity generator (no API key needed) ===== */
+const BANK={
+ cricket:{en:["Which match do you remember best?","Who was your favourite player, and why?","Who did you watch cricket with?","What sounds or snacks do you remember from match days?"],
+          hi:["कौन-सा मैच आपको सबसे अच्छी तरह याद है?","आपका पसंदीदा खिलाड़ी कौन था और क्यों?","आप किसके साथ क्रिकेट देखते थे?"]},
+ garden:{en:["Which flowers or plants did you love most?","What did your garden smell like in the morning?","Who helped you in the garden?","What is the best thing you ever grew?"],
+          hi:["कौन-से फूल या पौधे आपको सबसे प्यारे थे?","सुबह आपके बगीचे की खुशबू कैसी होती थी?","बगीचे में आपकी मदद कौन करता था?"]},
+ cook:{en:["What dish were you known for?","Who taught you to cook it?","What did the kitchen smell like when you made it?","Which festival food do you remember most?"],
+          hi:["आप कौन-सा व्यंजन बनाने के लिए मशहूर थीं?","आपको यह बनाना किसने सिखाया?","त्योहार का कौन-सा पकवान आपको सबसे याद है?"]},
+ song:{en:["Which old song makes you smile?","Where were you when you first heard it?","Who used to sing or hum it with you?","Was there a special song for festivals at home?"],
+          hi:["कौन-सा पुराना गाना सुनकर आप मुस्कुरा देते हैं?","पहली बार यह गाना सुनते समय आप कहाँ थे?","इसे आपके साथ कौन गुनगुनाता था?"]},
+ read:{en:["What story did you love when you were young?","Who read to you, or whom did you read to?","Which book would you tell a child to read?"],
+          hi:["बचपन की कौन-सी कहानी आपको पसंद थी?","आपको कौन पढ़कर सुनाता था?","बच्चे को कौन-सी किताब पढ़ने को कहेंगे?"]},
+ place:{en:["What was your street or neighbourhood like?","Which market or place did you visit often?","Which festival was biggest in your area?"],
+          hi:["आपकी गली या मोहल्ला कैसा था?","आप किस बाज़ार या जगह अक्सर जाते थे?","आपके इलाके में सबसे बड़ा त्योहार कौन-सा था?"]},
+ any:{en:["What is a happy day you remember?","Who was with you?","What did you enjoy doing most?"],
+          hi:["कोई खुशी का दिन जो आपको याद हो?","उस दिन आपके साथ कौन था?","आपको सबसे ज़्यादा क्या करना अच्छा लगता था?"]}
+};
+const KEYS=[['cricket','cricket'],['garden','garden'],['cook','cook'],['song','song'],['music','song'],['read','read'],['delhi','place'],['village','place'],['city','place']];
+function localGenerate(picks,mem,lang){
+  const L=lang==='hi'?'hi':'en';
+  const topics=[...new Set(picks.map(p=>{const k=KEYS.find(([w])=>p.toLowerCase().includes(w));return k?k[1]:null;}).filter(Boolean))];
+  if(!topics.length) topics.push('any');
+  const q=[]; const m=(mem||'').trim();
+  if(m) q.push(L==='hi'?'इस याद के बारे में बताइए: '+m:'Tell me about this memory: '+m);
+  const pools=topics.map(t=>BANK[t][L].slice().sort(()=>Math.random()-.5));
+  for(let i=0;q.length<3&&i<12;i++){ const pool=pools[i%pools.length]; if(pool.length) q.push(pool.pop()); }
+  const first=picks[0]||'';
+  return {title:L==='hi'?(first?first+' की यादें':'यादें'):(first?first+' Memories':'Memories'),q:q.slice(0,3)};
+}
+
+/* ===== Photo Memory game (uses caregiver-labelled photos) ===== */
+let photoDeck=[],photoI=0,photoOk=0;
+function startPhoto(){
+  photoDeck=DB.get('mems',[]).filter(m=>m.img&&m.label).sort(()=>Math.random()-.5).slice(0,5); photoI=0; photoOk=0; showPhoto();
+}
+function showPhoto(){
+  const c=document.getElementById('photoCard');
+  if(!photoDeck.length){ c.innerHTML='<div class="art">&#128247;</div><h3>No photos yet</h3><p style="font-size:.88rem;color:var(--ink-soft)">Ask your family to add a photo with a name in Memory Capsule.</p><button class="next-btn" onclick="goto(\'elder-play\')">Back to Play</button>'; return; }
+  if(photoI>=photoDeck.length){ record('photo',Math.round(photoOk/photoDeck.length*100)); c.innerHTML=`<div class="art">&#127881;</div><h3>Lovely memories, ${esc(ELDER||'friend')}!</h3><p style="font-size:.88rem;color:var(--ink-soft)">${esc(tf('You named {n} of {m}.',{n:photoOk,m:photoDeck.length}))}</p><button class="next-btn" onclick="goto('elder-play')">Back to Play</button>`; return; }
+  const cur=photoDeck[photoI], all=DB.get('mems',[]).map(m=>m.label).filter(l=>l&&l!==cur.label);
+  const generic=['A neighbour','A cousin','An old friend','A family member'];
+  const wrong=[...new Set(all)].sort(()=>Math.random()-.5).concat(generic).slice(0,2);
+  const opts=[cur.label,...wrong].sort(()=>Math.random()-.5);
+  c.innerHTML=`<img alt="A family photo" src="${cur.img}" style="width:100%;border-radius:14px;max-height:240px;object-fit:cover"><h3 style="margin-top:14px">Who or what is in this photo?</h3>`+
+    opts.map(o=>`<button class="choice-btn" data-o="${esc(o)}">${esc(o)}</button>`).join('')+'<div class="feedback" id="photoFb" role="status"></div>';
+  c.querySelectorAll('.choice-btn').forEach(b=>b.onclick=()=>{
+    const ok=b.dataset.o===cur.label; if(ok)photoOk++; const f=document.getElementById('photoFb');
+    f.className='feedback'+(ok?'':' no'); f.textContent=ok?tf('Yes, that is right!'):tf('It was: {x}. What a lovely photo.',{x:cur.label});
+    c.querySelectorAll('.choice-btn').forEach(x=>x.disabled=true); setTimeout(()=>{photoI++;showPhoto();},1600);
+  });
+}
+
+/* ===== Tier 3: PIN, routine + reminders, mood week, contrast, PWA ===== */
+function askPin(){
+  const pin=DB.get('pin',null);
+  if(!pin){ const n=prompt('Create a 4-digit caregiver PIN. It keeps the settings area separate from the player.'); if(!/^\d{4}$/.test(n||'')){ alert('Please enter exactly 4 digits.'); return false; } DB.set('pin',n); return true; }
+  const t=prompt('Enter caregiver PIN'); if(t===pin) return true; if(t!==null) alert('That PIN is not correct.'); return false;
+}
+const _enter=enter; enter=function(v){ if(v==='caregiver-home'&&!askPin()) return; _enter(v); };
+
+/* routine */
+const DEF_ROUTINE=[{t:'07:00',w:'Wake up & stretch'},{t:'08:00',w:'Breakfast'},{t:'09:30',w:'Short walk'},{t:'13:00',w:'Lunch'},{t:'18:00',w:'Call with family'}];
+const routine=()=>DB.get('routine',DEF_ROUTINE);
+const fmt=t=>{const [h,m]=t.split(':');return ((+h)%12||12)+':'+m;};
+const today=()=>new Date().toISOString().slice(0,10);
+const rid=r=>r.t+'|'+r.w;
+function renderRoutine(){
+  const box=document.querySelector('#view-elder-day .timeline'); if(!box) return;
+  const done=DB.get('done:'+today(),[]);
+  box.innerHTML=routine().map((r,i)=>`<div class="tl-row${done.includes(rid(r))?' done':''}"><button class="tick" aria-pressed="${done.includes(rid(r))}" aria-label="Mark done: ${esc(r.w)}" onclick="tickRoutine(${i})">${done.includes(rid(r))?'\u2713':''}</button><div class="time">${fmt(r.t)}</div><div class="what">${esc(r.w)}</div></div>`).join('');
+  applyLang();
+}
+function tickRoutine(i){ const r=routine()[i], k='done:'+today(); let d=DB.get(k,[]); d=d.includes(rid(r))?d.filter(x=>x!==rid(r)):[...d,rid(r)]; DB.set(k,d); renderRoutine(); }
+function renderRoutineEd(){
+  const h=document.getElementById('routineList'); if(!h) return;
+  h.innerHTML=routine().map((r,i)=>`<div class="r-row"><b>${fmt(r.t)}</b> ${esc(r.w)}<button onclick="delRoutine(${i})" aria-label="Remove ${esc(r.w)}">&times;</button></div>`).join('');
+}
+function addRoutine(){ const t=document.getElementById('rTime').value, w=document.getElementById('rWhat').value.trim(); if(!t||!w){ alert('Add a time and a name for the task.'); return; }
+  DB.set('routine',[...routine(),{t,w}].sort((a,b)=>a.t.localeCompare(b.t))); document.getElementById('rWhat').value=''; renderRoutineEd(); }
+function delRoutine(i){ const r=routine().slice(); r.splice(i,1); DB.set('routine',r); renderRoutineEd(); }
+(function(){ const c=document.querySelector('#view-caregiver-profile .content'), b=c&&c.querySelector('.save-btn'); if(!c) return;
+  const d=document.createElement('div'); d.className='form-group'; d.innerHTML='<label>Daily routine (shown on My Day, with reminders)</label><div id="routineList"></div><div class="r-add"><input type="time" id="rTime" aria-label="Time"><input type="text" id="rWhat" placeholder="e.g. Take medicine" style="flex:1;min-width:0" aria-label="Task"><button class="pill-btn" type="button" onclick="addRoutine()">Add</button></div>';
+  c.insertBefore(d,b); renderRoutineEd(); })();
+
+/* reminders: banner + spoken, while the app is open */
+function remind(w){ const b=document.getElementById('reminder'); b.textContent=tf('Time for: {x}',{x:w})+' ('+t('tap to close')+')'; b.style.display='block'; setTimeout(()=>b.style.display='none',30000);
+  if('speechSynthesis' in window){ const u=new SpeechSynthesisUtterance(tf('Time for: {x}',{x:w})); u.lang=LANGS[CUR].v; speechSynthesis.speak(u); } }
+setInterval(()=>{ if(!ELDER) return; const d=new Date(), hm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'), k=today()+hm;
+  const hit=routine().find(r=>r.t===hm); if(hit&&DB.get('lastRem','')!==k){ DB.set('lastRem',k); remind(hit.w); } },20000);
+
+/* mood week for caregiver */
+function renderMoodWeek(){
+  const host=document.querySelector('#view-caregiver-progress .content'); if(!host) return;
+  let el=document.getElementById('moodWeek'); if(!el){ el=document.createElement('div'); el.id='moodWeek'; host.insertBefore(el,document.getElementById('journal')); }
+  const face=['😊','🙂','😐','😔'], by={}; DB.get('moods',[]).forEach(m=>by[new Date(m.t).toISOString().slice(0,10)]=m.m);
+  let cells=''; for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const k=d.toISOString().slice(0,10); cells+=`<div aria-label="${k}">${by[k]!==undefined?face[by[k]]:'\u2013'}<span>${d.toLocaleDateString(undefined,{weekday:'short'})}</span></div>`; }
+  el.innerHTML='<h3 style="font-size:1rem;margin:18px 0 10px">Mood this week</h3><div class="week">'+cells+'</div>';
+}
+const _g5=goto; goto=function(id){ _g5(id); if(id==='elder-day') renderRoutine(); if(id==='caregiver-progress') renderMoodWeek(); };
+
+/* accessibility */
+function toggleHC(on){ const v=typeof on==='boolean'?on:!document.body.classList.contains('hc'); document.body.classList.toggle('hc',v); document.getElementById('hcBtn').setAttribute('aria-pressed',v); DB.set('hc',v); }
+toggleHC(DB.get('hc',false));
+['Very happy','Happy','Okay','Sad'].forEach((l,i)=>{ const b=document.querySelectorAll('.mood-btn')[i]; if(b) b.setAttribute('aria-label',l); });
+document.querySelectorAll('.toast,.mood-note').forEach(e=>e.setAttribute('role','status'));
+const _pm2=pickMood; pickMood=function(b){ _pm2(b); document.querySelectorAll('.mood-btn').forEach(x=>x.setAttribute('aria-pressed',x===b)); };
+
+/* installable + offline */
+if('serviceWorker' in navigator&&location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+renderRoutine();
+
+/* ===== Care Connect: real contacts + appointments, and the elder Help screen from them ===== */
+const contacts=()=>DB.get('contacts',[{n:'Dr. Sharma',r:'Cognitive therapist',p:''},{n:CARE||'Caregiver',r:'Primary caregiver',p:''}]);
+const appts=()=>DB.get('appts',[]);
+const cleanPhone=v=>{const x=String(v||'').replace(/[\s-]/g,'');return /^\+?\d{5,15}$/.test(x)?x:'';};
+function renderConnect(){
+  const c=document.querySelector('#view-caregiver-connect .content'); if(!c) return;
+  if(!document.getElementById('contactList')){
+    c.querySelectorAll('.connect-row,.add-contact-btn').forEach(e=>e.remove());
+    const w=document.createElement('div'); w.innerHTML='<div id="contactList"></div><div class="connect-row"><b>Add a contact</b><div class="cc-form"><input id="ccN" placeholder="Name" aria-label="Name"><input id="ccR" placeholder="Role, e.g. Neighbour" aria-label="Role"><input id="ccP" type="tel" placeholder="Phone, e.g. +91 98765 43210" aria-label="Phone"><button class="pill-btn" type="button" onclick="addContact()">Save contact</button></div></div><h3 style="font-size:1rem;margin:18px 0 10px">Appointments</h3><div id="apptList"></div><div class="connect-row"><div class="cc-form"><input id="apD" type="datetime-local" aria-label="Date and time"><input id="apW" placeholder="e.g. Check-up with Dr. Sharma" aria-label="Appointment"><button class="pill-btn" type="button" onclick="addAppt()">Add appointment</button></div></div>';
+    while(w.firstChild) c.insertBefore(w.firstChild,c.querySelector('.lang-note'));
+  }
+  document.getElementById('contactList').innerHTML=contacts().map((x,i)=>`<div class="connect-row"><b>${esc(x.n)}</b><span class="role">${esc(x.r||'')}</span><div class="actions">${x.p?`<a class="pill-btn" href="tel:${x.p}">Call</a><a class="pill-btn ghost" href="sms:${x.p}">Message</a>`:'<span class="role">Add a phone number to call</span>'}<button class="pill-btn ghost" onclick="delContact(${i})">Remove</button></div></div>`).join('');
+  document.getElementById('apptList').innerHTML=appts().map((a,i)=>`<div class="r-row"><b>${new Date(a.d).toLocaleString([], {dateStyle:'medium',timeStyle:'short'})}</b> ${esc(a.w)}<button onclick="delAppt(${i})" aria-label="Remove appointment">&times;</button></div>`).join('')||'<p class="setup-note">No appointments yet.</p>';
+}
+function addContact(){ const n=ccN.value.trim(), p=cleanPhone(ccP.value); if(!n){alert('Please enter a name.');return;} if(ccP.value.trim()&&!p){alert('Please enter a valid phone number, digits only with an optional +.');return;}
+  DB.set('contacts',[...contacts(),{n,r:ccR.value.trim(),p}]); ccN.value=ccR.value=ccP.value=''; renderConnect(); }
+function delContact(i){ const c=contacts().slice(); c.splice(i,1); DB.set('contacts',c); renderConnect(); }
+function addAppt(){ if(!apD.value||!apW.value.trim()){alert('Add a date, time and a description.');return;} DB.set('appts',[...appts(),{d:apD.value,w:apW.value.trim()}].sort((a,b)=>a.d.localeCompare(b.d))); apW.value=''; renderConnect(); }
+function delAppt(i){ const a=appts().slice(); a.splice(i,1); DB.set('appts',a); renderConnect(); }
+function renderHelp(){
+  const c=document.querySelector('#view-elder-help .content'), note=c&&c.querySelector('.lang-note'); if(!c) return;
+  c.querySelectorAll('.help-row').forEach(e=>e.remove());
+  const rows=contacts().filter(x=>x.p).map(x=>[x.n,x.r||'',x.p]).concat([['Emergency contact','For urgent situations','112']]);
+  rows.forEach(([n,r,p])=>{ const d=document.createElement('div'); d.className='help-row'; d.innerHTML=`<div class="ico">${p==='112'?'&#128680;':'&#128222;'}</div><div class="info"><b>${esc(n)}</b><span>${esc(r)}</span></div><a class="call-btn" href="tel:${p}" aria-label="Call ${esc(n)}">&#128222;</a>`; c.insertBefore(d,note); });
+}
+const _g6=goto; goto=function(id){ _g6(id); if(id==='caregiver-connect') renderConnect(); if(id==='elder-help') renderHelp(); applyLang(); };
+
+function statusLine(){
+  const el=[...document.querySelectorAll('#view-caregiver-home *')].find(e=>!e.children.length&&e.textContent.trim().startsWith('\u25CF'));
+  if(!el) return; const n=daysSince();
+  el.textContent=n===0?tf('\u25CF Active today'):n===null?tf('\u25CF No activity yet'):tf('\u25CF Last active {n} days ago',{n:n});
+}
+
+/* ===== Cross-device sync (family code + polling) ===== */
+const SYNC_KEYS=/^(elder|care|inbox|mems|voice|answers|moods|stats|routine|contacts|appts|chips|done:\d{4}-\d{2}-\d{2})$/;
+const SY={
+  code:()=>localStorage.getItem('yaad:syncCode')||'',
+  url:()=>(localStorage.getItem('yaad:syncUrl')||(location.protocol.startsWith('http')?location.origin:'')).replace(/\/$/,''),
+  since:()=>+(localStorage.getItem('yaad:syncSince')||0)
+};
+let pushQ={}, pushT=null, syncOk=null;
+function syncDot(){ const b=document.getElementById('syncBtn'); if(b) b.textContent='Sync '+(!SY.code()?'\u25CB':syncOk===false?'!':'\u25CF'); }
+function syncPush(key){ if(!SY.code()||!SYNC_KEYS.test(key)) return; pushQ[key]=1; clearTimeout(pushT); pushT=setTimeout(flushSync,700); }
+const _dbset=DB.set; DB.set=function(k,v){ _dbset.call(DB,k,v); syncPush(k); };
+async function flushSync(){
+  for(const k of Object.keys(pushQ)){
+    const v=localStorage.getItem('yaad:'+k); if(v===null){ delete pushQ[k]; continue; }
+    try{ const r=await fetch(SY.url()+'/api/sync/'+SY.code()+'/'+encodeURIComponent(k),{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({v})}); if(!r.ok) throw 0; delete pushQ[k]; syncOk=true; }
+    catch(e){ syncOk=false; }
+  }
+  syncDot();
+}
+async function pollSync(){
+  if(!SY.code()) return;
+  try{
+    const r=await fetch(SY.url()+'/api/sync/'+SY.code()+'?since='+SY.since()); if(!r.ok) throw 0; const d=await r.json();
+    let changed=false, max=SY.since();
+    for(const [k,it] of Object.entries(d.items||{})){ max=Math.max(max,it.ts); if(pushQ[k]) continue; if(localStorage.getItem('yaad:'+k)!==it.v){ localStorage.setItem('yaad:'+k,it.v); changed=true; } }
+    localStorage.setItem('yaad:syncSince',String(max)); syncOk=true; syncDot();
+    if(changed){ ELDER=DB.get('elder',null); CARE=DB.get('care',null); personalise();
+      if(!/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||'')){ const v=document.querySelector('.view.active'); if(v) goto(v.id.replace('view-','')); } }
+    if(Object.keys(pushQ).length) flushSync();
+  }catch(e){ syncOk=false; syncDot(); }
+}
+setInterval(pollSync,6000); document.addEventListener('visibilitychange',()=>{ if(!document.hidden) pollSync(); });
+
+function openSync(){ if(!askPin()) return; const p=document.getElementById('syncPanel'); document.getElementById('syncUrlIn').value=localStorage.getItem('yaad:syncUrl')||SY.url(); renderSync(); p.style.display='block'; }
+function closeSync(){ document.getElementById('syncPanel').style.display='none'; }
+function renderSync(){
+  const c=SY.code(); document.getElementById('syncCodeBox').textContent=c;
+  document.getElementById('syncInfo').textContent=c?(syncOk===false?'Cannot reach the server. Check the address and your connection.':'Syncing. Enter this code on the other device. Anyone with the code can see this data, so share it only with family.'):(location.protocol.startsWith('http')||SY.url()?'Create a code on one device, then join with it on the other.':'Open the app from your server address, or type the server address below.');
+}
+function saveUrl(){ const u=document.getElementById('syncUrlIn').value.trim().replace(/\/$/,''); if(u&&!/^https?:\/\//.test(u)){ alert('The server address must start with http:// or https://'); return false; } if(u) localStorage.setItem('yaad:syncUrl',u); return !!SY.url()||(alert('Please enter the server address.'),false); }
+function createSync(){
+  if(!saveUrl()) return;
+  const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r=crypto.getRandomValues(new Uint8Array(8)); let code=''; r.forEach(x=>code+=A[x%A.length]);
+  localStorage.setItem('yaad:syncCode',code); localStorage.setItem('yaad:syncSince','0');
+  Object.keys(localStorage).filter(k=>k.startsWith('yaad:')&&SYNC_KEYS.test(k.slice(5))).forEach(k=>pushQ[k.slice(5)]=1);
+  flushSync().then(()=>{ renderSync(); });
+  renderSync();
+}
+async function joinSync(){
+  if(!saveUrl()) return; const code=document.getElementById('syncJoinIn').value.trim().toUpperCase();
+  if(!/^[A-Z2-9]{8}$/.test(code)){ alert('A family code has 8 letters and numbers.'); return; }
+  if(!confirm('Joining replaces the shared data on this device with the family data. Continue?')) return;
+  localStorage.setItem('yaad:syncCode',code); localStorage.setItem('yaad:syncSince','0'); pushQ={};
+  await pollSync(); renderSync(); closeSync();
+}
+function stopSync(){ localStorage.removeItem('yaad:syncCode'); localStorage.removeItem('yaad:syncSince'); pushQ={}; syncOk=null; syncDot(); renderSync(); }
+syncDot(); pollSync();
+</script>
+</body>
+</html>

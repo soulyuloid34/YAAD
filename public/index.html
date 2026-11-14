@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YAAD — Play. Remember. Connect.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#f4e9d8"><link rel="icon" href="icon.svg">
+</head>
+<body>
+<div class="phone" id="phone">
+<div class="tools" role="toolbar" aria-label="Accessibility and language">
+<button class="hcbtn" id="speakBtn" onclick="readScreen()" aria-label="Read this screen aloud">&#128266; Read aloud</button>
+<button class="hcbtn" id="syncBtn" onclick="openSync()">Sync</button>
+<button class="hcbtn" id="hcBtn" onclick="toggleHC()" aria-pressed="false">Contrast</button>
+<select class="langsel" id="langSel" aria-label="Language" onchange="setLang(this.value)"><option value="en">English</option><option value="hi">हिन्दी</option><option value="ta">தமிழ்</option><option value="te">తెలుగు</option><option value="kn">ಕನ್ನಡ</option><option value="bn">বাংলা</option><option value="mr">मराठी</option></select>
+</div>
+<input type="file" id="photoIn" accept="image/*" hidden>
+<div id="syncPanel" role="dialog" aria-modal="true" aria-label="Family sync" style="display:none;position:absolute;inset:0;z-index:8;background:rgba(60,40,25,.5);padding:18px;overflow:auto">
+ <div style="background:var(--card);border-radius:20px;padding:18px;margin-top:30px">
+  <h3 style="margin:0 0 8px">Family sync</h3>
+  <p id="syncInfo" class="setup-note"></p>
+  <div id="syncCodeBox" style="font:700 1.6rem monospace;letter-spacing:.15em;margin:6px 0 12px"></div>
+  <div class="cc-form">
+   <input id="syncUrlIn" placeholder="Server address, e.g. https://yaad.example.com" aria-label="Server address">
+   <button class="pill-btn" type="button" onclick="createSync()">Create a family code</button>
+   <input id="syncJoinIn" placeholder="Or enter a family code" maxlength="8" aria-label="Family code" style="text-transform:uppercase">
+   <button class="pill-btn" type="button" onclick="joinSync()">Join with this code</button>
+   <button class="pill-btn ghost" type="button" onclick="stopSync()">Stop syncing on this device</button>
+   <button class="next-btn" type="button" onclick="closeSync()">Close</button>
+  </div>
+ </div>
+</div>
+<div id="reminder" role="alert" onclick="this.style.display='none'" style="display:none;position:absolute;top:0;left:0;right:0;z-index:7;background:var(--gold);color:#fff;padding:16px;font-weight:700;text-align:center;cursor:pointer"></div>
+
+  <!-- ============ ROLE SELECT ============ -->
+  <section class="view active" id="view-role">
+    <div class="roofline"><svg viewBox="0 0 400 14" preserveAspectRatio="none"><polyline points="0,14 20,2 40,14 60,2 80,14 100,2 120,14 140,2 160,14 180,2 200,14 220,2 240,14 260,2 280,14 300,2 320,14 340,2 360,14 380,2 400,14" fill="none" stroke="#8b5a3c" stroke-width="2" opacity=".35"/></svg></div>
+    <div class="content">
+      <div class="wordmark">YAAD</div>
+      <div class="tagline">Play. Remember. Connect.</div>
+      <div class="role-prompt">Who's using YAAD right now?</div>
+
+      <div class="role-card" onclick="enter('elder-home')">
+        <div class="emoji">👵</div>
+        <div>
+          <h3>I'm using it myself</h3>
+          <p>Games, family memories &amp; a gentle daily routine</p>
+        </div>
+      </div>
+
+      <div class="role-card" onclick="enter('caregiver-home')">
+        <div class="emoji">🤝</div>
+        <div>
+          <h3>I'm a caregiver / family member</h3>
+          <p>Set up activities, add memories &amp; keep track</p>
+        </div>
+      </div>
+
+      <div class="role-footnote">You can switch anytime from the home screen.</div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: HOME ============ -->
+  <section class="view" id="view-elder-home">
+    <div class="topbar">
+      <div style="font-family:'Fraunces',serif; font-weight:700; color:var(--brown-dark);">YAAD</div>
+      <div class="top-actions">
+        <button class="text-btn" onclick="toggleLang()"><span data-en>अ</span><span data-hi>A</span></button>
+        <button class="text-btn" onclick="cycleFont()">A+</button>
+      </div>
+    </div>
+    <div class="greeting">
+      <h2><span data-en>Good morning, Grandpa Verma 🌼</span><span data-hi>सुप्रभात, दादा वर्मा जी 🌼</span></h2>
+      <div class="date"></div>
+    </div>
+    <div class="content pad-bottom">
+      <div class="big-grid">
+        <div class="big-tile tile-sage" onclick="goto('elder-play')">
+          <div class="head"><span class="emoji">🧠</span><span class="label"><span data-en>PLAY</span><span data-hi>खेलें</span></span></div>
+          <div class="sub">Games &amp; exercises</div>
+        </div>
+        <div class="big-tile tile-coral" onclick="goto('elder-day')">
+          <div class="head"><span class="emoji">❤️</span><span class="label"><span data-en>MY DAY</span><span data-hi>मेरा दिन</span></span></div>
+          <div class="sub">Routine &amp; mood</div>
+        </div>
+        <div class="big-tile tile-blue" onclick="goto('elder-family')">
+          <div class="head"><span class="emoji">👨‍👩‍👧</span><span class="label"><span data-en>FAMILY</span><span data-hi>परिवार</span></span></div>
+          <div class="sub">Photos &amp; voices</div>
+        </div>
+        <div class="big-tile tile-terracotta" onclick="goto('elder-progress')">
+          <div class="head"><span class="emoji">📊</span><span class="label"><span data-en>MY PROGRESS</span><span data-hi>मेरी प्रगति</span></span></div>
+          <div class="sub">How you're doing</div>
+        </div>
+      </div>
+
+      <div class="hint-card" onclick="goto('elder-play')">
+        <div class="emoji">✨</div>
+        <div class="txt">
+          <b>Cricket Memories is ready</b>
+          <span>Made for you by Priya — tap Play to try it</span>
+        </div>
+      </div>
+
+      <div class="switch-link" onclick="goto('role')">Not Grandpa Verma? Switch user</div>
+    </div>
+    <div class="bottom-bar">
+      <button class="help-btn" onclick="goto('elder-help')">☎ <span data-en>Get Help</span><span data-hi>मदद लें</span></button>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: PLAY ============ -->
+  <section class="view" id="view-elder-play">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title">Play</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="subtitle">A few minutes a day keeps the mind active</div>
+      <div id="sentList"></div>
+      <div class="list-row" onclick="goto('elder-photo');startPhoto()"><div class="ico" style="background:var(--amber-soft)">&#128247;</div><div class="info"><b>Photo Memory</b><span>Who is in the photo?</span></div><button class="pill-btn">Play</button></div>
+
+      <div class="list-row" onclick="goto('elder-game')">
+        <div class="ico" style="background:var(--sage-soft);">🏏</div>
+        <div class="info"><b>Cricket Memories<span class="badge">Made for you</span></b><span>A personal activity from Priya</span></div>
+        <button class="pill-btn">Play</button>
+      </div>
+
+      <div class="list-row" onclick="goto('elder-match');startMatch()">
+        <div class="ico" style="background:var(--blue-soft);">🧩</div>
+        <div class="info"><b>Memory Match</b><span>Find the matching pairs</span></div>
+        <button class="pill-btn">Play</button>
+      </div>
+
+      <div class="list-row soon">
+        <div class="ico" style="background:var(--coral-soft);">🎵</div>
+        <div class="info"><b>Name That Tune</b><span>Coming soon: needs audio</span></div>
+        <button class="pill-btn ghost" disabled>Soon</button>
+      </div>
+
+      <div class="list-row" onclick="goto('elder-trail');startTrail()">
+        <div class="ico" style="background:var(--terracotta-soft);">🔢</div>
+        <div class="info"><b>Number Trail</b><span>Tap numbers in order</span></div>
+        <button class="pill-btn">Play</button>
+      </div>
+
+      <div class="list-row" onclick="goto('elder-sort');startSort()">
+        <div class="ico" style="background:var(--mauve-soft);">🧺</div>
+        <div class="info"><b>Sort It</b><span>Kitchen, clothes or garden?</span></div>
+        <button class="pill-btn">Play</button>
+      </div>
+
+      <div class="list-row" onclick="goto('elder-decisions');startDec()">
+        <div class="ico" style="background:var(--sage-soft);">☂️</div>
+        <div class="info"><b>Everyday Decisions</b><span>It's raining — what do you take?</span></div>
+        <button class="pill-btn">Play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: GAME (Cricket Memories demo) ============ -->
+  <section class="view" id="view-elder-game">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">←</button>
+      <div class="title">Cricket Memories</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div id="game-step-1" class="game-card">
+        <div class="art">🏏</div>
+        <h3>Which team do you remember watching?</h3>
+        <button class="choice-btn" onclick="pickChoice(this)">India</button>
+        <button class="choice-btn" onclick="pickChoice(this)">Delhi Daredevils</button>
+        <button class="choice-btn" onclick="pickChoice(this)">Not sure</button>
+        <button class="next-btn" id="step1-next" disabled onclick="showStep(2)">Next question</button>
+      </div>
+
+      <div id="game-step-2" class="game-card" style="display:none;">
+        <div class="art">🎙️</div>
+        <h3>Who was your favourite player?</h3>
+        <p style="font-size:.85rem; color:var(--ink-soft); margin:-8px 0 4px;">Say your answer, or tap to type instead</p>
+        <div class="mic-wrap" style="justify-content:center;">
+          <button class="mic-btn" id="micBtn" onclick="startListening()">🎤</button>
+          <div class="mic-status" id="micStatus">Tap the mic and speak</div>
+        </div>
+        <div class="answer-bubble" id="answerBubble">You said: "Kapil Dev" 🏏</div>
+        <button class="next-btn" id="step2-next" disabled onclick="showStep(3)" style="margin-top:16px;">Finish</button>
+      </div>
+
+      <div id="game-step-3" class="game-card" style="display:none;">
+        <div class="art">🎉</div>
+        <h3>Wonderful, Grandpa Verma!</h3>
+        <p style="font-size:.88rem; color:var(--ink-soft); margin-bottom:16px;">You've completed today's activity. Priya will love hearing about Kapil Dev.</p>
+        <button class="next-btn" onclick="goto('elder-play')">Back to Play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: MY DAY ============ -->
+  <section class="view" id="view-elder-day">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title">My Day</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="subtitle">How are you feeling today?</div>
+      <div class="mood-row">
+        <button class="mood-btn" onclick="pickMood(this)">😊</button>
+        <button class="mood-btn" onclick="pickMood(this)">🙂</button>
+        <button class="mood-btn" onclick="pickMood(this)">😐</button>
+        <button class="mood-btn" onclick="pickMood(this)">😔</button>
+      </div>
+      <div class="mood-note" id="moodNote">Thank you for sharing. Priya will see this. 💛</div>
+
+      <h3 style="font-size:1rem; margin:20px 0 12px;">Today's routine</h3>
+      <div class="timeline">
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">7:00</div><div class="what">Wake up &amp; stretch</div></div>
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">8:00</div><div class="what">Breakfast</div></div>
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">9:30</div><div class="what">Short walk</div></div>
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">1:00</div><div class="what">Lunch</div></div>
+        <div class="tl-row"><div class="tl-dot"></div><div class="time">6:00</div><div class="what">Call with family</div></div>
+      </div>
+
+      <div class="prompt-card">
+        <p>🌤️ Would you like to do a 5-minute memory activity now?</p>
+        <button class="pill-btn" onclick="goto('elder-play')" style="width:100%;">Yes, let's play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: FAMILY ============ -->
+  <section class="view" id="view-elder-family">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title">Family</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="voice-card">
+        <div class="who">🎙️ Voice message from Priya</div>
+        <div class="waveform">
+          <button class="play-circle">▶</button>
+          <div class="bars-track"><div class="bars-fill"></div></div>
+        </div>
+        <blockquote>"Papa, we're coming to Delhi this weekend — save some kachoris for us!"</blockquote>
+      </div>
+
+      <h3 style="font-size:1rem; margin:4px 0 12px;">Memory album</h3>
+      <div class="memory-grid">
+        <div class="memory-tile"><div class="thumb" style="background:var(--gold);">🪔</div><div class="cap"><b>Diwali, 2019</b><span>Whole family, Delhi</span></div></div>
+        <div class="memory-tile"><div class="thumb" style="background:var(--sage);">🏏</div><div class="cap"><b>At the stadium</b><span>With Ramesh, 1987</span></div></div>
+        <div class="memory-tile"><div class="thumb" style="background:var(--coral);">💍</div><div class="cap"><b>Wedding day</b><span>You &amp; Kamla, 1975</span></div></div>
+        <div class="memory-tile"><div class="thumb" style="background:var(--blue);">🎓</div><div class="cap"><b>Priya's graduation</b><span>2015</span></div></div>
+        <div id="userMems" style="display:contents"></div><div class="memory-tile add">
+          <div>💌</div>
+          <div>Ask your family to add more memories</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: PROGRESS ============ -->
+  <section class="view" id="view-elder-progress">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title">My Progress</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="subtitle">Here's how this week is going — just gentle trends, nothing to worry about.</div>
+
+      <div class="bar-row">
+        <div class="lbl"><span>Memory</span><span class="trend">82% ↑</span></div>
+        <div class="bar-track bar-mem"><div class="bar-fill" data-pct="82"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span>Attention</span><span class="trend">90% ↑</span></div>
+        <div class="bar-track bar-att"><div class="bar-fill" data-pct="90"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span>Consistency</span><span class="trend">71% ↑</span></div>
+        <div class="bar-track bar-con"><div class="bar-fill" data-pct="71"></div></div>
+      </div>
+
+      <div class="stat-strip">
+        <div class="stat-box"><b>3/4</b><span>Activities today</span></div>
+        <div class="stat-box"><b>6 days</b><span>Playing streak</span></div>
+      </div>
+
+      <div class="recommend-card">
+        <div class="emoji">🧩</div>
+        <div><b>Today's recommendation</b><span>Picture Memory · 5 minutes · Easy</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ELDER: HELP ============ -->
+  <section class="view" id="view-elder-help">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('elder-home')" aria-label="Back">←</button>
+      <div class="title">Get Help</div>
+      <button class="text-btn" onclick="cycleFont()">A+</button>
+    </div>
+    <div class="content">
+      <div class="help-row">
+        <div class="ico">👩</div>
+        <div class="info"><b>Priya (daughter)</b><span>Usually replies within minutes</span></div>
+        <a class="call-btn" href="tel:+911234567890">📞</a>
+      </div>
+      <div class="help-row">
+        <div class="ico">🩺</div>
+        <div class="info"><b>Dr. Sharma</b><span>Cognitive therapist · Hindi &amp; English</span></div>
+        <a class="call-btn" href="tel:+911234567891">📞</a>
+      </div>
+      <div class="help-row">
+        <div class="ico">🚨</div>
+        <div class="info"><b>Emergency contact</b><span>For urgent situations</span></div>
+        <a class="call-btn" href="tel:112">📞</a>
+      </div>
+      <div class="lang-note">💬 Support is available in Hindi, English and other regional languages.</div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: HOME ============ -->
+  <section class="view" id="view-caregiver-home">
+    <div class="topbar">
+      <div style="font-family:'Fraunces',serif; font-weight:700; color:var(--brown-dark);">YAAD <span style="font-family:'Quicksand'; font-weight:700; font-size:.68rem; color:var(--ink-soft); background:var(--card); border:1px solid var(--border); padding:2px 8px; border-radius:8px; vertical-align:middle;">Caregiver</span></div>
+    </div>
+    <div class="content">
+      <h2 style="font-size:1.35rem; margin-bottom:14px;">Welcome back, Priya 👋</h2>
+
+      <div class="snapshot-card">
+        <div class="avatar">👴</div>
+        <div style="flex:1;">
+          <b>Grandpa Verma</b>
+          <div class="status">● Active today, 9:12 AM</div>
+          <div class="mini-stats">
+            <div><b>3/4</b>Today</div>
+            <div><b>6🔥</b>Streak</div>
+            <div><b>🙂</b>Mood</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alert-banner">
+        ⚠️ <div>No activity was logged the day before yesterday. A quick call might help.</div>
+      </div>
+
+      <div class="tool-grid">
+        <div class="big-tile tile-brown" onclick="goto('caregiver-profile')">
+          <div class="head"><span class="emoji">👤</span><span class="label">Profile &amp; Preferences</span></div>
+          <div class="sub">Update who they are</div>
+        </div>
+        <div class="big-tile tile-terracotta" onclick="goto('caregiver-builder')">
+          <div class="head"><span class="emoji">🎯</span><span class="label">Activity Builder</span></div>
+          <div class="sub">Create a personal activity</div>
+        </div>
+        <div class="big-tile tile-mauve" onclick="goto('caregiver-capsule')">
+          <div class="head"><span class="emoji">🎁</span><span class="label">Memory Capsule</span></div>
+          <div class="sub">Add photos, songs &amp; places</div>
+        </div>
+        <div class="big-tile tile-sage" onclick="goto('caregiver-progress')">
+          <div class="head"><span class="emoji">📈</span><span class="label">Progress &amp; Alerts</span></div>
+          <div class="sub">See how they're doing</div>
+        </div>
+      </div>
+      <div class="big-tile tile-blue" style="margin-top:12px;" onclick="goto('caregiver-connect')">
+        <div class="head"><span class="emoji">☎️</span><span class="label">Care Connect</span></div>
+        <div class="sub">Therapists &amp; appointments</div>
+      </div>
+
+      <div class="switch-link" onclick="goto('role')">Switch user</div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: PROFILE ============ -->
+  <section class="view" id="view-caregiver-profile">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title">Profile &amp; Preferences</div>
+    </div>
+    <div class="content">
+      <div class="subtitle">This helps YAAD personalise everything Grandpa Verma sees.</div>
+
+      <div class="form-group">
+        <label>Name</label>
+        <input type="text" value="Grandpa Verma">
+      </div>
+      <div class="form-group">
+        <label>Preferred language</label>
+        <div class="chip-set">
+          <div class="chip on" onclick="toggleChip(this)">Hindi</div>
+          <div class="chip" onclick="toggleChip(this)">English</div>
+          <div class="chip" onclick="toggleChip(this)">Tamil</div>
+          <div class="chip" onclick="toggleChip(this)">Bengali</div>
+          <div class="chip" onclick="toggleChip(this)">Marathi</div>
+          <div class="chip" onclick="toggleChip(this)">Telugu</div>
+          <div class="chip" onclick="toggleChip(this)">Kannada</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Hobbies &amp; interests</label>
+        <div class="chip-set">
+          <div class="chip on" onclick="toggleChip(this)">Cricket</div>
+          <div class="chip on" onclick="toggleChip(this)">Old Hindi songs</div>
+          <div class="chip" onclick="toggleChip(this)">Gardening</div>
+          <div class="chip" onclick="toggleChip(this)">Cooking</div>
+          <div class="chip" onclick="toggleChip(this)">Reading</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>City / village</label>
+        <input type="text" value="Delhi">
+      </div>
+      <div class="form-group">
+        <label>Ability level</label>
+        <div class="chip-set">
+          <div class="chip" onclick="toggleChip(this)">Independent</div>
+          <div class="chip on" onclick="toggleChip(this)">Needs light support</div>
+          <div class="chip" onclick="toggleChip(this)">Needs more support</div>
+        </div>
+      </div>
+
+      <button class="save-btn" onclick="showToast('profileToast')">💾 Save profile</button>
+      <div class="toast" id="profileToast">Saved — YAAD will use this for Grandpa Verma</div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: ACTIVITY BUILDER ============ -->
+  <section class="view" id="view-caregiver-builder">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title">Activity Builder</div>
+    </div>
+    <div class="content">
+      <div class="subtitle">"Create an activity for this person." Tell YAAD a little about them.</div>
+
+      <div class="form-group">
+        <label>Hobbies</label>
+        <div class="chip-set">
+          <div class="chip on" onclick="toggleChip(this)">Cricket</div>
+          <div class="chip" onclick="toggleChip(this)">Gardening</div>
+          <div class="chip" onclick="toggleChip(this)">Cooking</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Culture &amp; language</label>
+        <div class="chip-set">
+          <div class="chip on" onclick="toggleChip(this)">Delhi</div>
+          <div class="chip on" onclick="toggleChip(this)">Hindi songs</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Memories to draw from</label>
+        <input type="text" value="Watching cricket at the stadium, 1987">
+      </div>
+
+      <button class="generate-btn" id="genBtn" onclick="generateActivity()">✨ Generate activity</button>
+
+      <div class="activity-result result-block" id="activityResult">
+        <div class="activity-result">
+          <h3>🏏 Cricket Memories</h3>
+          <p>An old-style cricket photo, followed by two gentle questions — "Which team do you remember watching?" and "Who was your favourite player?" — then a simple matching game with cricket objects.</p>
+          <div class="activity-actions">
+            <button class="pill-btn" onclick="showToast('sendToast')">Send to Grandpa Verma</button>
+            <button class="pill-btn ghost" onclick="generateActivity()">Regenerate</button>
+          </div>
+        </div>
+        <div class="toast" id="sendToast">Sent — it will appear at the top of their Play list</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: MEMORY CAPSULE ============ -->
+  <section class="view" id="view-caregiver-capsule">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title">Memory Capsule</div>
+    </div>
+    <div class="content">
+      <div class="subtitle">Upload a photo, song or memory — YAAD turns it into a gentle activity.</div>
+
+      <div class="capsule-grid">
+        <div class="capsule-tile" onclick="toggleCapsule(this)"><span class="emoji">📷</span>Photo</div>
+        <div class="capsule-tile" onclick="toggleCapsule(this)"><span class="emoji">🎵</span>Song</div>
+        <div class="capsule-tile" onclick="toggleCapsule(this)"><span class="emoji">🏠</span>Home</div>
+        <div class="capsule-tile" onclick="toggleCapsule(this)"><span class="emoji">👨‍👩‍👧</span>Family</div>
+        <div class="capsule-tile" onclick="toggleCapsule(this)"><span class="emoji">🍛</span>Food</div>
+        <div class="capsule-tile" onclick="toggleCapsule(this)"><span class="emoji">📍</span>Hometown</div>
+      </div>
+
+      <div class="form-group"><label for="photoLabel">Who or what is in the photo? (used in the Photo Memory game)</label><input type="text" id="photoLabel" placeholder="e.g. Ramesh at the stadium"></div>
+      <div class="form-group"><button class="pill-btn" id="recBtn" type="button" onclick="toggleRec()">&#127897;&#65039; Record voice message</button><div class="feedback" id="recFb" role="status"></div></div>
+      <button class="generate-btn" id="capsuleBtn" disabled onclick="generateCapsule()">✨ Create activity from this</button>
+
+      <div class="result-block" id="capsuleResult">
+        <h3 style="font-size:1rem; margin:16px 0 10px;">📷 Wedding picture → 4 questions</h3>
+        <div class="q-row"><div class="n">1</div>Who is standing next to you?</div>
+        <div class="q-row"><div class="n">2</div>What year was this?</div>
+        <div class="q-row"><div class="n">3</div>What do you remember about that day?</div>
+        <div class="q-row"><div class="n">4</div>Would you like to tell your family this story?</div>
+        <button class="pill-btn" style="width:100%; margin-top:6px;" onclick="showToast('capsuleToast')">Send to Family screen</button>
+        <div class="toast" id="capsuleToast">Added to Grandpa Verma's Memory Wall</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: PROGRESS & ALERTS ============ -->
+  <section class="view" id="view-caregiver-progress">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title">Progress &amp; Alerts</div>
+    </div>
+    <div class="content">
+      <div class="subtitle">How Grandpa Verma is doing this week — trends, not diagnoses.</div>
+
+      <div class="bar-row">
+        <div class="lbl"><span>Memory</span><span class="trend">78% ↑</span></div>
+        <div class="bar-track bar-mem"><div class="bar-fill" data-pct="78"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span>Attention</span><span class="trend">84% ↑</span></div>
+        <div class="bar-track bar-att"><div class="bar-fill" data-pct="84"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span>Language</span><span class="trend" style="color:var(--ink-soft);">72% →</span></div>
+        <div class="bar-track bar-lang"><div class="bar-fill" data-pct="72"></div></div>
+      </div>
+      <div class="bar-row">
+        <div class="lbl"><span>Consistency</span><span class="trend">6 days ↑</span></div>
+        <div class="bar-track bar-con"><div class="bar-fill" data-pct="80"></div></div>
+      </div>
+
+      <div class="recommend-card" style="margin-bottom:16px;">
+        <div class="emoji">🧩</div>
+        <div><b>Today's recommendation</b><span>Picture Memory · 5 minutes · Easy</span></div>
+      </div>
+
+      <div class="alert-banner">
+        ⚠️ <div>No activity logged 2 days ago. Consider a gentle check-in call.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CAREGIVER: CARE CONNECT ============ -->
+  <section class="view" id="view-caregiver-connect">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goto('caregiver-home')" aria-label="Back">←</button>
+      <div class="title">Care Connect</div>
+    </div>
+    <div class="content">
+      <div class="subtitle">Therapists, appointments and contacts, all in one place.</div>
+
+      <div class="connect-row">
+        <b>Dr. Sharma</b>
+        <span class="role">Cognitive therapist · Hindi &amp; English · Delhi</span>
+        <div class="actions">
+          <button class="pill-btn">View profile</button>
+          <button class="pill-btn ghost">Book appointment</button>
+        </div>
+      </div>
+
+      <div class="connect-row">
+        <b>Priya Verma</b>
+        <span class="role">Primary caregiver · Daughter</span>
+        <div class="actions">
+          <button class="pill-btn">Message</button>
+          <button class="pill-btn ghost">Call</button>
+        </div>
+      </div>
+
+      <button class="add-contact-btn">+ Add a contact</button>
+      <div class="lang-note" style="margin-top:16px;">💬 Local-language support available in Hindi, English and 8 regional languages.</div>
+    </div>
+  </section>
+  <section class="view" id="view-setup">
+    <div class="topbar"><div class="title">Welcome to YAAD</div></div>
+    <div class="content">
+      <p class="setup-note">Tell us who YAAD is for. Every screen will use these names.</p>
+      <div class="form-group"><label for="setElder">Who will be playing?</label><input type="text" id="setElder" placeholder="e.g. Grandma Rekha"></div>
+      <div class="form-group"><label for="setCare">Who is the caregiver?</label><input type="text" id="setCare" placeholder="e.g. Priya"></div>
+      <button class="save-btn" onclick="finishSetup()">Save and continue</button>
+    </div>
+  </section>
+
+  <section class="view" id="view-elder-trail">
+    <div class="topbar"><button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">&larr;</button><div class="title">Number Trail</div><button class="text-btn" onclick="cycleFont()">A+</button></div>
+    <div class="content"><div class="game-card">
+      <h3 id="trailH">Tap the numbers from 1 to 8</h3>
+      <div class="trail-grid" id="trailGrid"></div>
+      <div class="feedback" id="trailFb"></div>
+      <button class="next-btn" onclick="startTrail()">Start again</button>
+    </div></div>
+  </section>
+
+  <section class="view" id="view-elder-sort">
+    <div class="topbar"><button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">&larr;</button><div class="title">Sort It</div><button class="text-btn" onclick="cycleFont()">A+</button></div>
+    <div class="content"><div class="game-card">
+      <div class="sort-item" id="sortItem"></div>
+      <h3 id="sortQ">Where does this belong?</h3>
+      <div class="sort-opts">
+        <button class="choice-btn" onclick="pickSort('kitchen')">Kitchen</button>
+        <button class="choice-btn" onclick="pickSort('clothes')">Clothes</button>
+        <button class="choice-btn" onclick="pickSort('garden')">Garden</button>
+      </div>
+      <div class="feedback" id="sortFb"></div>
+    </div></div>
+  </section>
+
+  <section class="view" id="view-elder-decisions">
+    <div class="topbar"><button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">&larr;</button><div class="title">Everyday Decisions</div><button class="text-btn" onclick="cycleFont()">A+</button></div>
+    <div class="content"><div class="game-card" id="decCard"></div></div>
+  </section>
+
+  <section class="view" id="view-elder-match">
+    <div class="topbar"><button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">&larr;</button><div class="title">Memory Match</div><button class="text-btn" onclick="cycleFont()">A+</button></div>
+    <div class="content"><div class="game-card">
+      <h3>Find the three matching pairs</h3>
+      <div class="match-stats" style="display:flex;justify-content:space-between;font-size:.85rem;color:var(--ink-soft)"><span id="mMoves">Moves: 0</span><span id="mFound">Found: 0 / 3</span></div>
+      <div class="match-grid" id="matchGrid"></div>
+      <button class="next-btn" onclick="startMatch()">Shuffle again</button>
+    </div></div>
+  </section>
+  <section class="view" id="view-elder-photo">
+    <div class="topbar"><button class="icon-btn" onclick="goto('elder-play')" aria-label="Back">&larr;</button><div class="title">Photo Memory</div><button class="text-btn" onclick="cycleFont()">A+</button></div>
+    <div class="content"><div class="game-card" id="photoCard"></div></div>
+  </section>
+
+
+
+</div>
+
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
