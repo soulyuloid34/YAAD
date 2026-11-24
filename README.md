@@ -58,3 +58,4 @@ A per-view "A+" button (`cycleFont()`) cycles a global font-scale class for read
  
   Video Demo: [<img width="870" height="1476" alt="ezgif-1d557fda57636a9f" src="https://github.com/user-attachments/assets/7bbd4512-5969-469c-96ee-3d3faf358587" />
 ]
+:p
